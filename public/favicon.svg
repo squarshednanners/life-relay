@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Rounded square background -->
+  <rect width="512" height="512" rx="80" fill="#0f766e"/>
+  <!-- Shield shape -->
+  <path d="M256 72c-80 0-152 24-152 24v200c0 80 68 136 152 168 84-32 152-88 152-168V96s-72-24-152-24z" fill="#134e4a" opacity="0.5"/>
+  <!-- Downward arrow (pass down) -->
+  <path d="M216 160v120h-60l100 120 100-120h-60V160z" fill="white"/>
+</svg>

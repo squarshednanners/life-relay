@@ -1,0 +1,102 @@
+import type { FormSectionSchema } from '@/models/FormSchema'
+
+export const propertySchema: FormSectionSchema = {
+  sectionKey: 'property',
+  title: 'Property & Real Estate',
+  description: 'Real estate holdings, property ownership, and mortgages',
+  isArray: true,
+  arrayItemLabel: (index) => `Property ${index + 1}`,
+  pdfGroup: 'Property & Household',
+  fields: [
+    {
+      name: 'address',
+      label: 'Address',
+      type: 'text',
+      placeholder: 'Property Address',
+      colSpan: 2,
+      fullWidth: true,
+    },
+    {
+      name: 'type',
+      label: 'Type',
+      type: 'text',
+      placeholder: 'House, Condo, Land, etc.',
+      colSpan: 1,
+    },
+    {
+      name: 'ownership',
+      label: 'Ownership',
+      type: 'text',
+      placeholder: 'Sole, Joint, Trust, etc.',
+      colSpan: 1,
+    },
+    {
+      name: 'estimatedValue',
+      label: 'Estimated Value',
+      type: 'currency',
+      placeholder: '$0.00',
+      colSpan: 1,
+    },
+    {
+      name: 'mortgageInfo',
+      label: 'Mortgage Information',
+      type: 'textarea',
+      placeholder: 'Mortgage details, lender, balance, etc.',
+      colSpan: 2,
+      fullWidth: true,
+      rows: 2,
+    },
+    {
+      sectionDivider: {
+        label: 'Property Manager',
+      },
+    },
+    {
+      name: 'propertyManagerName',
+      label: 'Manager Name',
+      type: 'text',
+      placeholder: 'Property manager name',
+      colSpan: 1,
+    },
+    {
+      name: 'propertyManagerCompany',
+      label: 'Manager Company',
+      type: 'text',
+      placeholder: 'Company name',
+      colSpan: 1,
+    },
+    {
+      name: 'propertyManagerPhone',
+      label: 'Manager Phone',
+      type: 'tel',
+      placeholder: '(555) 123-4567',
+      colSpan: 1,
+    },
+    {
+      name: 'propertyManagerEmail',
+      label: 'Manager Email',
+      type: 'email',
+      placeholder: 'email@example.com',
+      colSpan: 1,
+    },
+    {
+      name: 'propertyManagerAddress',
+      label: 'Manager Address',
+      type: 'textarea',
+      placeholder: 'Manager address',
+      colSpan: 2,
+      fullWidth: true,
+      rows: 2,
+    },
+    {
+      name: 'notes',
+      label: 'Notes',
+      type: 'textarea',
+      placeholder: 'Additional notes',
+      colSpan: 2,
+      fullWidth: true,
+      rows: 2,
+    },
+  ],
+}
+

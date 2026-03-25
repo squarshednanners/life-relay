@@ -1,0 +1,86 @@
+import type { FormSectionSchema } from '@/models/FormSchema'
+
+export const vaultBackupSchema: FormSectionSchema = {
+  sectionKey: 'vaultBackup',
+  title: 'Life Relay Backup',
+  description: 'Where to find the digital backup of this Life Relay vault and how to access it',
+  isArray: false,
+  pdfGroup: 'Documents & Storage',
+  fields: [
+    {
+      sectionDivider: { label: 'Backup File Location' },
+    },
+    {
+      name: 'storageMethod',
+      label: 'Storage Method',
+      type: 'select',
+      placeholder: 'Where is the backup stored?',
+      colSpan: 1,
+      options: [
+        { value: 'usb', label: 'USB Drive' },
+        { value: 'external-drive', label: 'External Hard Drive' },
+        { value: 'cloud', label: 'Cloud Storage (Google Drive, Dropbox, etc.)' },
+        { value: 'nas', label: 'Network Attached Storage (NAS)' },
+        { value: 'computer', label: 'Computer / Folder on Disk' },
+        { value: 'email', label: 'Emailed to Someone' },
+        { value: 'other', label: 'Other' },
+      ],
+    },
+    {
+      name: 'fileLocation',
+      label: 'File Location',
+      type: 'textarea',
+      placeholder: 'e.g. "Blue USB drive in the fireproof safe" or "Google Drive > Estate folder > liferelay-backup.json"',
+      colSpan: 2,
+      fullWidth: true,
+      rows: 2,
+    },
+    {
+      sectionDivider: { label: 'Encryption Password' },
+    },
+    {
+      name: 'isEncrypted',
+      label: 'The backup file is encrypted with a password',
+      type: 'checkbox',
+      colSpan: 2,
+    },
+    {
+      name: 'password',
+      label: 'Encryption Password',
+      type: 'password',
+      placeholder: 'Password used to encrypt the backup',
+      colSpan: 1,
+      manualEntry: true,
+      visible: { field: 'isEncrypted', operator: 'equals', value: true },
+    },
+    {
+      name: 'passwordHint',
+      label: 'Password Hint',
+      type: 'text',
+      placeholder: 'A hint to help remember the password',
+      colSpan: 1,
+      visible: { field: 'isEncrypted', operator: 'equals', value: true },
+    },
+    {
+      sectionDivider: { label: 'Additional Details' },
+    },
+    {
+      name: 'accessInstructions',
+      label: 'Access Instructions',
+      type: 'textarea',
+      placeholder: 'Any additional steps needed to access the backup (e.g. cloud account login, safe combination, who has the USB drive)',
+      colSpan: 2,
+      fullWidth: true,
+      rows: 3,
+    },
+    {
+      name: 'notes',
+      label: 'Notes',
+      type: 'textarea',
+      placeholder: 'Additional notes about the backup',
+      colSpan: 2,
+      fullWidth: true,
+      rows: 2,
+    },
+  ],
+}

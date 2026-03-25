@@ -1,0 +1,95 @@
+import type { FormSectionSchema } from '@/models/FormSchema'
+
+export const taxInfoSchema: FormSectionSchema = {
+  sectionKey: 'taxInfo',
+  title: 'Tax Information',
+  description: 'Tax filing details, where returns are stored, and EIN information for self-employment or businesses',
+  isArray: false,
+  pdfGroup: 'Finances',
+  fields: [
+    {
+      sectionDivider: { label: 'Filing Details' },
+    },
+    {
+      name: 'filingStatus',
+      label: 'Filing Status',
+      type: 'select',
+      colSpan: 1,
+      options: [
+        { label: 'Select status', value: '' },
+        { label: 'Single', value: 'Single' },
+        { label: 'Married Filing Jointly', value: 'Married Filing Jointly' },
+        { label: 'Married Filing Separately', value: 'Married Filing Separately' },
+        { label: 'Head of Household', value: 'Head of Household' },
+        { label: 'Qualifying Surviving Spouse', value: 'Qualifying Surviving Spouse' },
+      ],
+    },
+    {
+      name: 'taxState',
+      label: 'State of Residence (for taxes)',
+      type: 'text',
+      placeholder: 'e.g. California',
+      colSpan: 1,
+    },
+    {
+      name: 'ein',
+      label: 'EIN (if self-employed or business owner)',
+      type: 'password',
+      placeholder: 'XX-XXXXXXX',
+      colSpan: 1,
+      manualEntry: true,
+    },
+    {
+      name: 'itin',
+      label: 'ITIN (if applicable)',
+      type: 'password',
+      placeholder: '9XX-XX-XXXX',
+      colSpan: 1,
+      manualEntry: true,
+    },
+    {
+      sectionDivider: { label: 'Tax Returns' },
+    },
+    {
+      name: 'returnStorageLocation',
+      label: 'Where Tax Returns Are Stored',
+      type: 'textarea',
+      placeholder: 'e.g. "Filing cabinet in home office" or "TurboTax online account" or "With CPA at Smith & Associates"',
+      colSpan: 2,
+      fullWidth: true,
+      rows: 2,
+    },
+    {
+      name: 'taxSoftware',
+      label: 'Tax Software / Service',
+      type: 'text',
+      placeholder: 'e.g. TurboTax, H&R Block, CPA name',
+      colSpan: 1,
+    },
+    {
+      name: 'taxSoftwareLogin',
+      label: 'Login Email',
+      type: 'email',
+      placeholder: 'email@example.com',
+      colSpan: 1,
+    },
+    {
+      sectionDivider: { label: 'Additional Details' },
+    },
+    {
+      name: 'estimatedPayments',
+      label: 'Makes estimated quarterly tax payments',
+      type: 'checkbox',
+      colSpan: 2,
+    },
+    {
+      name: 'notes',
+      label: 'Notes',
+      type: 'textarea',
+      placeholder: 'Outstanding tax obligations, payment plans, other details an executor should know',
+      colSpan: 2,
+      fullWidth: true,
+      rows: 2,
+    },
+  ],
+}
