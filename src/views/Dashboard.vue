@@ -64,6 +64,12 @@
         >
           {{ isLoading ? 'Saving...' : 'Save to Browser' }}
         </button>
+        <button
+          @click="deleteAllData"
+          class="px-4 py-3 bg-gray-200 text-red-600 rounded-lg hover:bg-red-50 hover:text-red-700 transition-colors"
+        >
+          Delete All Data
+        </button>
       </div>
     </div>
 
@@ -207,6 +213,17 @@ async function saveData() {
     showToast('Data saved successfully!', 'success')
   } catch (error) {
     showToast('Error saving data', 'error')
+  }
+}
+
+async function deleteAllData() {
+  if (confirm('Are you sure you want to delete all data? This action cannot be undone.')) {
+    try {
+      await store.deleteData()
+      showToast('All data deleted successfully!', 'success')
+    } catch (error) {
+      showToast('Error deleting data', 'error')
+    }
   }
 }
 

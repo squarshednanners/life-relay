@@ -2,6 +2,16 @@
   "name": "liferelay",
   "version": "2.0.0",
   "type": "module",
+  "description": "Privacy-first, offline-capable web app for organizing estate plans, digital assets, and critical information.",
+  "homepage": "https://liferelay.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/squarshednanners/life-relay.git"
+  },
+  "bugs": {
+    "url": "https://github.com/squarshednanners/life-relay/issues"
+  },
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build",

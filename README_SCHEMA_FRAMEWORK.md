@@ -339,6 +339,105 @@ All fields with the same `expandableSectionId` will be grouped together in a col
 
 Nested expandable sections are supported — the `ExpandableSection` component uses a slot-based design, so expandable sections can be nested by placing fields with different `expandableSectionId` values within a parent section.
 
+## Layout
+
+Fields render into a 2-column responsive grid by default. Two layout properties control how a field is sized:
+
+```typescript
+{
+  name: 'institution',
+  label: 'Institution',
+  type: 'text',
+  colSpan: 1,        // 1 = half-width (default), 2 = full-width within the grid
+  fullWidth: true,   // Force the field to span the full row regardless of grid
+}
+```
+
+Use `colSpan: 2` when you want a field to take both grid columns. Use `fullWidth: true` for fields like `textarea` or custom components that should always be full-width.
+
+## Section Dividers
+
+For purely visual grouping inside a single schema (no collapsing, no checkbox), use a `sectionDivider` field. It is a label-only entry that draws a heading and (optionally) a top border:
+
+```typescript
+{
+  sectionDivider: {
+    label: 'Recovery Information',
+    showBorder: true, // default true
+  },
+}
+```
+
+Section divider entries do not need `name`, `label`, or `type` — they are render-only.
+
+## Nested Array Fields
+
+Some sections need an array nested *inside* a single item — for example, `multiSigConfig.keys[]` inside a crypto asset. Use the `array` field type with an `arraySchema`:
+
+```typescript
+{
+  name: 'keys',
+  label: 'Multisig Keys',
+  type: 'array',
+  arraySchema: keyItemSchema,    // a FormSectionSchema describing a single key
+  arrayAllowAdd: true,           // default true — show "Add" button
+  arrayAllowRemove: true,        // default true — show "Remove" button on each row
+}
+```
+
+The `arraySchema` is itself a full `FormSectionSchema`, so nested arrays can have their own fields, validation, conditional visibility, and even further nested arrays.
+
+## Custom Array Item Initialization
+
+By default new array items are added as empty objects. To generate IDs or seed defaults, provide `initializeItem` on the section schema:
+
+```typescript
+export const trustsSchema: FormSectionSchema = {
+  sectionKey: 'trusts',
+  title: 'Trusts',
+  isArray: true,
+  initializeItem: () => ({
+    id: `trust-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    trustName: '',
+  }),
+  fields: [ /* ... */ ],
+}
+```
+
+## Conditional Sections
+
+Whole sections can be hidden/shown using the same `VisibilityCondition` syntax as fields, by setting `visible` on the section schema itself:
+
+```typescript
+export const businessOwnershipSchema: FormSectionSchema = {
+  sectionKey: 'businessOwnership',
+  title: 'Business Ownership',
+  visible: { field: 'hasBusiness', operator: 'equals', value: true },
+  fields: [ /* ... */ ],
+}
+```
+
+When the condition is false, the section is omitted from both the form UI and PDF output.
+
+## PDF-Specific Field Options
+
+Fields can customize how they appear in PDF output without affecting the form UI:
+
+```typescript
+{
+  name: 'balance',
+  label: 'Balance',
+  type: 'currency',
+  pdfLabel: 'Account Balance',                       // Override label in PDF only
+  pdfFormat: (value) => `$${Number(value).toFixed(2)}`, // Custom PDF formatter
+  pdfSkipIfEmpty: true,                              // Omit field from PDF when empty
+}
+```
+
+- `pdfLabel` — alternate label used only in the PDF (form keeps `label`).
+- `pdfFormat` — function that returns the string to print in the PDF.
+- `pdfSkipIfEmpty` — when true, an empty value is omitted from the PDF rather than rendered as blank.
+
 ## Accessibility
 
 All form inputs include:
@@ -383,10 +482,10 @@ The registry organizes schemas into 8 groups matching the PDF layout:
 Tests are in `src/*/__tests__/` directories and run with `npx vitest run`:
 
 - **FormSchema.test.ts** — Visibility evaluation, compound conditions, nested paths, `getVisibleFields`
-- **registry.test.ts** — Schema integrity: all groups populated, required properties, no duplicate fields, valid pdfGroup values, field names match test data
-- **useSectionProgress.test.ts** — `hasSectionData()` for all 27 section paths against test-data.json
+- **registry.test.ts** — Schema integrity: all groups populated, required properties, no duplicate fields, valid pdfGroup values
+- **useSectionProgress.test.ts** — `hasSectionData()` across section paths
 - **encryption.test.ts** — AES-256 encryption round-trip, error cases, unique ciphertext
 - **FormField.test.ts** — Component rendering
 - **legacy.test.ts** — Store behavior
 
-Test data lives in `test-data.json` at the project root with complete data for all 26 sections.
+A fully fictional example vault is available at `examples/sample-vault.json` and can be imported via the Dashboard for manual testing.

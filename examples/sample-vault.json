@@ -1,0 +1,1149 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-03-15T14:30:00.000Z",
+  "lastReviewedAt": "2026-03-10T09:00:00.000Z",
+  "skippedSections": [],
+
+  "people": [
+    {
+      "id": "person-0000000000000-aaa001",
+      "name": "John Doe",
+      "dateOfBirth": "1975-06-15",
+      "socialSecurityNumber": "000-00-0000",
+      "address": "123 Example Street, Anytown, ST 00000",
+      "phone": "(555) 555-0100",
+      "email": "john.doe@example.com",
+      "notes": "EXAMPLE DATA — fictional. Primary account holder."
+    },
+    {
+      "id": "person-0000000000001-aaa002",
+      "name": "Jane Doe",
+      "dateOfBirth": "1978-03-22",
+      "socialSecurityNumber": "000-00-0000",
+      "address": "123 Example Street, Anytown, ST 00000",
+      "phone": "(555) 555-0101",
+      "email": "jane.doe@example.com",
+      "notes": "EXAMPLE DATA — fictional. Spouse."
+    },
+    {
+      "id": "person-0000000000002-aaa003",
+      "name": "Alex Doe",
+      "dateOfBirth": "2010-11-08",
+      "socialSecurityNumber": "000-00-0000",
+      "address": "123 Example Street, Anytown, ST 00000",
+      "phone": "",
+      "email": "",
+      "notes": "EXAMPLE DATA — fictional. Minor child."
+    },
+    {
+      "id": "person-0000000000003-aaa004",
+      "name": "Sam Doe",
+      "dateOfBirth": "2013-04-17",
+      "socialSecurityNumber": "000-00-0000",
+      "address": "123 Example Street, Anytown, ST 00000",
+      "phone": "",
+      "email": "",
+      "notes": "EXAMPLE DATA — fictional. Minor child."
+    }
+  ],
+
+  "beneficiaries": [
+    {
+      "id": "beneficiary-0000000000010-bbb001",
+      "name": "Jane Doe",
+      "relationship": "Spouse",
+      "type": "primary",
+      "percentage": 60,
+      "phone": "(555) 555-0101",
+      "email": "jane.doe@example.com",
+      "address": "123 Example Street, Anytown, ST 00000",
+      "notes": "Primary beneficiary on all accounts unless otherwise specified."
+    },
+    {
+      "id": "beneficiary-0000000000011-bbb002",
+      "name": "Alex Doe",
+      "relationship": "Child",
+      "type": "primary",
+      "percentage": 20,
+      "phone": "",
+      "email": "",
+      "address": "123 Example Street, Anytown, ST 00000",
+      "dateOfBirth": "2010-11-08",
+      "notes": "Minor child — assets held in trust until age 25."
+    },
+    {
+      "id": "beneficiary-0000000000012-bbb003",
+      "name": "Sam Doe",
+      "relationship": "Child",
+      "type": "primary",
+      "percentage": 20,
+      "phone": "",
+      "email": "",
+      "address": "123 Example Street, Anytown, ST 00000",
+      "dateOfBirth": "2013-04-17",
+      "notes": "Minor child — assets held in trust until age 25."
+    },
+    {
+      "id": "beneficiary-0000000000013-bbb004",
+      "name": "Robert Doe Sr.",
+      "relationship": "Parent",
+      "type": "secondary",
+      "percentage": 100,
+      "phone": "(555) 555-0102",
+      "email": "robert.doe@example.com",
+      "address": "456 Example Avenue, Anytown, ST 00000",
+      "notes": "Contingent beneficiary if primary beneficiaries predecease."
+    }
+  ],
+
+  "importantContacts": [
+    {
+      "name": "Attorney Example",
+      "role": "Attorney",
+      "organization": "Example Law Firm, PLLC",
+      "phone": "(555) 555-0110",
+      "email": "attorney@example.com",
+      "address": "100 Example Plaza, Suite 400, Anytown, ST 00000",
+      "notes": "Estate planning attorney. Drafted will and trust documents."
+    },
+    {
+      "name": "Executor Example",
+      "role": "Executor",
+      "organization": "",
+      "phone": "(555) 555-0111",
+      "email": "executor@example.com",
+      "address": "200 Example Way, Anytown, ST 00000",
+      "notes": "Named executor in will. Knows location of safe deposit box key."
+    },
+    {
+      "name": "CPA Example",
+      "role": "Accountant / CPA",
+      "organization": "Example Tax Group",
+      "phone": "(555) 555-0112",
+      "email": "cpa@example.com",
+      "address": "300 Example Blvd, Suite 200, Anytown, ST 00000",
+      "notes": "Handles personal and business tax returns."
+    },
+    {
+      "name": "Advisor Example",
+      "role": "Financial Advisor",
+      "organization": "Example Advisor Services",
+      "phone": "(555) 555-0113",
+      "email": "advisor@example.com",
+      "address": "",
+      "notes": "Manages retirement and brokerage accounts."
+    },
+    {
+      "name": "Dr. Physician Example",
+      "role": "Doctor",
+      "organization": "Example Family Medicine",
+      "phone": "(555) 555-0114",
+      "email": "doctor@example.com",
+      "address": "400 Example Drive, Anytown, ST 00000",
+      "notes": "Primary care physician for the whole family."
+    },
+    {
+      "name": "Insurance Agent Example",
+      "role": "Insurance Agent",
+      "organization": "Example Insurance Co.",
+      "phone": "(555) 555-0115",
+      "email": "agent@example.com",
+      "address": "500 Example Street, Anytown, ST 00000",
+      "notes": "Handles auto, homeowners, and umbrella policies."
+    },
+    {
+      "name": "Trustee Example",
+      "role": "Trustee",
+      "organization": "",
+      "phone": "(555) 555-0116",
+      "email": "trustee@example.com",
+      "address": "600 Example Court, Anytown, ST 00000",
+      "notes": "Named trustee for children's trust."
+    }
+  ],
+
+  "passwordVaults": [
+    {
+      "vaultName": "Family Password Manager",
+      "vaultType": "Example Password Manager",
+      "accessUrl": "https://example.com/vault",
+      "email": "john.doe@example.com",
+      "username": "john.doe",
+      "secretKey": "EXAMPLE-XXXX-XXXX-XXXX-XXXX-XXXX",
+      "masterPassword": "See emergency kit in fireproof safe",
+      "recoveryEmail": "jane.doe@example.com",
+      "twoFactorAuth": "Hardware key on keychain + backup in safe deposit box",
+      "recoveryInstructions": "Emergency kit printed and stored in the fireproof safe. Spouse knows the combination.",
+      "notes": "Family vault shared with spouse. Contains all website logins."
+    }
+  ],
+
+  "computerServers": [
+    {
+      "name": "Home Office Desktop",
+      "type": "Desktop PC",
+      "localUrl": "",
+      "username": "johndoe",
+      "adminEmail": "john.doe@example.com",
+      "password": "See password manager",
+      "encryptionPassword": "Disk encryption recovery key in password manager",
+      "sshKeyLocation": "",
+      "sshKeyPassword": "",
+      "twoFactorAuth": "OS PIN",
+      "recoveryInstructions": "Disk encryption recovery key stored in password manager under 'Home Desktop'",
+      "notes": "Primary work computer. Contains tax documents and family photos."
+    },
+    {
+      "name": "Home NAS",
+      "type": "NAS",
+      "localUrl": "http://192.168.0.0:0000",
+      "username": "admin",
+      "adminEmail": "john.doe@example.com",
+      "password": "See password manager",
+      "encryptionPassword": "Shared folder encryption key in password manager",
+      "sshKeyLocation": "",
+      "sshKeyPassword": "",
+      "twoFactorAuth": "None",
+      "recoveryInstructions": "Located in home office closet. Backup power via UPS.",
+      "notes": "Family photo/video backup. RAID 1 with two large drives."
+    }
+  ],
+
+  "phones": [
+    {
+      "phoneName": "John's Phone",
+      "phoneNumber": "(555) 555-0100",
+      "carrier": "Example Mobile",
+      "imei": "000000000000000",
+      "pin": "",
+      "passcode": "See password manager",
+      "biometricUnlock": "Face/Fingerprint",
+      "simPin": "",
+      "cloudAccount": "Example Cloud",
+      "cloudAccountEmail": "john.doe@example.com",
+      "cloudAccountPassword": "See password manager",
+      "encryptionPassword": "",
+      "recoveryEmail": "jane.doe@example.com",
+      "recoveryPhone": "(555) 555-0101",
+      "twoFactorAuth": "Trusted device (spouse's phone)",
+      "backupLocation": "Cloud automatic backup",
+      "notes": "Has authenticator apps. Smartwatch paired."
+    },
+    {
+      "phoneName": "Jane's Phone",
+      "phoneNumber": "(555) 555-0101",
+      "carrier": "Example Mobile",
+      "imei": "000000000000000",
+      "pin": "",
+      "passcode": "See password manager",
+      "biometricUnlock": "Face/Fingerprint",
+      "simPin": "",
+      "cloudAccount": "Example Cloud",
+      "cloudAccountEmail": "jane.doe@example.com",
+      "cloudAccountPassword": "See password manager",
+      "encryptionPassword": "",
+      "recoveryEmail": "john.doe@example.com",
+      "recoveryPhone": "(555) 555-0100",
+      "twoFactorAuth": "Trusted device (spouse's phone)",
+      "backupLocation": "Cloud automatic backup",
+      "notes": "Family cloud account for kids' devices."
+    }
+  ],
+
+  "authenticatorApps": [
+    {
+      "appName": "Example Authenticator",
+      "deviceName": "John's Phone",
+      "accountEmail": "john.doe@example.com",
+      "backupCodes": "Stored in password manager under 'Authenticator Backup Codes'",
+      "recoveryKey": "See password manager",
+      "cloudBackup": "Enabled",
+      "cloudBackupLocation": "Encrypted cloud backup; password in password manager",
+      "notes": "Primary 2FA app. Multi-device enabled — also on Home Desktop."
+    }
+  ],
+
+  "healthInsurance": {
+    "provider": "Example Health Insurance Co.",
+    "policyNumber": "EX-HEALTH-0000000",
+    "groupNumber": "GRP-EXAMPLE",
+    "contactPhone": "(800) 555-0120",
+    "notes": "PPO plan through employer. Family plan covers all 4 members. Dental and vision separate."
+  },
+
+  "lifeInsurance": {
+    "policies": [
+      {
+        "company": "Example Life Insurance",
+        "policyNumber": "EX-LIFE-0000001",
+        "policyType": "Term Life - 20 Year",
+        "faceValue": "$1,000,000",
+        "beneficiaries": [
+          { "customName": "Jane Doe", "percentage": 100 }
+        ],
+        "amount": "$1,000,000",
+        "notes": "Term expires 2040. Convertible to whole life."
+      },
+      {
+        "company": "Example Mutual Insurance",
+        "policyNumber": "EX-LIFE-0000002",
+        "policyType": "Whole Life",
+        "faceValue": "$500,000",
+        "beneficiaries": [
+          { "customName": "Jane Doe", "percentage": 50 },
+          { "customName": "Alex Doe", "percentage": 25 },
+          { "customName": "Sam Doe", "percentage": 25 }
+        ],
+        "amount": "$500,000",
+        "notes": "Cash value approximately $45,000."
+      }
+    ]
+  },
+
+  "medicalInfo": [
+    {
+      "personId": "person-0000000000000-aaa001",
+      "primaryPhysician": "Dr. Physician Example",
+      "physicianPhone": "(555) 555-0114",
+      "allergies": "Example allergy 1, example allergy 2",
+      "medications": "Example Med 10mg daily, Vitamin D 2000 IU daily",
+      "medicalConditions": "Example condition, managed with medication",
+      "advanceDirective": "Signed, filed with physician and attorney",
+      "organDonor": true,
+      "notes": "Blood type: O+. Annual physical in September."
+    },
+    {
+      "personId": "person-0000000000001-aaa002",
+      "primaryPhysician": "Dr. Physician Example",
+      "physicianPhone": "(555) 555-0114",
+      "allergies": "None known",
+      "medications": "Daily multivitamin",
+      "medicalConditions": "None",
+      "advanceDirective": "Signed, filed with physician",
+      "organDonor": true,
+      "notes": "Blood type: A+."
+    }
+  ],
+
+  "employmentBenefits": [
+    {
+      "personId": "person-0000000000000-aaa001",
+      "employer": "Example Tech Company",
+      "employeeId": "EMP-EXAMPLE-0001",
+      "benefits": "Health, Dental, Vision, 401k (6% match), HSA, Life ($100k group), STD/LTD, 4 weeks PTO",
+      "contactInfo": "HR: (555) 555-0130, hr@example.com",
+      "notes": "Open enrollment in November. Stock options vest over 4 years, 25% per year."
+    },
+    {
+      "personId": "person-0000000000001-aaa002",
+      "employer": "Example School District",
+      "employeeId": "EMP-EXAMPLE-0002",
+      "benefits": "Pension, Health (secondary), Dental, 403b available, sick + personal days",
+      "contactInfo": "HR: (555) 555-0131, benefits@example.org",
+      "notes": "State teacher retirement system. Vested after 5 years of service."
+    }
+  ],
+
+  "financialAccounts": [
+    {
+      "institution": "Example National Bank",
+      "accountType": "Checking",
+      "accountCategory": "joint",
+      "accountName": "Household Checking",
+      "accountNumber": "****0000",
+      "routingNumber": "000000000",
+      "balance": "$12,450.00",
+      "notes": "Primary household account. Both paychecks deposited here."
+    },
+    {
+      "institution": "Example National Bank",
+      "accountType": "Savings",
+      "accountCategory": "joint",
+      "accountName": "Emergency Fund",
+      "accountNumber": "****0000",
+      "routingNumber": "000000000",
+      "balance": "$35,000.00",
+      "notes": "6-month emergency fund. Do not touch unless necessary."
+    },
+    {
+      "institution": "Example Online Bank",
+      "accountType": "High-Yield Savings",
+      "accountCategory": "joint",
+      "accountName": "Vacation Fund",
+      "accountNumber": "****0000",
+      "routingNumber": "000000000",
+      "balance": "$8,200.00",
+      "notes": "Saving for next family trip."
+    },
+    {
+      "institution": "Example Credit Union",
+      "accountType": "Checking",
+      "accountCategory": "personal",
+      "accountName": "John Personal",
+      "accountNumber": "****0000",
+      "routingNumber": "000000000",
+      "balance": "$3,100.00",
+      "notes": "Side business income and personal spending."
+    }
+  ],
+
+  "creditCards": [
+    {
+      "cardName": "Example Travel Card",
+      "issuer": "Example Bank",
+      "cardNumber": "****0000",
+      "expirationDate": "08/2028",
+      "notes": "Primary travel card. $10,000 limit. Pay full balance monthly."
+    },
+    {
+      "cardName": "Example Rewards Card",
+      "issuer": "Example Bank",
+      "cardNumber": "****0000",
+      "expirationDate": "12/2027",
+      "notes": "Used for online and grocery purchases. $8,000 limit."
+    },
+    {
+      "cardName": "Example Cashback Card",
+      "issuer": "Example Bank 2",
+      "cardNumber": "****0000",
+      "expirationDate": "04/2029",
+      "notes": "Gas and warehouse club purchases. $15,000 limit."
+    }
+  ],
+
+  "debts": [
+    {
+      "creditor": "Example Mortgage Lender",
+      "accountNumber": "****0000",
+      "type": "Mortgage",
+      "balance": "$285,000",
+      "monthlyPayment": "$2,100",
+      "notes": "30-year fixed at 3.25%. Originated 2021. Property: 123 Example Street."
+    },
+    {
+      "creditor": "Example Auto Finance",
+      "accountNumber": "****0000",
+      "type": "Auto Loan",
+      "balance": "$18,500",
+      "monthlyPayment": "$425",
+      "notes": "2023 SUV. 60-month term, 4.5% APR. Payoff date: March 2028."
+    },
+    {
+      "creditor": "Example Student Loan Servicer",
+      "accountNumber": "****0000",
+      "type": "Student Loan",
+      "balance": "$12,000",
+      "monthlyPayment": "$250",
+      "notes": "Remaining student loans. Standard 10-year repayment."
+    }
+  ],
+
+  "incomeSources": [
+    {
+      "source": "Example Tech Company — Salary",
+      "amount": "$125,000/year",
+      "accountNumber": "Direct deposit to Example Bank ****0000",
+      "contactInfo": "Payroll: payroll@example.com",
+      "notes": "Bi-weekly pay. Includes RSU vesting schedule."
+    },
+    {
+      "source": "Example School District — Salary",
+      "amount": "$62,000/year",
+      "accountNumber": "Direct deposit to Example Bank ****0000",
+      "contactInfo": "Payroll: (555) 555-0131",
+      "notes": "Paid monthly. Supplemental tutoring income ~$5,000/year."
+    },
+    {
+      "source": "Rental Property Income",
+      "amount": "$1,800/month",
+      "accountNumber": "Direct deposit to Example Credit Union ****0000",
+      "contactInfo": "Property manager: Example Property Mgmt, (555) 555-0140",
+      "notes": "Rental at 789 Example Lane. Net after expenses ~$1,200/month."
+    }
+  ],
+
+  "retirementAccounts": [
+    {
+      "type": "401(k)",
+      "institution": "Example Brokerage",
+      "accountName": "John 401k",
+      "accountNumber": "****0000",
+      "beneficiaries": [
+        { "customName": "Jane Doe", "percentage": 100 }
+      ],
+      "balance": "$245,000",
+      "notes": "Through employer. 6% match. Currently 80/20 stock/bond allocation."
+    },
+    {
+      "type": "Roth IRA",
+      "institution": "Example Brokerage",
+      "accountName": "John Roth IRA",
+      "accountNumber": "****0000",
+      "beneficiaries": [
+        { "customName": "Jane Doe", "percentage": 100 }
+      ],
+      "balance": "$85,000",
+      "notes": "Max contribution annually. Target date fund 2045."
+    },
+    {
+      "type": "Pension",
+      "institution": "Example State Retirement System",
+      "accountName": "Jane Pension",
+      "accountNumber": "****0000",
+      "beneficiaries": [
+        { "customName": "John Doe", "percentage": 100 }
+      ],
+      "balance": "$92,000",
+      "notes": "Defined benefit plan. 8 years of service credit."
+    },
+    {
+      "type": "Brokerage",
+      "institution": "Example Brokerage",
+      "accountName": "Joint Brokerage",
+      "accountNumber": "****0000",
+      "beneficiaries": [
+        { "customName": "Jane Doe", "percentage": 50 },
+        { "customName": "Alex Doe", "percentage": 25 },
+        { "customName": "Sam Doe", "percentage": 25 }
+      ],
+      "balance": "$67,000",
+      "notes": "Individual stocks and ETFs. Dividend reinvestment enabled."
+    }
+  ],
+
+  "digitalAssets": [
+    {
+      "platform": "Example Email/Cloud Provider",
+      "username": "john.doe",
+      "email": "john.doe@example.com",
+      "passwordHint": "See password manager",
+      "recoveryEmail": "jane.doe@example.com",
+      "notes": "Inactive Account Manager set to notify spouse after 6 months."
+    },
+    {
+      "platform": "Example Cloud / Device Provider",
+      "username": "john.doe@example.com",
+      "email": "john.doe@example.com",
+      "passwordHint": "See password manager",
+      "recoveryEmail": "jane.doe@example.com",
+      "notes": "Family Sharing organizer. Legacy Contact: spouse. 2TB cloud storage."
+    },
+    {
+      "platform": "Example Social Network",
+      "username": "johndoe",
+      "email": "john.doe@example.com",
+      "passwordHint": "See password manager",
+      "recoveryEmail": "jane.doe@example.com",
+      "notes": "Memorialization contact: spouse. Privacy settings: Friends only."
+    },
+    {
+      "platform": "Example Professional Network",
+      "username": "johndoe",
+      "email": "john.doe@example.com",
+      "passwordHint": "See password manager",
+      "recoveryEmail": "",
+      "notes": "Professional profile. May want to memorialize or remove."
+    },
+    {
+      "platform": "Example Code Hosting",
+      "username": "johndoe-dev",
+      "email": "john.doe@example.com",
+      "passwordHint": "See password manager",
+      "recoveryEmail": "",
+      "notes": "Contains personal and open-source projects. Some repos may have value."
+    },
+    {
+      "platform": "Example Online Retailer",
+      "username": "john.doe@example.com",
+      "email": "john.doe@example.com",
+      "passwordHint": "See password manager",
+      "recoveryEmail": "",
+      "notes": "Membership and digital purchases."
+    }
+  ],
+
+  "cryptoAssets": [
+    {
+      "nickname": "BTC Cold Storage",
+      "type": "Bitcoin",
+      "blockchain": "Bitcoin",
+      "blockchainOther": "",
+      "approximateHoldings": "1.5 BTC (example)",
+      "storageType": "single-sig",
+      "isCustodial": false,
+      "walletApp": "Example Wallet App",
+      "walletAppOther": "",
+      "walletAddress": "bc1qexampleaddressredacted",
+      "singleKey": [
+        {
+          "id": "key-btc-001",
+          "walletLabel": "Example Hardware Wallet - Primary",
+          "vendor": "Example Vendor",
+          "hardwareModel": "Example Model",
+          "hardwareLocation": "Home office safe, top drawer",
+          "keyType": "Hardware Wallet",
+          "provider": "",
+          "providerUrl": "",
+          "providerContact": "",
+          "publicKey": "",
+          "keyBackupType": "Seed Phrase",
+          "keyBackupLocation": "Steel plate in bank safe deposit box",
+          "keyBackupPassword": "",
+          "password": "See password manager under 'Hardware Wallet PIN'",
+          "pin": "See password manager",
+          "seedPhrase": "EXAMPLE — 24 words stamped on steel plate in safe deposit box",
+          "passphrase": "See password manager under 'BTC Passphrase'",
+          "derivationPath": "m/84'/0'/0'",
+          "physicalKeyLocations": [
+            {
+              "location": "Home office fireproof safe",
+              "description": "Hardware wallet device",
+              "accessInstructions": "Combination in password manager under 'Home Safe'"
+            },
+            {
+              "location": "Bank Safe Deposit Box",
+              "description": "Steel seed phrase backup plate",
+              "accessInstructions": "Box key in home safe. Spouse is authorized signer."
+            }
+          ],
+          "notes": "Primary BTC holdings. Last verified March 2026."
+        }
+      ],
+      "recoveryInstructions": "1) Get hardware wallet from home safe. 2) PIN is in password manager. 3) If device is lost, seed phrase is on steel plate in safe deposit box. 4) Use any BIP84-compatible wallet to restore.",
+      "heirInstructions": "Contact named executor who has been briefed on crypto recovery process. Do NOT share seed phrase with anyone other than a trusted crypto attorney.",
+      "notes": "HODL strategy."
+    },
+    {
+      "nickname": "ETH Staking",
+      "type": "Ethereum",
+      "blockchain": "Ethereum",
+      "blockchainOther": "",
+      "approximateHoldings": "10 ETH (example)",
+      "storageType": "exchange",
+      "isCustodial": true,
+      "exchange": "Example Exchange",
+      "exchangeAccountId": "john.doe@example.com",
+      "exchangeEmail": "john.doe@example.com",
+      "exchange2faMethod": "Authenticator TOTP",
+      "exchange2faRecovery": "Backup codes in password manager under 'Exchange 2FA'",
+      "exchangeBeneficiary": "Spouse added as account beneficiary",
+      "exchangeDeathClaimProcess": "Exchange has a digital asset inheritance process. Submit death certificate and letters testamentary to exchange support.",
+      "walletApp": "",
+      "walletAppOther": "",
+      "walletAddress": "",
+      "recoveryInstructions": "Login to exchange with email. Password in password manager. 2FA via authenticator app on phone.",
+      "heirInstructions": "Spouse is listed as beneficiary on the exchange. File claim with death certificate through exchange support.",
+      "notes": "Staking rewards ~4% APY. Some ETH in DeFi staking."
+    },
+    {
+      "nickname": "BTC Multisig Vault",
+      "type": "Bitcoin",
+      "blockchain": "Bitcoin",
+      "blockchainOther": "",
+      "approximateHoldings": "0.75 BTC (example)",
+      "storageType": "multi-sig",
+      "isCustodial": false,
+      "walletApp": "Example Multisig Wallet",
+      "walletAppOther": "",
+      "walletAddress": "bc1qexamplemultisigredacted",
+      "multiSigConfig": {
+        "requiredSignatures": 2,
+        "totalKeys": 3,
+        "keys": [
+          {
+            "id": "key-ms-001",
+            "walletLabel": "Hardware Wallet A",
+            "vendor": "Example Vendor",
+            "hardwareModel": "Example Model A",
+            "hardwareLocation": "Home office safe",
+            "keyType": "Hardware Wallet",
+            "physicalKeyLocations": [
+              {
+                "location": "Home office fireproof safe",
+                "description": "Hardware wallet device",
+                "accessInstructions": "Same device as single-sig BTC"
+              }
+            ],
+            "notes": "Key 1 of 3"
+          },
+          {
+            "id": "key-ms-002",
+            "walletLabel": "Hardware Wallet B",
+            "vendor": "Example Vendor 2",
+            "hardwareModel": "Example Model B",
+            "hardwareLocation": "Bank safe deposit box",
+            "keyType": "Hardware Wallet",
+            "physicalKeyLocations": [
+              {
+                "location": "Bank Safe Deposit Box",
+                "description": "Hardware wallet device in anti-static bag",
+                "accessInstructions": "Box key in home safe. Spouse authorized."
+              }
+            ],
+            "notes": "Key 2 of 3. PIN in password manager."
+          },
+          {
+            "id": "key-ms-003",
+            "walletLabel": "Seed Phrase Only (paper backup)",
+            "vendor": "",
+            "hardwareModel": "",
+            "hardwareLocation": "Attorney's office safe",
+            "keyType": "Seed Phrase",
+            "physicalKeyLocations": [
+              {
+                "location": "Attorney's office safe",
+                "description": "Sealed envelope with seed phrase",
+                "accessInstructions": "Contact attorney. Only to be opened upon death or incapacity."
+              }
+            ],
+            "notes": "Key 3 of 3. Emergency recovery key held by attorney."
+          }
+        ]
+      },
+      "recoveryInstructions": "2-of-3 multisig. Need any 2 of: Hardware Wallet A (home safe), Hardware Wallet B (bank box), or seed phrase (attorney). Use multisig wallet app to coordinate signing.",
+      "heirInstructions": "Executor and attorney each hold guidance letters. Both must coordinate. Use multisig wallet descriptor file (backed up in password manager).",
+      "notes": "Long-term cold storage. Wallet descriptor file saved in password manager."
+    }
+  ],
+
+  "property": [
+    {
+      "address": "123 Example Street, Anytown, ST 00000",
+      "type": "Single Family Home",
+      "ownership": "Joint Tenancy",
+      "estimatedValue": "$550,000",
+      "mortgageInfo": "Example Lender, 30yr fixed 3.25%, balance ~$285k, payment $2,100/mo",
+      "propertyManagerName": "",
+      "propertyManagerCompany": "",
+      "propertyManagerPhone": "",
+      "propertyManagerEmail": "",
+      "propertyManagerAddress": "",
+      "notes": "Purchased 2021. Homestead exemption filed. HOA: $150/quarter."
+    },
+    {
+      "address": "789 Example Lane, Anytown, ST 00000",
+      "type": "Duplex",
+      "ownership": "Sole",
+      "estimatedValue": "$380,000",
+      "mortgageInfo": "Example Lender 2, 30yr fixed 4.0%, balance ~$195k, payment $1,200/mo",
+      "propertyManagerName": "Property Manager Example",
+      "propertyManagerCompany": "Example Property Management",
+      "propertyManagerPhone": "(555) 555-0140",
+      "propertyManagerEmail": "manager@example.com",
+      "propertyManagerAddress": "900 Example Ave, Suite 100, Anytown, ST 00000",
+      "notes": "Both units rented. Gross rental income $3,600/month. Management fee 8%."
+    }
+  ],
+
+  "vehicles": [
+    {
+      "make": "Example",
+      "model": "SUV",
+      "year": "2023",
+      "vin": "0000000000EXAMPLE1",
+      "licensePlate": "EXAMPLE",
+      "location": "Home garage",
+      "titleLocation": "Glove compartment (copy), original in home safe",
+      "titleNumber": "EX-2023-000000",
+      "lienholder": "Example Auto Finance",
+      "registrationLocation": "Glove compartment",
+      "registrationNumber": "REG-EX-2023-000",
+      "notes": "Family SUV. Extended warranty through 2028."
+    },
+    {
+      "make": "Example",
+      "model": "Sedan",
+      "year": "2020",
+      "vin": "0000000000EXAMPLE2",
+      "licensePlate": "EXAMPLE2",
+      "location": "Home driveway",
+      "titleLocation": "Home safe",
+      "titleNumber": "EX-2020-000000",
+      "lienholder": "",
+      "registrationLocation": "Glove compartment",
+      "registrationNumber": "REG-EX-2020-000",
+      "notes": "Paid off."
+    }
+  ],
+
+  "businessOwnership": [
+    {
+      "businessName": "Example Consulting LLC",
+      "entityType": "LLC",
+      "type": "LLC",
+      "ownershipPercentage": "100",
+      "ein": "00-0000000",
+      "contactInfo": "Registered agent: Example Service. Operating agreement in home safe.",
+      "successionPlan": "Dissolve upon death. Transfer client contracts to executor if willing to continue.",
+      "notes": "Side consulting business. ~$30k/year revenue. CPA handles tax filings."
+    }
+  ],
+
+  "utilities": [
+    {
+      "service": "Electric",
+      "provider": "Example Electric Co.",
+      "accountNumber": "EE-0000000",
+      "contactPhone": "(555) 555-0150",
+      "monthlyCost": "$180",
+      "billingFrequency": "Monthly",
+      "notes": "Budget billing enabled. Auto-pay from household checking."
+    },
+    {
+      "service": "Water / Sewer",
+      "provider": "Example Water Utility",
+      "accountNumber": "EW-0000000",
+      "contactPhone": "(555) 555-0151",
+      "monthlyCost": "$85",
+      "billingFrequency": "Monthly",
+      "notes": "Auto-pay from household checking."
+    },
+    {
+      "service": "Internet",
+      "provider": "Example Internet Provider",
+      "accountNumber": "EI-0000000",
+      "contactPhone": "(555) 555-0152",
+      "monthlyCost": "$70",
+      "billingFrequency": "Monthly",
+      "notes": "1 Gbps plan. No contract."
+    },
+    {
+      "service": "Phone / Mobile",
+      "provider": "Example Mobile",
+      "accountNumber": "EM-0000000",
+      "contactPhone": "(555) 555-0153",
+      "monthlyCost": "$140",
+      "billingFrequency": "Monthly",
+      "notes": "4 lines: 2 adults, 2 kids' tablets."
+    },
+    {
+      "service": "Streaming Service",
+      "provider": "Various",
+      "accountNumber": "N/A",
+      "contactPhone": "",
+      "monthlyCost": "$65",
+      "billingFrequency": "Monthly",
+      "notes": "Multiple streaming subscriptions. All billed to primary credit card."
+    },
+    {
+      "service": "Security / Alarm",
+      "provider": "Example Security",
+      "accountNumber": "ES-0000000",
+      "contactPhone": "(555) 555-0154",
+      "monthlyCost": "$25",
+      "billingFrequency": "Monthly",
+      "notes": "Interactive monitoring plan. Cameras, door/window sensors, smart lock."
+    },
+    {
+      "service": "Lawn Care / Landscaping",
+      "provider": "Example Lawn Service",
+      "accountNumber": "EL-0000000",
+      "contactPhone": "(555) 555-0155",
+      "monthlyCost": "$150",
+      "billingFrequency": "Monthly",
+      "notes": "Weekly mowing in season, bi-weekly off-season. Annual contract."
+    }
+  ],
+
+  "legalDocuments": {
+    "willLocation": "Original in safe deposit box. Copy in home safe and with attorney.",
+    "willDate": "2024-01-15",
+    "powerOfAttorney": "Original filed with attorney. Copy in home safe.",
+    "poaAgent": "Jane Doe",
+    "livingWill": "Filed with primary physician and attorney. Copy in home safe.",
+    "otherDocuments": "Durable Power of Attorney for Finances: spouse. HIPAA Authorization: Filed with all physicians. Guardianship Nomination: trustee for minor children.",
+    "notes": "All documents executed January 15, 2024. Review annually or after major life events."
+  },
+
+  "trusts": [
+    {
+      "id": "trust-0000000000020-ttt001",
+      "trustName": "Doe Family Revocable Living Trust",
+      "trustType": "Revocable Living Trust",
+      "dateCreated": "2024-01-15",
+      "trustNumber": "EXT-2024-001",
+      "grantor": "John Doe and Jane Doe",
+      "trustee": "John Doe",
+      "successorTrustee": "Jane Doe (1st), Trustee Example (2nd)",
+      "trustLocation": "Original with attorney. Copy in home safe.",
+      "beneficiaries": [
+        { "customName": "Jane Doe", "percentage": 100 },
+        { "customName": "Alex Doe (contingent)" },
+        { "customName": "Sam Doe (contingent)" }
+      ],
+      "purpose": "Avoid probate on primary residence and major assets. Provide for surviving spouse and minor children.",
+      "distributionInstructions": "Surviving spouse receives all trust assets. If both grantors deceased, assets distributed equally to children at age 25. Trustee has discretion for health, education, maintenance, and support before that age.",
+      "notes": "Primary residence and rental property titled in trust name. Financial accounts have trust as beneficiary."
+    }
+  ],
+
+  "physicalStorageLocations": [
+    {
+      "id": "storage-0000000000030-sss001",
+      "name": "Home Office Fireproof Safe",
+      "locationType": "Safe",
+      "location": "Home office closet, floor level, behind filing cabinet",
+      "combination": "See password manager under 'Home Safe Combination'",
+      "keyLocation": "Combination lock, no key needed",
+      "accessInstructions": "Pull filing cabinet forward to access. Combination in password manager.",
+      "notes": "Fireproof safe. Contains: original titles, passports, birth certificates, hardware wallet, insurance policies, spare keys."
+    },
+    {
+      "id": "storage-0000000000031-sss002",
+      "name": "Bank Safe Deposit Box",
+      "locationType": "Safe Deposit Box",
+      "location": "Example Bank, Anytown branch.",
+      "combination": "",
+      "keyLocation": "Primary key in home safe (small brass key, labeled). Spare key with attorney.",
+      "accessInstructions": "Both spouses are authorized signers. Bring photo ID.",
+      "notes": "Contains: original will, steel seed phrase backup, hardware wallet, gold coins, original trust document."
+    },
+    {
+      "id": "storage-0000000000032-sss003",
+      "name": "Garage Storage Cabinet",
+      "locationType": "Cabinet",
+      "location": "Garage, east wall, gray metal cabinet",
+      "combination": "",
+      "keyLocation": "Key on house keyring (small silver key)",
+      "accessInstructions": "Unlock with key. Important documents in top shelf binder labeled 'House Documents'.",
+      "notes": "Contains: home warranty docs, appliance manuals, vehicle maintenance records, HOA docs."
+    }
+  ],
+
+  "assetDocuments": [
+    {
+      "documentType": "Property Deed",
+      "description": "Warranty deed for 123 Example Street (primary residence), titled in Doe Family Trust",
+      "location": "Safe deposit box (original), home safe (copy)",
+      "notes": "Recorded January 2024."
+    },
+    {
+      "documentType": "Property Deed",
+      "description": "Warranty deed for 789 Example Lane (rental property), titled in Doe Family Trust",
+      "location": "Safe deposit box (original), home safe (copy)",
+      "notes": "Recorded February 2024."
+    },
+    {
+      "documentType": "Vehicle Title",
+      "description": "2023 SUV title",
+      "location": "Home safe (original in glove compartment is copy)",
+      "notes": "Lien holder: Example Auto Finance. Clean title upon payoff."
+    },
+    {
+      "documentType": "Vehicle Title",
+      "description": "2020 Sedan title",
+      "location": "Home safe",
+      "notes": "Clear title, no liens."
+    },
+    {
+      "documentType": "Business Formation",
+      "description": "Example Consulting LLC — Articles of Organization and Operating Agreement",
+      "location": "Home safe",
+      "notes": "Filed with state, 2020."
+    },
+    {
+      "documentType": "Insurance Policy",
+      "description": "Example Term Life Policy EX-LIFE-0000001",
+      "location": "Home safe",
+      "notes": "$1M face value. Policy documents and amendment riders."
+    },
+    {
+      "documentType": "Tax Returns",
+      "description": "Federal and state tax returns 2020-2025",
+      "location": "Home office filing cabinet, digital copies on NAS and cloud",
+      "notes": "Prepared by CPA."
+    }
+  ],
+
+  "letterOfInstruction": {
+    "content": "Dear Family,\n\nIf you're reading this, I want you to know that I love you all more than words can express. I've tried to organize everything to make this process as smooth as possible.\n\nFirst Steps:\n1. Contact the named executor — they know the overall plan.\n2. Contact the attorney — they have copies of all legal documents.\n3. Contact the CPA for tax matters.\n4. Do NOT rush any financial decisions. Take at least 6 months.\n\nImportant Notes:\n- The password manager contains all digital credentials. The emergency kit is in the home safe.\n- Crypto assets require careful handling. See the crypto section and contact the executor who has been briefed.\n- The rental property can be sold or kept for income — the property manager handles everything.\n- The consulting business should be wound down. Notify clients and close the LLC.\n\nFor the Kids:\n- I've set aside letters in the home safe, to be given at age 18.\n- Their education funds are in 529 plans.\n- The named guardian has agreed to take care of them if needed.\n\nPlease take care of each other.\n\nWith all my love,\nJohn",
+    "recipients": "Spouse, Executor, Guardian for children",
+    "notes": "EXAMPLE letter. Last updated March 2026. Review annually."
+  },
+
+  "finalWishesAndServices": [
+    {
+      "personId": "person-0000000000000-aaa001",
+      "burialOrCremation": "Cremation",
+      "cemetery": "",
+      "plotLocation": "",
+      "funeralArrangements": "Keep it simple and celebratory. Memorial gathering preferred.",
+      "servicePreferences": "Outdoor celebration of life. Casual attire. Potluck style.",
+      "music": "(example music preferences)",
+      "readings": "(example readings)",
+      "obituary": "Keep it brief and honest. Donations to favorite charity in lieu of flowers.",
+      "socialMedia": "Memorialize primary social account. Remove others after 6 months.",
+      "otherInstructions": "Scatter ashes at favorite outdoor location.",
+      "notes": "Pre-discussed wishes with spouse and executor."
+    }
+  ],
+
+  "petCare": {
+    "veterinarian": "Dr. Vet Example at Example Animal Hospital",
+    "vetContact": "(555) 555-0160, 1000 Example Rd, Anytown",
+    "petInsurance": "Example Pet Insurance, Policy #EP-0000",
+    "feedingInstructions": "Dog (Golden Retriever, 7yo): 2 cups twice daily. Cat (4yo): 1/2 cup dry + 1 can wet daily.",
+    "medicalNeeds": "Dog: heartworm prevention monthly, flea/tick every 3 months. Cat: indoor only, annual vaccines current.",
+    "emergencyContacts": "Trusted neighbor (555) 555-0161 — has spare house key. Example Pet Boarding (555) 555-0162.",
+    "rehomingInstructions": "Spouse keeps the pets. If unable, named guardian has agreed to take them. Please keep them together.",
+    "notes": "Both pets are microchipped."
+  },
+
+  "photosAndMedia": {
+    "photoLocations": "Cloud Photo Library, secondary cloud, home NAS",
+    "digitalPhotoStorage": "Primary: cloud (2TB plan). Backup: home NAS RAID mirror.",
+    "photoAlbums": "Physical albums in living room bookshelf. Wedding album in home safe. Kids' first year albums in nursery closet.",
+    "videoLocations": "Family videos on home NAS under /video/family/. Some private cloud uploads.",
+    "importantMedia": "Wedding video, kids' birth videos, family trips. All on NAS and cloud.",
+    "accessInstructions": "Home NAS: see Computer/Server section, login in password manager. Cloud: Legacy Contact (spouse) enabled.",
+    "notes": "Please don't delete anything — let the kids have access when they're older."
+  },
+
+  "otherInsurance": [
+    {
+      "policyType": "Homeowner's Insurance",
+      "provider": "Example Insurance Co.",
+      "policyNumber": "EX-HO-0000001",
+      "agentName": "Insurance Agent Example",
+      "agentPhone": "(555) 555-0115",
+      "premium": "$2,400",
+      "billingFrequency": "Annually",
+      "coverageAmount": "$450,000",
+      "deductible": "$2,500",
+      "notes": "Covers primary residence. Includes personal property rider for electronics. Flood insurance is separate."
+    },
+    {
+      "policyType": "Auto Insurance",
+      "provider": "Example Insurance Co.",
+      "policyNumber": "EX-AU-0000001",
+      "agentName": "Insurance Agent Example",
+      "agentPhone": "(555) 555-0115",
+      "premium": "$3,200",
+      "billingFrequency": "Semi-Annually",
+      "coverageAmount": "$500,000",
+      "deductible": "$1,000",
+      "notes": "Covers both family vehicles. Full coverage on both. Multi-car and bundling discounts applied."
+    },
+    {
+      "policyType": "Umbrella Insurance",
+      "provider": "Example Insurance Co.",
+      "policyNumber": "EX-UMB-0000001",
+      "agentName": "Insurance Agent Example",
+      "agentPhone": "(555) 555-0115",
+      "premium": "$450",
+      "billingFrequency": "Annually",
+      "coverageAmount": "$1,000,000",
+      "deductible": "",
+      "notes": "Sits on top of auto and homeowner's."
+    },
+    {
+      "policyType": "Long-Term Care Insurance",
+      "provider": "Example LTC Insurer",
+      "policyNumber": "EX-LTC-0000001",
+      "agentName": "LTC Agent Example",
+      "agentPhone": "(555) 555-0117",
+      "premium": "$185",
+      "billingFrequency": "Monthly",
+      "coverageAmount": "$200/day",
+      "deductible": "",
+      "notes": "90-day elimination period. 3-year benefit period. Inflation protection rider."
+    },
+    {
+      "policyType": "Flood Insurance",
+      "provider": "Example Flood Insurer",
+      "policyNumber": "EX-FL-0000001",
+      "agentName": "Insurance Agent Example",
+      "agentPhone": "(555) 555-0115",
+      "premium": "$680",
+      "billingFrequency": "Annually",
+      "coverageAmount": "$250,000",
+      "deductible": "$1,250",
+      "notes": "Required by mortgage lender. Covers structure only."
+    }
+  ],
+
+  "loyaltyPrograms": [
+    {
+      "programType": "Airline Miles",
+      "programName": "Example Airline Rewards",
+      "memberNumber": "0000000000",
+      "approximateValue": "142,000 miles",
+      "loginEmail": "john.doe@example.com",
+      "transferable": false,
+      "notes": "Elite status. Miles do not expire as long as there's account activity every 2 years."
+    },
+    {
+      "programType": "Hotel Points",
+      "programName": "Example Hotel Rewards",
+      "memberNumber": "0000000000",
+      "approximateValue": "85,000 points",
+      "loginEmail": "john.doe@example.com",
+      "transferable": true,
+      "notes": "Elite status. Points can be transferred to airline partners."
+    },
+    {
+      "programType": "Credit Card Rewards",
+      "programName": "Example Card Rewards",
+      "memberNumber": "See credit card",
+      "approximateValue": "210,000 points",
+      "loginEmail": "john.doe@example.com",
+      "transferable": true,
+      "notes": "Points can be transferred to partners or redeemed through portal. Authorized user: spouse."
+    },
+    {
+      "programType": "Cashback",
+      "programName": "Example Membership Reward",
+      "memberNumber": "0000-0000-0000",
+      "approximateValue": "$380 annual reward",
+      "loginEmail": "john.doe@example.com",
+      "transferable": false,
+      "notes": "Annual reward usually arrives in February."
+    }
+  ],
+
+  "taxInfo": {
+    "filingStatus": "Married Filing Jointly",
+    "taxState": "Example State",
+    "ein": "00-0000000",
+    "itin": "",
+    "returnStorageLocation": "Paper copies in home office filing cabinet. Digital copies on home NAS. Tax software has 7 years of returns.",
+    "taxSoftware": "Example Tax Software",
+    "taxSoftwareLogin": "john.doe@example.com",
+    "estimatedPayments": true,
+    "notes": "Quarterly estimated payments for rental income and freelance consulting. CPA reviews self-prepared returns."
+  },
+
+  "pendingLegalMatters": [
+    {
+      "matterType": "Insurance Claim",
+      "description": "Example claim — roof replacement",
+      "status": "Pending",
+      "attorney": "",
+      "attorneyPhone": "",
+      "caseNumber": "CLM-EX-0000",
+      "notes": "Filed Feb 2026. Adjuster visited 3/5/2026, estimate pending. Contractor quote: $18,500."
+    },
+    {
+      "matterType": "Property Dispute",
+      "description": "Example fence line dispute with neighbor at rental property",
+      "status": "Active",
+      "attorney": "Attorney Example 2",
+      "attorneyPhone": "(555) 555-0118",
+      "caseNumber": "",
+      "notes": "Neighbor claims fence encroaches. Survey ordered. Low stakes but need to resolve before selling."
+    }
+  ],
+
+  "vaultBackup": {
+    "storageMethod": "usb",
+    "fileLocation": "Labeled USB drive in the fireproof safe in the home office closet. Second copy on the home NAS under /documents/estate/liferelay-backup.json",
+    "isEncrypted": true,
+    "password": "",
+    "passwordManualEntry": true,
+    "passwordHint": "Same as the home safe combination but with our wedding year appended",
+    "accessInstructions": "1. Get the USB drive from the fireproof safe (combo is with spouse and executor). 2. Open liferelay.app in a web browser. 3. Click Import Vault on the dashboard. 4. Select the .json file from the USB drive. 5. Enter the encryption password when prompted.",
+    "notes": "Backup updated monthly. Spouse knows this exists and has the safe combination. Executor has a sealed envelope with the safe combo."
+  },
+
+  "notes": "EXAMPLE VAULT — All data in this file is fictional and for demonstration purposes only. Names, addresses, phone numbers, account numbers, and other identifiers do not refer to real people or organizations. Use this file to explore the Life Relay app structure or as a starting template."
+}
