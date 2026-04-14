@@ -23,7 +23,7 @@ export interface DeathboxData {
 
   // Insurance, Medical & Benefits
   lifeInsurance?: LifeInsurance
-  healthInsurance?: HealthInsurance
+  healthInsurance?: HealthInsurance[]
   medicalInfo?: MedicalInfo[]
   employmentBenefits?: EmploymentBenefits[]
 

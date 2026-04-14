@@ -1,6 +1,6 @@
 <template>
   <div class="mb-4">
-    <label :for="id" class="block text-sm font-medium text-gray-700 mb-1">
+    <label :for="id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
       {{ label }}
       <span v-if="required" class="text-red-500">*</span>
     </label>
@@ -10,7 +10,7 @@
       :type="type"
       :value="modelValue"
       @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
-      class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+      class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
       :placeholder="placeholder"
     />
     <textarea
@@ -18,7 +18,7 @@
       :id="id"
       :value="modelValue"
       @input="$emit('update:modelValue', ($event.target as HTMLTextAreaElement).value)"
-      class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+      class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
       :rows="rows"
       :placeholder="placeholder"
     />
@@ -40,4 +40,3 @@ defineEmits<{
   'update:modelValue': [value: string]
 }>()
 </script>
-

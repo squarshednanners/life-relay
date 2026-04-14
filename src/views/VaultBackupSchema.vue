@@ -8,7 +8,7 @@
     />
 
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-sm text-blue-800">
+      <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6 text-sm text-blue-800 dark:text-blue-300">
         <strong>Why this matters:</strong> If you've exported an encrypted backup of your Life Relay vault,
         your loved ones will need to know where the file is and how to decrypt it. This information will
         be included in your PDF export.

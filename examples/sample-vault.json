@@ -263,13 +263,26 @@
     }
   ],
 
-  "healthInsurance": {
-    "provider": "Example Health Insurance Co.",
-    "policyNumber": "EX-HEALTH-0000000",
-    "groupNumber": "GRP-EXAMPLE",
-    "contactPhone": "(800) 555-0120",
-    "notes": "PPO plan through employer. Family plan covers all 4 members. Dental and vision separate."
-  },
+  "healthInsurance": [
+    {
+      "provider": "Example Health Insurance Co.",
+      "planType": "PPO",
+      "policyNumber": "EX-HEALTH-0000001",
+      "groupNumber": "GRP-EXAMPLE",
+      "contactPhone": "(800) 555-0120",
+      "coveredMembers": "John Doe, Jane Doe, Alex Doe, Sam Doe",
+      "notes": "PPO plan through John's employer. Family plan covers all 4 members."
+    },
+    {
+      "provider": "Example Dental Insurance",
+      "planType": "Dental",
+      "policyNumber": "EX-DENTAL-0000001",
+      "groupNumber": "GRP-EXAMPLE",
+      "contactPhone": "(800) 555-0121",
+      "coveredMembers": "John Doe, Jane Doe, Alex Doe, Sam Doe",
+      "notes": "Dental plan through John's employer."
+    }
+  ],
 
   "lifeInsurance": {
     "policies": [

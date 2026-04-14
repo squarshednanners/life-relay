@@ -12,6 +12,7 @@
         :schema="healthInsuranceSchema"
         :model-value="healthInsurance"
         @update:model-value="healthInsurance = $event"
+        @remove="removeItem"
       />
 
       <div class="mt-6 flex gap-4">
@@ -37,15 +38,23 @@ import { useUnsavedChanges } from '@/composables/useUnsavedChanges'
 
 const store = useLegacyStore()
 const { showToast } = useToast()
-const healthInsurance = ref<Record<string, any>>({})
+const healthInsurance = ref<any[]>([])
 const { markClean, initialize } = useUnsavedChanges(healthInsurance)
 
 function loadFormData() {
-  if (store.data?.healthInsurance) {
-    healthInsurance.value = { ...store.data.healthInsurance }
+  const data = store.data?.healthInsurance as any
+  if (Array.isArray(data)) {
+    healthInsurance.value = data.map((item: any) => ({ ...item }))
+  } else if (data && typeof data === 'object') {
+    // Migrate legacy single object to array
+    healthInsurance.value = [{ ...data }]
   } else {
-    healthInsurance.value = {}
+    healthInsurance.value = []
   }
+}
+
+function removeItem(index: number) {
+  healthInsurance.value.splice(index, 1)
 }
 
 onMounted(() => {
@@ -65,4 +74,3 @@ async function save() {
   }
 }
 </script>
-

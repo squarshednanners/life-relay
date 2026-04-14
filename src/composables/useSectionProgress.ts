@@ -46,7 +46,7 @@ export function hasSectionData(data: DeathboxData | null, path: string): boolean
     case '/authenticator-apps':
       return !!(data.authenticatorApps && data.authenticatorApps.length > 0)
     case '/health-insurance':
-      return hasObjectData(data.healthInsurance)
+      return !!(data.healthInsurance && Array.isArray(data.healthInsurance) && data.healthInsurance.length > 0) || hasObjectData(data.healthInsurance)
     case '/life-insurance':
       return !!(data.lifeInsurance?.policies && data.lifeInsurance.policies.length > 0)
     case '/medical-info':

@@ -3,8 +3,9 @@ import type { FormSectionSchema } from '@/models/FormSchema'
 export const healthInsuranceSchema: FormSectionSchema = {
   sectionKey: 'healthInsurance',
   title: 'Health Insurance',
-  description: 'Health insurance provider and policy information',
-  isArray: false,
+  description: 'Health insurance policies and covered members',
+  isArray: true,
+  arrayItemLabel: (index, item) => item?.provider || `Policy ${index + 1}`,
   pdfGroup: 'Insurance, Medical & Benefits',
   fields: [
     {
@@ -13,6 +14,25 @@ export const healthInsuranceSchema: FormSectionSchema = {
       type: 'text',
       placeholder: 'Insurance Provider',
       colSpan: 1,
+    },
+    {
+      name: 'planType',
+      label: 'Plan Type',
+      type: 'select',
+      colSpan: 1,
+      options: [
+        { label: '', value: '' },
+        { label: 'PPO', value: 'PPO' },
+        { label: 'HMO', value: 'HMO' },
+        { label: 'EPO', value: 'EPO' },
+        { label: 'POS', value: 'POS' },
+        { label: 'HDHP', value: 'HDHP' },
+        { label: 'Medicare', value: 'Medicare' },
+        { label: 'Medicaid', value: 'Medicaid' },
+        { label: 'Dental', value: 'Dental' },
+        { label: 'Vision', value: 'Vision' },
+        { label: 'Other', value: 'Other' },
+      ],
     },
     {
       name: 'policyNumber',
@@ -36,14 +56,21 @@ export const healthInsuranceSchema: FormSectionSchema = {
       colSpan: 1,
     },
     {
+      name: 'coveredMembers',
+      label: 'Covered Members',
+      type: 'text',
+      placeholder: 'e.g. John, Jane, Alex, Sam',
+      colSpan: 1,
+      helpText: 'Names of people covered under this policy',
+    },
+    {
       name: 'notes',
       label: 'Notes',
       type: 'textarea',
-      placeholder: 'Additional notes',
+      placeholder: 'Additional notes (deductible, copay, etc.)',
       colSpan: 2,
       fullWidth: true,
       rows: 2,
     },
   ],
 }
-

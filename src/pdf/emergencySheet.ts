@@ -219,15 +219,19 @@ export async function generateEmergencySheet(
 
   // --- Health Insurance ---
   if (selections.includeHealthInsurance && data.healthInsurance) {
-    const hi = data.healthInsurance
-    const hasData = hi.provider || hi.policyNumber || hi.groupNumber || hi.contactPhone
-    if (hasData) {
+    const policies = Array.isArray(data.healthInsurance) ? data.healthInsurance : [data.healthInsurance]
+    const validPolicies = policies.filter((hi: any) => hi.provider || hi.policyNumber || hi.groupNumber || hi.contactPhone)
+    if (validPolicies.length > 0) {
       drawSectionTitle('HEALTH INSURANCE', leftX, COL_WIDTH)
-      drawField('Provider', hi.provider, leftX + 2, COL_WIDTH - 4)
-      drawField('Policy #', hi.policyNumber, leftX + 2, COL_WIDTH - 4)
-      drawField('Group #', hi.groupNumber, leftX + 2, COL_WIDTH - 4)
-      drawField('Phone', hi.contactPhone, leftX + 2, COL_WIDTH - 4)
-      y -= sectionGap
+      for (const hi of validPolicies) {
+        drawField('Provider', [hi.provider, hi.planType].filter(Boolean).join(' — '), leftX + 2, COL_WIDTH - 4)
+        drawField('Policy #', hi.policyNumber, leftX + 2, COL_WIDTH - 4)
+        drawField('Group #', hi.groupNumber, leftX + 2, COL_WIDTH - 4)
+        drawField('Phone', hi.contactPhone, leftX + 2, COL_WIDTH - 4)
+        if (hi.coveredMembers) drawField('Covered', hi.coveredMembers, leftX + 2, COL_WIDTH - 4)
+        y -= 4
+      }
+      y -= sectionGap - 4
     }
   }
 

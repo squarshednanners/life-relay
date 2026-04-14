@@ -37,7 +37,7 @@
             <div class="flex items-center gap-2 py-1">
               <input type="checkbox" v-model="includeHealthInsurance" class="rounded text-primary-600" />
               <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Health Insurance</span>
-              <span class="text-xs text-gray-400">{{ data?.healthInsurance?.provider }}</span>
+              <span class="text-xs text-gray-400 dark:text-gray-500">{{ healthInsuranceSummary }}</span>
             </div>
           </section>
 
@@ -152,8 +152,15 @@ const storageLocations = computed(() => props.data?.physicalStorageLocations ?? 
 const cryptoAssets = computed(() => props.data?.cryptoAssets ?? [])
 
 const hasHealthInsurance = computed(() => {
-  const hi = props.data?.healthInsurance
+  const hi = props.data?.healthInsurance as any
+  if (Array.isArray(hi)) return hi.length > 0
   return !!(hi && (hi.provider || hi.policyNumber))
+})
+
+const healthInsuranceSummary = computed(() => {
+  const hi = props.data?.healthInsurance
+  if (Array.isArray(hi)) return hi.map((p: any) => p.provider).filter(Boolean).join(', ') || ''
+  return (hi as any)?.provider || ''
 })
 
 const hasLegalDocuments = computed(() => {
