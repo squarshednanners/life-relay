@@ -18,9 +18,12 @@
               Life Relay
             </h1>
           </div>
-          <p class="text-lg sm:text-xl text-primary-100 mb-10 max-w-2xl mx-auto leading-relaxed">
-            The privacy-first app for organizing your critical information, estate plans, and digital assets
-            — so your loved ones aren't left guessing.
+          <p class="text-lg sm:text-xl text-primary-100 mb-4 max-w-2xl mx-auto leading-relaxed">
+            The free, privacy-first app for organizing your will, trust, finances, digital assets, and everything
+            your family would need after your death — so they know exactly what exists and where to find it.
+          </p>
+          <p class="text-sm text-primary-200/80 mb-10 max-w-xl mx-auto">
+            No servers. No accounts. No tracking. 100% free and open source.
           </p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <router-link
@@ -43,24 +46,24 @@
     <!-- Audience Section -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <div class="text-center mb-10">
-        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Built for People Who Plan Ahead</h2>
-        <p class="text-gray-500 max-w-xl mx-auto">Whether you hold crypto, have a family, or are approaching retirement — Life Relay helps you get organized.</p>
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Your In-Case-of-Death Folder, Done Right</h2>
+        <p class="text-gray-500 max-w-xl mx-auto">Whether you're preparing a will, documenting crypto for your heirs, or building a family emergency binder — Life Relay organizes it all in one place.</p>
       </div>
       <div class="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
         <div class="bg-white rounded-xl border border-gray-200 p-6 text-center hover:shadow-md transition-shadow">
           <div class="text-3xl mb-3">&#x20BF;</div>
           <h3 class="font-semibold text-gray-900 mb-1">Crypto Holders</h3>
-          <p class="text-sm text-gray-500">Document wallets, seed phrase locations, exchange access, and multi-sig configurations so heirs can recover your assets.</p>
+          <p class="text-sm text-gray-500">Create a crypto recovery plan — document wallets, seed phrase locations, exchange access, and multi-sig configurations so heirs can actually recover your assets.</p>
         </div>
         <div class="bg-white rounded-xl border border-gray-200 p-6 text-center hover:shadow-md transition-shadow">
           <div class="text-3xl mb-3">&#x1F3E0;</div>
           <h3 class="font-semibold text-gray-900 mb-1">Parents & Families</h3>
-          <p class="text-sm text-gray-500">Organize accounts, insurance, legal documents, and final wishes. Name guardians, executors, and beneficiaries.</p>
+          <p class="text-sm text-gray-500">Build a family emergency binder with accounts, insurance, legal documents, final wishes, guardianship, and beneficiary designations — all in one organized place.</p>
         </div>
         <div class="bg-white rounded-xl border border-gray-200 p-6 text-center hover:shadow-md transition-shadow">
           <div class="text-3xl mb-3">&#x2696;</div>
-          <h3 class="font-semibold text-gray-900 mb-1">Estate Planners</h3>
-          <p class="text-sm text-gray-500">Use the Estate Planning Guide to prepare for attorney meetings with an organized summary of your assets and wishes.</p>
+          <h3 class="font-semibold text-gray-900 mb-1">Will & Trust Preparation</h3>
+          <p class="text-sm text-gray-500">Organize your information before meeting with an attorney. The Estate Planning Guide generates an Attorney Preparation Summary PDF you can bring to your first meeting.</p>
         </div>
       </div>
     </div>
@@ -69,8 +72,8 @@
     <div id="features" class="bg-white py-16">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-          <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Everything You Need</h2>
-          <p class="text-gray-500 max-w-xl mx-auto">A comprehensive, secure toolkit to organize your legacy — all in one place.</p>
+          <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Everything You Need, Nothing You Don't</h2>
+          <p class="text-gray-500 max-w-xl mx-auto">A free, comprehensive toolkit for legacy planning, inheritance preparation, and documenting where everything is — without uploading your data to anyone's server.</p>
         </div>
 
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -100,8 +103,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
               </svg>
             </div>
-            <h3 class="font-semibold text-gray-900 mb-2">Emergency Sheet</h3>
-            <p class="text-sm text-gray-500 leading-relaxed">Generate a one-page emergency information PDF with key contacts, medical info, and document locations.</p>
+          <h3 class="font-semibold text-gray-900 mb-2">Emergency Information Card</h3>
+            <p class="text-sm text-gray-500 leading-relaxed">Generate a one-page emergency sheet PDF with key contacts, medical info, and important document locations. Print and store in your family emergency binder.</p>
           </div>
 
           <div class="group rounded-xl border border-gray-200 p-6 hover:border-primary-300 hover:shadow-md transition-all">
@@ -120,8 +123,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
             </div>
-            <h3 class="font-semibold text-gray-900 mb-2">Crypto Asset Management</h3>
-            <p class="text-sm text-gray-500 leading-relaxed">Document wallets, exchanges, seed phrase locations, multi-sig setups, and hardware devices. Includes chain-specific recovery instructions for heirs.</p>
+            <h3 class="font-semibold text-gray-900 mb-2">Crypto Recovery Plan</h3>
+            <p class="text-sm text-gray-500 leading-relaxed">Document wallets, exchanges, seed phrase locations, multi-sig setups, and hardware devices. Build a complete crypto inheritance plan with step-by-step recovery instructions for heirs.</p>
           </div>
 
           <div class="group rounded-xl border border-gray-200 p-6 hover:border-primary-300 hover:shadow-md transition-all">
@@ -130,8 +133,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <h3 class="font-semibold text-gray-900 mb-2">Multiple PDF Exports</h3>
-            <p class="text-sm text-gray-500 leading-relaxed">Full vault PDF with selective sections, one-page emergency sheet, and attorney preparation summary. All generated client-side.</p>
+            <h3 class="font-semibold text-gray-900 mb-2">Important Documents Organizer</h3>
+            <p class="text-sm text-gray-500 leading-relaxed">Full vault PDF, one-page emergency sheet, and attorney preparation summary. Export as your printable in-case-of-death folder. All generated client-side.</p>
           </div>
         </div>
       </div>
@@ -141,7 +144,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <div class="text-center mb-10">
         <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">26 Sections Across 8 Categories</h2>
-        <p class="text-gray-500 max-w-xl mx-auto">Organized logically so you can fill in what matters to you and skip the rest.</p>
+        <p class="text-gray-500 max-w-xl mx-auto">From bank accounts to burial preferences — organized logically so you can fill in what matters and skip the rest.</p>
       </div>
 
       <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -231,7 +234,7 @@
       <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-2xl sm:text-3xl font-bold mb-4">Don't Leave Your Family Guessing</h2>
         <p class="text-primary-100 mb-8 text-lg">
-          Start organizing your legacy information today. It's free, private, and takes just minutes to begin.
+          Start organizing your will, trust, and legacy information today. It's free, private, and takes just minutes to begin.
         </p>
         <router-link
           to="/dashboard"
