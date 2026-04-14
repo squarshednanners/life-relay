@@ -1,14 +1,14 @@
 <template>
   <div class="space-y-6">
     <!-- Overall Progress -->
-    <div class="bg-white rounded-lg shadow p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-lg font-semibold">Overall Progress</h3>
         <span class="text-2xl font-bold" :class="overallColorClass">
           {{ overallProgress.percentage }}%
         </span>
       </div>
-      <div class="w-full bg-gray-200 rounded-full h-3">
+      <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
         <div
           class="h-3 rounded-full transition-all duration-500"
           :class="overallBarClass"
@@ -20,12 +20,12 @@
       </p>
 
       <!-- Suggested Next Section -->
-      <div v-if="suggestedNextSection" class="mt-4 p-3 bg-primary-50 border border-primary-200 rounded-lg">
-        <p class="text-sm text-primary-700">
+      <div v-if="suggestedNextSection" class="mt-4 p-3 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg">
+        <p class="text-sm text-primary-700 dark:text-primary-300">
           <span class="font-medium">Suggested next:</span>
           <router-link
             :to="suggestedNextSection.path"
-            class="ml-1 underline hover:text-primary-900"
+            class="ml-1 underline hover:text-primary-900 dark:hover:text-primary-100"
           >
             {{ suggestedNextSection.name }}
           </router-link>
@@ -34,17 +34,17 @@
     </div>
 
     <!-- Group Progress -->
-    <div class="bg-white rounded-lg shadow p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
       <h3 class="text-lg font-semibold mb-4">Progress by Section</h3>
       <div class="space-y-5">
         <div v-for="group in groupProgress" :key="group.name">
           <div class="flex items-center justify-between mb-1">
-            <h4 class="text-sm font-semibold text-gray-700">{{ group.name }}</h4>
+            <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ group.name }}</h4>
             <span class="text-xs font-medium" :class="groupColorClass(group.percentage)">
               {{ group.completed }}/{{ group.total }}
             </span>
           </div>
-          <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+          <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
             <div
               class="h-2 rounded-full transition-all duration-500"
               :class="groupBarClass(group.percentage)"
@@ -56,11 +56,11 @@
             <div
               v-for="item in group.items"
               :key="item.path"
-              class="flex items-center justify-between text-sm py-1 px-2 rounded hover:bg-gray-50 group"
+              class="flex items-center justify-between text-sm py-1 px-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 group"
             >
               <router-link
                 :to="item.path"
-                class="flex items-center gap-2 text-gray-600 hover:text-primary-700 flex-1 min-w-0"
+                class="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-primary-700 dark:hover:text-primary-400 flex-1 min-w-0"
               >
                 <span class="flex-shrink-0">
                   <svg
@@ -88,9 +88,9 @@
                       transform="rotate(-90 10 10)"
                     />
                   </svg>
-                  <span v-else class="w-4 h-4 inline-block rounded-full border-2 border-gray-300"></span>
+                  <span v-else class="w-4 h-4 inline-block rounded-full border-2 border-gray-300 dark:border-gray-500"></span>
                 </span>
-                <span class="truncate" :class="{ 'line-through text-gray-400': isSectionSkipped(item.path) }">
+                <span class="truncate" :class="{ 'line-through text-gray-400 dark:text-gray-500': isSectionSkipped(item.path) }">
                   {{ item.name }}
                 </span>
               </router-link>
@@ -98,8 +98,8 @@
                 @click.prevent="toggleSkipSection(item.path)"
                 class="text-xs px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 ml-2"
                 :class="isSectionSkipped(item.path)
-                  ? 'text-primary-600 hover:text-primary-800 hover:bg-primary-50'
-                  : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'"
+                  ? 'text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-200 hover:bg-primary-50 dark:hover:bg-primary-900/30'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'"
                 :title="isSectionSkipped(item.path) ? 'Unskip this section' : 'Skip — not applicable'"
               >
                 {{ isSectionSkipped(item.path) ? 'Unskip' : 'Skip' }}

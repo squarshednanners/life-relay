@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <!-- Show sidebar and layout only when not on welcome page -->
     <div v-if="$route.path !== '/'" class="flex">
       <!-- Mobile Menu Overlay -->
@@ -11,19 +11,19 @@
 
       <!-- Sidebar -->
       <aside
-        class="w-64 bg-white border-r border-gray-200 min-h-screen fixed left-0 top-0 overflow-y-auto max-h-screen z-50 transform transition-transform duration-300 ease-in-out lg:translate-x-0"
+        class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 min-h-screen fixed left-0 top-0 overflow-y-auto max-h-screen z-50 transform transition-transform duration-300 ease-in-out lg:translate-x-0"
         :class="isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
       >
         <div class="p-6">
           <div class="flex items-center justify-between mb-8">
             <router-link to="/" class="flex items-center gap-2" @click="isMobileMenuOpen = false">
               <LifeRelayLogo size="sm" />
-              <h1 class="text-2xl font-bold text-primary-700 hover:text-primary-800 transition-colors">Life Relay</h1>
+              <h1 class="text-2xl font-bold text-primary-700 dark:text-primary-300 hover:text-primary-800 dark:hover:text-primary-200 transition-colors">Life Relay</h1>
             </router-link>
             <!-- Close button for mobile -->
             <button
               @click="isMobileMenuOpen = false"
-              class="lg:hidden text-gray-500 hover:text-gray-700"
+              class="lg:hidden text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
             >
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -32,7 +32,7 @@
           </div>
           <nav class="space-y-6">
             <div v-for="group in navigationGroups" :key="group.name">
-              <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <div class="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 {{ group.name }}
               </div>
               <div class="mt-1 space-y-1">
@@ -44,8 +44,8 @@
                   class="flex items-center justify-between px-4 py-2 text-sm font-medium rounded-lg transition-colors"
                   :class="
                     $route.path === item.path
-                      ? 'bg-primary-100 text-primary-700'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                   "
                 >
                   <span class="flex items-center gap-2">
@@ -66,7 +66,7 @@
                   </svg>
                   <span
                     v-else-if="isSectionSkipped(item.path)"
-                    class="text-xs text-gray-400 ml-2 flex-shrink-0"
+                    class="text-xs text-gray-400 dark:text-gray-500 ml-2 flex-shrink-0"
                     title="Skipped"
                   >—</span>
                 </router-link>
@@ -79,16 +79,16 @@
       <!-- Main Content -->
       <main class="flex-1 lg:ml-64 w-full">
         <!-- Mobile Menu Button -->
-        <div class="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+        <div class="lg:hidden bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
           <button
             @click="isMobileMenuOpen = true"
-            class="text-gray-500 hover:text-gray-700"
+            class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
           >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <router-link to="/" class="flex items-center gap-1.5 text-xl font-bold text-primary-700">
+          <router-link to="/" class="flex items-center gap-1.5 text-xl font-bold text-primary-700 dark:text-primary-300">
             <LifeRelayLogo size="sm" />
             Life Relay
           </router-link>
@@ -97,6 +97,13 @@
         <div class="p-4 md:p-6 lg:p-8">
           <router-view />
         </div>
+        <footer class="border-t border-gray-200 dark:border-gray-700 px-4 md:px-6 lg:px-8 py-4 text-center text-sm text-gray-400 dark:text-gray-500">
+          <router-link to="/" class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">liferelay.app</router-link>
+          <span class="mx-2">&middot;</span>
+          <a href="https://github.com/squarshednanners/life-relay" target="_blank" rel="noopener noreferrer" class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">GitHub</a>
+          <span class="mx-2">&middot;</span>
+          <a href="/#donate" class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Donate</a>
+        </footer>
       </main>
     </div>
 

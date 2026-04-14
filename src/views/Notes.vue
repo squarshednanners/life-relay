@@ -5,7 +5,7 @@
       description="Additional notes, thoughts, or information"
     />
 
-    <div class="bg-white rounded-lg shadow p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
       <form @submit.prevent="save">
         <FormField
           id="notes"

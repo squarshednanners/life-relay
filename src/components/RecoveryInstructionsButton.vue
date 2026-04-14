@@ -7,7 +7,7 @@
     >
       {{ label || 'Generate Recommended Recovery Instructions' }}
     </button>
-    <p v-if="helpText" class="mt-1 text-sm text-gray-500">{{ helpText }}</p>
+    <p v-if="helpText" class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ helpText }}</p>
   </div>
 </template>
 

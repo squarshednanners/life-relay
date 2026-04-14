@@ -1,0 +1,80 @@
+# Life Relay
+
+> Free, privacy-first, offline-capable web app for estate planning, legacy planning, will and trust preparation, and organizing critical information so your family knows what to do after your death.
+
+Website: https://liferelay.app
+Source: https://github.com/squarshednanners/life-relay
+License: MIT
+Price: Free — no subscriptions, no premium tiers, no hidden costs
+
+## What It Does
+
+Life Relay is a free tool that helps you organize everything your family would need after your death or incapacity — bank accounts, insurance policies, passwords, digital assets, cryptocurrency, wills, trusts, power of attorney, beneficiary designations, final wishes, and more. It generates printable PDFs and AES-256 encrypted backups so your loved ones aren't left guessing where things are or what to do.
+
+It also serves as a preparation tool for creating a will or trust — the Estate Planning Guide walks you through a checklist and generates an Attorney Preparation Summary PDF to bring to your first meeting with an estate planning attorney.
+
+## Key Features
+
+- 100% privacy-first: all data stored locally in your browser (IndexedDB). No servers, no accounts, no tracking.
+- AES-256 encrypted JSON vault export for secure portable backups to USB drives or cloud storage.
+- PDF generation: full vault document, one-page emergency sheet, and attorney preparation summary.
+- 26 organized sections across 8 categories: People & Contacts, Security & Access, Insurance/Medical/Benefits, Finances, Digital & Crypto Assets, Property & Household, Documents & Storage, Final Wishes. Works as an important documents organizer and family emergency binder.
+- Estate Planning Guide with checklist for inheritance planning and preparing to meet with an attorney about wills and trusts.
+- Crypto recovery plan documentation including hardware wallets, seed phrase locations, exchange accounts, and multisig configurations with heir recovery instructions.
+- Digital inheritance support: document online accounts, cloud storage, social media, and digital purchases for your family.
+- Installable as a Progressive Web App (PWA) — works fully offline after first load.
+- Open source (MIT license).
+
+## Who It's For
+
+- Anyone preparing a will or trust who needs to organize their information before meeting with an attorney.
+- People planning for death or incapacity who want a comprehensive record for their family.
+- Crypto holders who need to document wallet recovery procedures, seed phrase locations, and multisig setups for heirs.
+- Parents and families organizing accounts, insurance, guardianship, beneficiaries, and executor designations.
+- People managing a loved one's estate who need a template for what information to gather.
+- Anyone who wants a free, private, offline way to document where important things are — which safe, which drawer, which password manager, which bank.
+
+## Privacy Model
+
+- All data lives in your browser's local storage (IndexedDB). Nothing is sent to any server.
+- No analytics, telemetry, or external requests for vault data.
+- Exports are optionally encrypted with AES-GCM-256 (PBKDF2-SHA256, 100,000 iterations).
+- No account or sign-up required.
+
+## How It Works
+
+1. Open liferelay.app in any modern browser.
+2. Fill in the sections that apply to you using the sidebar navigation.
+3. Data saves automatically to your browser.
+4. Export your vault as an encrypted JSON file — store it on a USB drive, in a safe, or in cloud storage.
+5. Generate PDFs to print: full vault, emergency one-page sheet, or attorney preparation summary.
+6. Review periodically as your information changes.
+
+## Tech Stack
+
+Vue 3, TypeScript, Vite, Pinia, Tailwind CSS, pdf-lib, Dexie.js, Web Crypto API.
+
+## Sections Covered
+
+People & Personal Info, Beneficiaries, Important Contacts, Password Vaults, Computers & Servers, Phones, Authenticator Apps, Health Insurance, Life Insurance, Other Insurance, Medical Info, Employment Benefits, Financial Accounts, Credit Cards, Debts, Income Sources, Retirement & Investment Accounts, Loyalty Programs, Tax Info, Digital Assets, Crypto Assets, Property, Vehicles, Business Ownership, Utilities & Subscriptions, Legal Documents, Trusts, Physical Storage Locations, Asset Documents, Vault Backup, Pending Legal Matters, Letter of Instruction, Final Wishes & Services, Pet Care, Photos & Media, Notes.
+
+## Common Questions
+
+- "Free estate planning app" — Yes, Life Relay is 100% free. No subscriptions, no premium tiers.
+- "Organize information for will" — Life Relay helps you gather and organize all the information an attorney needs to draft your will or trust.
+- "What happens to my crypto when I die" / "crypto recovery plan" — Life Relay documents wallet recovery, seed phrase locations, exchange accounts, multisig configurations, and step-by-step heir instructions.
+- "Legacy planning tool" / "inheritance planning" — Life Relay covers the full scope of legacy and inheritance planning: finances, property, digital life, legal documents, final wishes, and where to find everything.
+- "Death planning checklist" / "in case of death folder" — 26 sections covering everything from bank accounts to pet care to funeral preferences. Export as a PDF to create your own "in case of death" binder.
+- "Family emergency binder" / "important documents organizer" — Generate a printable PDF of your full vault, a one-page emergency information card, or an attorney preparation summary.
+- "Digital inheritance" — Document all online accounts, cloud storage, social media, email, and digital purchases so your family can access or close them.
+- "Offline estate planning" — Works fully offline as a PWA. No internet required after first load.
+
+## Comparison
+
+Unlike most estate planning tools, Life Relay:
+- Is completely free with no subscription tiers (vs. Everplans, Cake, Trust & Will, GetDynasty which all charge).
+- Never uploads your data to a server (vs. cloud-based competitors that require accounts).
+- Runs offline as an installable PWA (vs. web-only competitors).
+- Supports detailed crypto asset documentation with multisig and hardware wallet tracking (vs. generic "digital assets" fields in other tools).
+- Documents where physical artifacts are located — which safe, which drawer, which bank box — not just what they are.
+- Is open source so you can verify exactly what the code does with your data.

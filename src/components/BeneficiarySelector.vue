@@ -1,17 +1,17 @@
 <template>
   <div class="space-y-2">
-    <label v-if="label" class="block text-sm font-medium text-gray-700 mb-2">
+    <label v-if="label" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
       {{ label }}
       <span v-if="required" class="text-red-500">*</span>
     </label>
     
     <div v-for="(assignment, index) in assignments" :key="index" class="flex gap-2 items-end">
       <div class="flex-1">
-        <label class="block text-xs text-gray-600 mb-1">Beneficiary</label>
+        <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Beneficiary</label>
         <select
           v-model="assignment.beneficiaryId"
           @change="onChange"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md"
+          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md"
         >
           <option value="">Select Beneficiary or Enter Custom</option>
           <option
@@ -26,17 +26,17 @@
         </select>
       </div>
       <div class="flex-1" v-if="!assignment.beneficiaryId">
-        <label class="block text-xs text-gray-600 mb-1">Custom Name</label>
+        <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Custom Name</label>
         <input
           v-model="assignment.customName"
           @input="onChange"
           type="text"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md"
+          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md"
           placeholder="Custom Beneficiary Name"
         />
       </div>
       <div class="w-32">
-        <label class="block text-xs text-gray-600 mb-1">Percentage (%)</label>
+        <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Percentage (%)</label>
         <input
           v-model.number="assignment.percentage"
           @input="onChange"
@@ -44,7 +44,7 @@
           min="0"
           max="100"
           step="0.01"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md"
+          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md"
           placeholder="%"
         />
       </div>
@@ -62,7 +62,7 @@
       v-if="allowMultiple"
       @click="addAssignment"
       type="button"
-      class="text-sm text-primary-600 hover:text-primary-800"
+      class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-200"
     >
       + Add Another Beneficiary
     </button>

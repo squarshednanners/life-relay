@@ -2,9 +2,9 @@
   <!-- Section Divider -->
   <div
     v-if="field.sectionDivider && (!field.name || field.name.startsWith('_'))"
-    :class="field.sectionDivider.showBorder !== false ? 'col-span-1 md:col-span-2 border-t pt-4 mt-2' : 'col-span-1 md:col-span-2 pt-2'"
+    :class="field.sectionDivider.showBorder !== false ? 'col-span-1 md:col-span-2 border-t border-gray-200 dark:border-gray-600 pt-4 mt-2' : 'col-span-1 md:col-span-2 pt-2'"
   >
-    <h4 v-if="field.sectionDivider.label" class="text-sm font-semibold text-gray-700 mb-2">
+    <h4 v-if="field.sectionDivider.label" class="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
       {{ field.sectionDivider.label }}
     </h4>
   </div>
@@ -14,7 +14,7 @@
     v-else-if="field.type === 'array' && field.arraySchema && field.name"
     :class="field.fullWidth ? 'col-span-1 md:col-span-2' : `col-span-1 md:col-span-${field.colSpan || 1}`"
   >
-    <label class="block text-sm font-medium text-gray-700 mb-2">
+    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
       {{ field.label }}
       <span v-if="field.required" class="text-red-500">*</span>
     </label>
@@ -51,7 +51,7 @@
     v-else-if="field.type === 'password' && field.name"
     :class="field.fullWidth ? 'col-span-1 md:col-span-2' : `col-span-1 md:col-span-${field.colSpan || 1}`"
   >
-    <label :for="`${field.name}-${index ?? ''}`" class="block text-sm font-medium text-gray-700 mb-1">
+    <label :for="`${field.name}-${index ?? ''}`" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
       {{ field.label }}
       <span v-if="field.required" class="text-red-500">*</span>
     </label>
@@ -67,12 +67,12 @@
         :aria-required="field.required || undefined"
         :aria-invalid="!!(field.name && touched[field.name] && errors[field.name]) || undefined"
         :aria-describedby="describedBy(field)"
-        :class="['w-full px-3 py-2 pr-10 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500', inputBorderClass(field)]"
+        :class="['w-full px-3 py-2 pr-10 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100', inputBorderClass(field)]"
       />
       <button
         type="button"
         @click="passwordVisible[field.name!] = !passwordVisible[field.name!]"
-        class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+        class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
         :aria-label="passwordVisible[field.name!] ? 'Hide' : 'Show'"
       >
         <svg v-if="passwordVisible[field.name!]" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,7 +86,7 @@
     </div>
     <label
       v-if="field.manualEntry"
-      class="flex items-center mt-1 text-sm text-gray-600"
+      class="flex items-center mt-1 text-sm text-gray-600 dark:text-gray-400"
     >
       <input
         type="checkbox"
@@ -96,7 +96,7 @@
       />
       <span>Leave space in PDF for manual entry</span>
     </label>
-    <p v-if="field.helpText" :id="helpId(field.name!)" class="mt-1 text-sm text-gray-500">{{ field.helpText }}</p>
+    <p v-if="field.helpText" :id="helpId(field.name!)" class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ field.helpText }}</p>
     <p v-if="field.name && touched[field.name] && errors[field.name]" :id="errorId(field.name)" class="mt-1 text-sm text-red-600" role="alert">{{ errors[field.name] }}</p>
   </div>
 
@@ -105,7 +105,7 @@
     v-else-if="(field.type === 'text' || field.type === 'email' || field.type === 'tel' || field.type === 'number') && field.name"
     :class="field.fullWidth ? 'col-span-1 md:col-span-2' : `col-span-1 md:col-span-${field.colSpan || 1}`"
   >
-    <label :for="`${field.name}-${index ?? ''}`" class="block text-sm font-medium text-gray-700 mb-1">
+    <label :for="`${field.name}-${index ?? ''}`" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
       {{ field.label }}
       <span v-if="field.required" class="text-red-500">*</span>
     </label>
@@ -120,11 +120,11 @@
       :aria-required="field.required || undefined"
       :aria-invalid="!!(field.name && touched[field.name!] && errors[field.name!]) || undefined"
       :aria-describedby="describedBy(field)"
-      :class="['w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500', inputBorderClass(field)]"
+      :class="['w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100', inputBorderClass(field)]"
     />
     <label
       v-if="field.manualEntry"
-      class="flex items-center mt-1 text-sm text-gray-600"
+      class="flex items-center mt-1 text-sm text-gray-600 dark:text-gray-400"
     >
       <input
         type="checkbox"
@@ -134,7 +134,7 @@
       />
       <span>Leave space in PDF for manual entry</span>
     </label>
-    <p v-if="field.helpText" :id="helpId(field.name!)" class="mt-1 text-sm text-gray-500">{{ field.helpText }}</p>
+    <p v-if="field.helpText" :id="helpId(field.name!)" class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ field.helpText }}</p>
     <p v-if="field.name && touched[field.name] && errors[field.name]" :id="errorId(field.name)" class="mt-1 text-sm text-red-600" role="alert">{{ errors[field.name] }}</p>
   </div>
 
@@ -143,7 +143,7 @@
     v-else-if="field.type === 'textarea' && field.name"
     :class="field.fullWidth ? 'col-span-1 md:col-span-2' : `col-span-1 md:col-span-${field.colSpan || 1}`"
   >
-    <label :for="`${field.name}-${index ?? ''}`" class="block text-sm font-medium text-gray-700 mb-1">
+    <label :for="`${field.name}-${index ?? ''}`" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
       {{ field.label }}
       <span v-if="field.required" class="text-red-500">*</span>
     </label>
@@ -159,14 +159,14 @@
       :aria-describedby="describedBy(field)"
       :rows="field.rows || 3"
       :class="[
-        'w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500',
+        'w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100',
         inputBorderClass(field),
         field.manualEntry ? 'font-mono text-sm' : ''
       ]"
     />
     <label
       v-if="field.manualEntry"
-      class="flex items-center mt-1 text-sm text-gray-600"
+      class="flex items-center mt-1 text-sm text-gray-600 dark:text-gray-400"
     >
       <input
         type="checkbox"
@@ -176,7 +176,7 @@
       />
       <span>Leave space in PDF for manual entry</span>
     </label>
-    <p v-if="field.helpText" :id="helpId(field.name!)" class="mt-1 text-sm text-gray-500">{{ field.helpText }}</p>
+    <p v-if="field.helpText" :id="helpId(field.name!)" class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ field.helpText }}</p>
     <p v-if="field.name && touched[field.name] && errors[field.name]" :id="errorId(field.name)" class="mt-1 text-sm text-red-600" role="alert">{{ errors[field.name] }}</p>
   </div>
 
@@ -185,7 +185,7 @@
     v-else-if="field.type === 'select' && field.name"
     :class="field.fullWidth ? 'col-span-1 md:col-span-2' : `col-span-1 md:col-span-${field.colSpan || 1}`"
   >
-    <label :for="`${field.name}-${index ?? ''}`" class="block text-sm font-medium text-gray-700 mb-1">
+    <label :for="`${field.name}-${index ?? ''}`" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
       {{ field.label }}
       <span v-if="field.required" class="text-red-500">*</span>
     </label>
@@ -198,7 +198,7 @@
       :aria-required="field.required || undefined"
       :aria-invalid="!!(field.name && touched[field.name!] && errors[field.name!]) || undefined"
       :aria-describedby="describedBy(field)"
-      :class="['w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500', inputBorderClass(field)]"
+      :class="['w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100', inputBorderClass(field)]"
     >
       <option
         v-for="option in resolvedOptions"
@@ -208,7 +208,7 @@
         {{ option.label }}
       </option>
     </select>
-    <p v-if="field.helpText" :id="helpId(field.name!)" class="mt-1 text-sm text-gray-500">{{ field.helpText }}</p>
+    <p v-if="field.helpText" :id="helpId(field.name!)" class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ field.helpText }}</p>
     <p v-if="field.name && touched[field.name] && errors[field.name]" :id="errorId(field.name)" class="mt-1 text-sm text-red-600" role="alert">{{ errors[field.name] }}</p>
   </div>
 
@@ -217,7 +217,7 @@
     v-else-if="field.type === 'currency' && field.name"
     :class="field.fullWidth ? 'col-span-1 md:col-span-2' : `col-span-1 md:col-span-${field.colSpan || 1}`"
   >
-    <label :for="`${field.name}-${index ?? ''}`" class="block text-sm font-medium text-gray-700 mb-1">
+    <label :for="`${field.name}-${index ?? ''}`" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
       {{ field.label }}
       <span v-if="field.required" class="text-red-500">*</span>
     </label>
@@ -232,11 +232,11 @@
       :aria-required="field.required || undefined"
       :aria-invalid="!!(field.name && touched[field.name!] && errors[field.name!]) || undefined"
       :aria-describedby="describedBy(field)"
-      :class="['w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500', inputBorderClass(field)]"
+      :class="['w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100', inputBorderClass(field)]"
     />
     <label
       v-if="field.manualEntry"
-      class="flex items-center mt-1 text-sm text-gray-600"
+      class="flex items-center mt-1 text-sm text-gray-600 dark:text-gray-400"
     >
       <input
         type="checkbox"
@@ -246,7 +246,7 @@
       />
       <span>Leave space in PDF for manual entry</span>
     </label>
-    <p v-if="field.helpText" :id="helpId(field.name!)" class="mt-1 text-sm text-gray-500">{{ field.helpText }}</p>
+    <p v-if="field.helpText" :id="helpId(field.name!)" class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ field.helpText }}</p>
     <p v-if="field.name && touched[field.name] && errors[field.name]" :id="errorId(field.name)" class="mt-1 text-sm text-red-600" role="alert">{{ errors[field.name] }}</p>
   </div>
 
@@ -255,7 +255,7 @@
     v-else-if="field.type === 'date' && field.name"
     :class="field.fullWidth ? 'col-span-1 md:col-span-2' : `col-span-1 md:col-span-${field.colSpan || 1}`"
   >
-    <label :for="`${field.name}-${index ?? ''}`" class="block text-sm font-medium text-gray-700 mb-1">
+    <label :for="`${field.name}-${index ?? ''}`" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
       {{ field.label }}
       <span v-if="field.required" class="text-red-500">*</span>
     </label>
@@ -269,9 +269,9 @@
       :aria-required="field.required || undefined"
       :aria-invalid="!!(field.name && touched[field.name!] && errors[field.name!]) || undefined"
       :aria-describedby="describedBy(field)"
-      :class="['w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500', inputBorderClass(field)]"
+      :class="['w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100', inputBorderClass(field)]"
     />
-    <p v-if="field.helpText" :id="helpId(field.name!)" class="mt-1 text-sm text-gray-500">{{ field.helpText }}</p>
+    <p v-if="field.helpText" :id="helpId(field.name!)" class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ field.helpText }}</p>
     <p v-if="field.name && touched[field.name] && errors[field.name]" :id="errorId(field.name)" class="mt-1 text-sm text-red-600" role="alert">{{ errors[field.name] }}</p>
   </div>
 
@@ -290,12 +290,12 @@
         :aria-describedby="describedBy(field)"
         class="mr-2"
       />
-      <span class="text-sm font-medium text-gray-700">
+      <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
         {{ field.label }}
         <span v-if="field.required" class="text-red-500">*</span>
       </span>
     </label>
-    <p v-if="field.helpText" :id="helpId(field.name!)" class="mt-1 text-sm text-gray-500">{{ field.helpText }}</p>
+    <p v-if="field.helpText" :id="helpId(field.name!)" class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ field.helpText }}</p>
   </div>
 
   <!-- Radio -->
@@ -305,7 +305,7 @@
     role="radiogroup"
     :aria-labelledby="`${field.name}-${index ?? ''}-label`"
   >
-    <label :id="`${field.name}-${index ?? ''}-label`" class="block text-sm font-medium text-gray-700 mb-2">
+    <label :id="`${field.name}-${index ?? ''}-label`" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
       {{ field.label }}
       <span v-if="field.required" class="text-red-500">*</span>
     </label>
@@ -327,7 +327,7 @@
         <span>{{ option.label }}</span>
       </label>
     </div>
-    <p v-if="field.helpText" :id="helpId(field.name!)" class="mt-1 text-sm text-gray-500">{{ field.helpText }}</p>
+    <p v-if="field.helpText" :id="helpId(field.name!)" class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ field.helpText }}</p>
   </div>
 </template>
 

@@ -5,20 +5,152 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0f766e" />
-    <meta name="description" content="Privacy-first estate planning — organize your finances, digital assets, crypto, and legal documents for your loved ones." />
+    <meta name="description" content="Free, privacy-first estate planning app — organize your will, trust, finances, digital assets, crypto, and legacy documents so your family knows what to do after death. No servers, no accounts, 100% offline." />
     <link rel="apple-touch-icon" href="/favicon.svg" />
     <link rel="canonical" href="https://liferelay.app/" />
-    <meta property="og:title" content="Life Relay — Privacy-First Estate Planning" />
-    <meta property="og:description" content="Privacy-first estate planning — organize your finances, digital assets, crypto, and legal documents for your loved ones." />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+    <meta property="og:title" content="Life Relay — Free, Privacy-First Estate Planning App" />
+    <meta property="og:description" content="Free app to organize your will, trust, finances, digital assets, crypto, and legacy documents so your family knows what to do after death. 100% offline, no servers." />
     <meta property="og:url" content="https://liferelay.app/" />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Life Relay" />
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="Life Relay — Privacy-First Estate Planning" />
-    <meta name="twitter:description" content="Privacy-first estate planning — organize your finances, digital assets, crypto, and legal documents for your loved ones." />
+    <meta name="twitter:title" content="Life Relay — Free, Privacy-First Estate Planning App" />
+    <meta name="twitter:description" content="Free app to organize your will, trust, finances, digital assets, crypto, and legacy documents so your family knows what to do after death. 100% offline, no servers." />
+    <meta name="keywords" content="estate planning, will preparation, trust planning, legacy planning, inheritance planning, death preparation, end of life planning, in case of death, digital assets, digital inheritance, crypto inheritance, crypto recovery plan, crypto heir recovery, password manager, emergency contacts, emergency information card, important documents organizer, family emergency binder, offline, privacy, PDF export, free, open source, beneficiaries, power of attorney, executor, advance directive, final wishes, family emergency plan" />
     <title>Life Relay - Privacy-First Estate Planning</title>
+    <script>
+      (function() {
+        var t = localStorage.getItem('theme');
+        var d = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (t === 'dark' || (t !== 'light' && d)) document.documentElement.classList.add('dark');
+      })();
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Life Relay",
+      "url": "https://liferelay.app",
+      "description": "Free, privacy-first, offline-capable web app for organizing your will, trust, legacy, finances, digital assets, crypto, and critical information so your family knows what to do after death.",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires a modern web browser with JavaScript enabled",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "100% offline and privacy-first — no servers, no tracking",
+        "AES-256 encrypted JSON vault export",
+        "PDF generation: full vault, emergency sheet, attorney preparation summary",
+        "26 organized sections across 8 categories",
+        "Installable as a Progressive Web App",
+        "Estate planning guide with attorney-prep checklist",
+        "Crypto asset documentation with multisig support"
+      ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is Life Relay?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Life Relay is a free, privacy-first web app for organizing the critical information your family would need if something happened to you — accounts, insurance, passwords, digital assets, crypto, legal documents, and final wishes. It runs entirely in your browser with no servers or accounts required."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is Life Relay free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, Life Relay is completely free and open source (MIT license). There are no subscription tiers, premium features, or hidden costs."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where is my data stored?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "All data is stored locally in your browser's IndexedDB. Nothing is ever sent to a server. You can export an AES-256 encrypted JSON backup to a USB drive or safe location, and generate printable PDFs."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I use Life Relay to prepare for meeting with an estate planning attorney?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Life Relay includes an Estate Planning Guide with a checklist for will and trust preparation, and generates an Attorney Preparation Summary PDF you can bring to your first meeting."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Life Relay support crypto assets?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Life Relay has detailed crypto asset documentation including hardware wallets, seed phrase locations, exchange accounts, multisig configurations, derivation paths, and step-by-step heir recovery instructions."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Life Relay work offline?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Life Relay is a Progressive Web App (PWA) that works fully offline after the first load. You can install it on your desktop or mobile device like a native app."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How is Life Relay different from Everplans or other estate planning tools?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Unlike cloud-based tools like Everplans, Cake, or Trust & Will, Life Relay never uploads your data to a server. It's completely free (no subscriptions), works offline, supports detailed crypto documentation with multisig tracking, and is open source so you can verify exactly what the code does."
+          }
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <div id="app"></div>
+    <noscript>
+      <div style="max-width:800px;margin:0 auto;padding:40px 20px;font-family:system-ui,sans-serif">
+        <h1>Life Relay — Free Estate Planning, Legacy &amp; Inheritance Organizer</h1>
+        <p>Life Relay is a free, privacy-first web app for organizing your will, trust, legacy, and the critical information your family would need after your death or incapacity. Your own in-case-of-death folder and family emergency binder — entirely in your browser with no servers, no accounts, no tracking.</p>
+
+        <h2>What You Can Organize</h2>
+        <p>26 sections across 8 categories: People &amp; Contacts, Security &amp; Access, Insurance/Medical/Benefits, Finances, Digital &amp; Crypto Assets, Property &amp; Household, Documents &amp; Storage, and Final Wishes. Works as an important documents organizer for inheritance planning.</p>
+
+        <h2>Key Features</h2>
+        <ul>
+          <li><strong>100% Private</strong> — All data stored locally in your browser. No servers, no cloud, no tracking.</li>
+          <li><strong>Encrypted Exports</strong> — AES-256 password-protected JSON backups for USB drives or safes.</li>
+          <li><strong>PDF Generation</strong> — Full vault PDF, one-page emergency information card, and attorney preparation summary. Print your own family emergency binder.</li>
+          <li><strong>Estate Planning Guide</strong> — Checklist for inheritance planning and preparing to meet with an attorney about wills and trusts.</li>
+          <li><strong>Crypto Recovery Plan</strong> — Hardware wallets, seed phrases, exchanges, multisig configs, and heir recovery instructions for digital inheritance.</li>
+          <li><strong>Digital Inheritance</strong> — Document online accounts, cloud storage, social media, and digital purchases.</li>
+          <li><strong>Works Offline</strong> — Installable as a Progressive Web App.</li>
+          <li><strong>Free &amp; Open Source</strong> — MIT license. No subscriptions, no premium tiers.</li>
+        </ul>
+
+        <h2>Who It's For</h2>
+        <ul>
+          <li>Anyone preparing a will or trust who needs to organize their information first.</li>
+          <li>Crypto holders documenting wallet recovery procedures for heirs.</li>
+          <li>Parents organizing accounts, insurance, guardianship, and beneficiaries.</li>
+          <li>Estate planners preparing for attorney meetings.</li>
+        </ul>
+
+        <p><strong>JavaScript is required to use Life Relay.</strong> Please enable JavaScript in your browser to get started.</p>
+        <p>Source code: <a href="https://github.com/squarshednanners/life-relay">github.com/squarshednanners/life-relay</a></p>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

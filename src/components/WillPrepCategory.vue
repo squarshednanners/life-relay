@@ -9,10 +9,10 @@
         <span class="text-xs font-semibold uppercase px-2 py-0.5 rounded" :class="badgeClass">
           {{ category.priority }}
         </span>
-        <h3 class="font-semibold text-gray-900">{{ category.title }}</h3>
+        <h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ category.title }}</h3>
       </div>
       <div class="flex items-center gap-3">
-        <span class="text-sm text-gray-500">
+        <span class="text-sm text-gray-500 dark:text-gray-400">
           {{ completedCount }}/{{ category.sections.length }} complete
         </span>
         <svg
@@ -26,13 +26,13 @@
     </button>
 
     <div v-if="expanded" class="border-t p-4 space-y-4" :class="contentBorderClass">
-      <p class="text-sm text-gray-600 leading-relaxed">{{ category.description }}</p>
+      <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{{ category.description }}</p>
 
       <div class="space-y-2">
         <div
           v-for="section in category.sections"
           :key="section.path"
-          class="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100"
+          class="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700"
         >
           <div class="flex items-center gap-2">
             <svg
@@ -44,17 +44,17 @@
             </svg>
             <svg
               v-else
-              class="w-5 h-5 text-gray-300"
+              class="w-5 h-5 text-gray-300 dark:text-gray-600"
               fill="currentColor" viewBox="0 0 20 20"
             >
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z" clip-rule="evenodd" />
             </svg>
-            <span class="text-sm font-medium text-gray-700">{{ section.label }}</span>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ section.label }}</span>
           </div>
           <router-link
             v-if="!isSectionDone(section.path)"
             :to="section.path"
-            class="text-xs font-medium text-primary-600 hover:text-primary-800 px-3 py-1 rounded-md hover:bg-primary-50 transition-colors"
+            class="text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-200 px-3 py-1 rounded-md hover:bg-primary-50 dark:hover:bg-primary-900/30 transition-colors"
           >
             Go &rarr;
           </router-link>
@@ -89,33 +89,33 @@ const completedCount = computed(() =>
 
 const borderClass = computed(() => {
   switch (props.category.priority) {
-    case 'essential': return 'border-blue-200'
-    case 'recommended': return 'border-amber-200'
-    case 'optional': return 'border-gray-200'
+    case 'essential': return 'border-blue-200 dark:border-blue-800'
+    case 'recommended': return 'border-amber-200 dark:border-amber-800'
+    case 'optional': return 'border-gray-200 dark:border-gray-700'
   }
 })
 
 const headerClass = computed(() => {
   switch (props.category.priority) {
-    case 'essential': return 'bg-blue-50 hover:bg-blue-100'
-    case 'recommended': return 'bg-amber-50 hover:bg-amber-100'
-    case 'optional': return 'bg-gray-50 hover:bg-gray-100'
+    case 'essential': return 'bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50'
+    case 'recommended': return 'bg-amber-50 dark:bg-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-900/50'
+    case 'optional': return 'bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50'
   }
 })
 
 const contentBorderClass = computed(() => {
   switch (props.category.priority) {
-    case 'essential': return 'border-blue-200 bg-blue-50/30'
-    case 'recommended': return 'border-amber-200 bg-amber-50/30'
-    case 'optional': return 'border-gray-200 bg-gray-50/30'
+    case 'essential': return 'border-blue-200 dark:border-blue-800 bg-blue-50/30 dark:bg-blue-900/10'
+    case 'recommended': return 'border-amber-200 dark:border-amber-800 bg-amber-50/30 dark:bg-amber-900/10'
+    case 'optional': return 'border-gray-200 dark:border-gray-700 bg-gray-50/30 dark:bg-gray-800/30'
   }
 })
 
 const badgeClass = computed(() => {
   switch (props.category.priority) {
-    case 'essential': return 'bg-blue-100 text-blue-700'
-    case 'recommended': return 'bg-amber-100 text-amber-700'
-    case 'optional': return 'bg-gray-100 text-gray-600'
+    case 'essential': return 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
+    case 'recommended': return 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300'
+    case 'optional': return 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
   }
 })
 </script>

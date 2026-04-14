@@ -4,8 +4,8 @@ import type { FormSectionSchema } from '@/models/FormSchema'
 import * as fs from 'fs'
 import * as path from 'path'
 
-// Load test data for cross-reference checks
-const testDataPath = path.resolve(__dirname, '../../../test-data.json')
+// Load sample vault for cross-reference checks
+const testDataPath = path.resolve(__dirname, '../../../examples/sample-vault.json')
 const testData = JSON.parse(fs.readFileSync(testDataPath, 'utf-8'))
 
 // Known PDF group names (from generator.ts GROUP_COLORS)

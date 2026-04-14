@@ -8,13 +8,13 @@
     <!-- Review Reminder -->
     <div
       v-if="reviewDue"
-      class="bg-amber-50 border border-amber-300 rounded-lg p-4 mb-6 flex items-center justify-between"
+      class="bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-lg p-4 mb-6 flex items-center justify-between"
     >
       <div>
-        <p class="text-sm font-medium text-amber-800">
+        <p class="text-sm font-medium text-amber-800 dark:text-amber-200">
           Time for a review — it's been {{ daysSinceReview }} days since your last review.
         </p>
-        <p class="text-xs text-amber-600 mt-0.5">
+        <p class="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
           Regular reviews help keep your vault accurate and up to date.
         </p>
       </div>
@@ -26,9 +26,9 @@
       </button>
     </div>
 
-    <div class="bg-white rounded-lg shadow p-6 mb-6">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
       <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-semibold">Quick Actions</h3>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Quick Actions</h3>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <button
@@ -66,9 +66,37 @@
         </button>
         <button
           @click="deleteAllData"
-          class="px-4 py-3 bg-gray-200 text-red-600 rounded-lg hover:bg-red-50 hover:text-red-700 transition-colors"
+          class="px-4 py-3 bg-gray-200 dark:bg-gray-700 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 transition-colors"
         >
           Delete All Data
+        </button>
+      </div>
+    </div>
+
+    <!-- Getting Started Guide -->
+    <div v-if="showGettingStarted" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-5 mb-6">
+      <div class="flex items-start justify-between">
+        <div>
+          <h3 class="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-2">How Life Relay Works</h3>
+          <ol class="text-sm text-blue-800 dark:text-blue-300 space-y-1.5 list-decimal list-inside">
+            <li>Fill in the sections that matter to you using the sidebar — skip what doesn't apply.</li>
+            <li>Your data saves automatically to this browser's local storage.</li>
+            <li><strong>Export your vault</strong> using the button above — save the encrypted .json file to a USB drive, cloud storage, or safe location. This is your portable backup.</li>
+            <li>Generate PDFs (full vault, emergency sheet, or attorney prep) to print and store physically.</li>
+            <li>Come back periodically to review and re-export as things change.</li>
+          </ol>
+          <p class="text-xs text-blue-600 dark:text-blue-400 mt-3">
+            Your data never leaves your device unless you explicitly export it. If you clear your browser data or switch devices, you'll need your exported vault file to restore.
+          </p>
+        </div>
+        <button
+          @click="dismissGettingStarted"
+          class="ml-4 text-blue-400 dark:text-blue-500 hover:text-blue-600 dark:hover:text-blue-300 flex-shrink-0"
+          title="Dismiss"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
         </button>
       </div>
     </div>
@@ -103,7 +131,6 @@
     <QuickStartModal
       :is-open="showQuickStart"
       @cancel="dismissQuickStart"
-      @select="applyTemplate"
       @import="handleQuickStartImport"
     />
 
@@ -137,7 +164,6 @@ import PdfExportModal from '@/components/PdfExportModal.vue'
 import PasswordPromptModal from '@/components/PasswordPromptModal.vue'
 import ProgressTracker from '@/components/ProgressTracker.vue'
 import QuickStartModal from '@/components/QuickStartModal.vue'
-import type { QuickStartTemplate } from '@/data/quickStartTemplates'
 import { isEncrypted } from '@/utils/encryption'
 
 const store = useLegacyStore()
@@ -147,6 +173,14 @@ const isGenerating = ref(false)
 const isGeneratingEmergency = ref(false)
 
 const isLoading = computed(() => store.isLoading)
+
+// Getting Started guide
+const gettingStartedDismissed = ref(localStorage.getItem('gettingStartedDismissed') === 'true')
+const showGettingStarted = computed(() => !gettingStartedDismissed.value)
+function dismissGettingStarted() {
+  gettingStartedDismissed.value = true
+  localStorage.setItem('gettingStartedDismissed', 'true')
+}
 
 // Quick Start
 const quickStartDismissed = ref(false)
@@ -159,16 +193,6 @@ function dismissQuickStart() {
 function handleQuickStartImport() {
   quickStartDismissed.value = true
   importData()
-}
-
-async function applyTemplate(template: QuickStartTemplate) {
-  quickStartDismissed.value = true
-  if (template.id === 'blank') return
-  await store.updateData({
-    ...template.data,
-    skippedSections: template.skippedSections.length ? template.skippedSections : undefined,
-  })
-  showToast(`Template "${template.name}" applied!`, 'success')
 }
 
 // Password modal state

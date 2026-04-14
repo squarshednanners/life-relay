@@ -242,6 +242,96 @@
       </div>
     </div>
 
+    <!-- Donate -->
+    <div id="donate" class="bg-gray-900 py-12">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row items-start md:items-center gap-8">
+          <div class="flex-shrink-0">
+            <h2 class="text-xl font-bold text-white mb-1">Donate</h2>
+            <p class="text-sm text-gray-400">Like the project?<br/>Consider a donation.</p>
+          </div>
+          <div class="flex flex-col sm:flex-row flex-wrap gap-8 flex-1 justify-center">
+            <!-- Lightning -->
+            <div class="flex flex-col items-center gap-2">
+              <div class="relative bg-white p-2 rounded-lg">
+                <img
+                  :src="lightningQr"
+                  alt="Lightning donation QR code"
+                  class="w-40 h-40"
+                />
+                <div class="absolute bottom-3 right-3 w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center">
+                  <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.381z" />
+                  </svg>
+                </div>
+              </div>
+              <button
+                @click="copyToClipboard('squarshednanner@strike.me', 'lightning')"
+                class="text-xs text-gray-400 hover:text-white transition-colors flex items-center gap-1"
+                title="Click to copy"
+              >
+                squarshednanner@strike.me
+                <svg v-if="copied !== 'lightning'" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                <svg v-else class="w-3.5 h-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              </button>
+            </div>
+            <!-- Bitcoin -->
+            <div class="flex flex-col items-center gap-2">
+              <div class="relative bg-white p-2 rounded-lg">
+                <img
+                  :src="bitcoinQr"
+                  alt="Bitcoin donation QR code"
+                  class="w-40 h-40"
+                />
+                <div class="absolute bottom-3 right-3 w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                  <span class="text-white font-bold text-sm">&#x20BF;</span>
+                </div>
+              </div>
+              <button
+                @click="copyToClipboard('bc1qjxwfm42n6zmlp8tq47j8lgslxhggve2wrwaagl', 'bitcoin')"
+                class="text-xs text-gray-400 hover:text-white transition-colors flex items-center gap-1"
+                title="Click to copy"
+              >
+                bc1qjxwfm42n6z...ve2wrwaagl
+                <svg v-if="copied !== 'bitcoin'" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                <svg v-else class="w-3.5 h-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              </button>
+            </div>
+          </div>
+          <!-- Platform donations -->
+          <div class="flex flex-col gap-3 sm:ml-4">
+            <a
+              href="https://github.com/sponsors/squarshednanners"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-800 border border-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+              GitHub Sponsors
+            </a>
+            <a
+              href="https://venmo.com/squarshednanners"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#008CFF] text-white rounded-lg hover:bg-[#0070cc] transition-colors text-sm font-medium"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19.885 3.398c.66 1.09.957 2.214.957 3.635 0 4.527-3.862 10.41-6.994 14.55H7.27L4.116 3.81l5.89-.561 1.76 14.12c1.627-2.652 3.636-6.825 3.636-9.674 0-1.353-.23-2.28-.627-3.033l5.11-1.264z"/></svg>
+              Venmo
+            </a>
+            <a
+              href="https://buymeacoffee.com/squarshednanners"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#FFDD00] text-gray-900 rounded-lg hover:bg-[#e6c800] transition-colors text-sm font-medium"
+            >
+              <span class="text-lg">&#9749;</span>
+              Buy Me a Coffee
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Footer -->
     <footer class="bg-gray-800 text-gray-400 py-8">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -271,7 +361,20 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import LifeRelayLogo from '@/components/LifeRelayLogo.vue'
+
+// QR codes via public API (no dependency needed)
+const lightningQr = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=squarshednanner%40strike.me'
+const bitcoinQr = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=bitcoin%3Abc1qjxwfm42n6zmlp8tq47j8lgslxhggve2wrwaagl'
+
+const copied = ref<string | null>(null)
+
+function copyToClipboard(text: string, id: string) {
+  navigator.clipboard.writeText(text)
+  copied.value = id
+  setTimeout(() => { copied.value = null }, 2000)
+}
 
 const sectionHighlights = [
   { name: 'People & Contacts', description: 'Personal info, beneficiaries, executors, attorneys, trustees, and key contacts.' },

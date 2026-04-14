@@ -5,10 +5,10 @@
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
       @click.self="$emit('cancel')"
     >
-      <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[85vh] flex flex-col">
-        <div class="p-6 border-b border-gray-200">
-          <h2 class="text-xl font-semibold">Emergency One-Page Sheet</h2>
-          <p class="text-sm text-gray-500 mt-1">Select which items to include on your emergency sheet.</p>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[85vh] flex flex-col">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Emergency One-Page Sheet</h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Select which items to include on your emergency sheet.</p>
         </div>
 
         <div class="overflow-y-auto flex-1 p-6 space-y-5">
@@ -17,7 +17,7 @@
             <SectionToggle label="Personal Information" :count="selectedPeople.length" :total="people.length" @toggle-all="togglePeople">
               <div v-for="person in people" :key="person.id" class="flex items-center gap-2 py-1">
                 <input type="checkbox" :value="person.id" v-model="selectedPeople" class="rounded text-primary-600" />
-                <span class="text-sm">{{ person.name || 'Unnamed' }}</span>
+                <span class="text-sm text-gray-700 dark:text-gray-300">{{ person.name || 'Unnamed' }}</span>
               </div>
             </SectionToggle>
           </section>
@@ -27,7 +27,7 @@
             <SectionToggle label="Key Contacts" :count="selectedContacts.length" :total="contacts.length" @toggle-all="toggleContacts">
               <div v-for="(contact, idx) in contacts" :key="idx" class="flex items-center gap-2 py-1">
                 <input type="checkbox" :value="idx" v-model="selectedContacts" class="rounded text-primary-600" />
-                <span class="text-sm">{{ [contact.name, contact.role].filter(Boolean).join(' - ') || 'Unnamed' }}</span>
+                <span class="text-sm text-gray-700 dark:text-gray-300">{{ [contact.name, contact.role].filter(Boolean).join(' - ') || 'Unnamed' }}</span>
               </div>
             </SectionToggle>
           </section>
@@ -36,7 +36,7 @@
           <section v-if="hasHealthInsurance">
             <div class="flex items-center gap-2 py-1">
               <input type="checkbox" v-model="includeHealthInsurance" class="rounded text-primary-600" />
-              <span class="text-sm font-medium text-gray-700">Health Insurance</span>
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Health Insurance</span>
               <span class="text-xs text-gray-400">{{ data?.healthInsurance?.provider }}</span>
             </div>
           </section>
@@ -46,7 +46,7 @@
             <SectionToggle label="Medical Information" :count="selectedMedical.length" :total="medicalInfoItems.length" @toggle-all="toggleMedical">
               <div v-for="(med, idx) in medicalInfoItems" :key="idx" class="flex items-center gap-2 py-1">
                 <input type="checkbox" :value="idx" v-model="selectedMedical" class="rounded text-primary-600" />
-                <span class="text-sm">{{ getPersonName(med.personId) || `Medical Record ${idx + 1}` }}</span>
+                <span class="text-sm text-gray-700 dark:text-gray-300">{{ getPersonName(med.personId) || `Medical Record ${idx + 1}` }}</span>
               </div>
             </SectionToggle>
           </section>
@@ -56,7 +56,7 @@
             <SectionToggle label="Key Document Locations" :count="selectedStorage.length" :total="storageLocations.length" @toggle-all="toggleStorage">
               <div v-for="loc in storageLocations" :key="loc.id" class="flex items-center gap-2 py-1">
                 <input type="checkbox" :value="loc.id" v-model="selectedStorage" class="rounded text-primary-600" />
-                <span class="text-sm">{{ [loc.name, loc.locationType].filter(Boolean).join(' - ') || 'Unnamed' }}</span>
+                <span class="text-sm text-gray-700 dark:text-gray-300">{{ [loc.name, loc.locationType].filter(Boolean).join(' - ') || 'Unnamed' }}</span>
               </div>
             </SectionToggle>
           </section>
@@ -66,7 +66,7 @@
             <SectionToggle label="Cryptocurrency Assets" :count="selectedCrypto.length" :total="cryptoAssets.length" @toggle-all="toggleCrypto">
               <div v-for="(asset, idx) in cryptoAssets" :key="idx" class="flex items-center gap-2 py-1">
                 <input type="checkbox" :value="idx" v-model="selectedCrypto" class="rounded text-primary-600" />
-                <span class="text-sm">{{ cryptoAssetLabel(asset) }}</span>
+                <span class="text-sm text-gray-700 dark:text-gray-300">{{ cryptoAssetLabel(asset) }}</span>
               </div>
             </SectionToggle>
           </section>
@@ -75,25 +75,25 @@
           <section v-if="hasLegalDocuments">
             <div class="flex items-center gap-2 py-1">
               <input type="checkbox" v-model="includeLegalDocuments" class="rounded text-primary-600" />
-              <span class="text-sm font-medium text-gray-700">Legal Documents</span>
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Legal Documents</span>
             </div>
           </section>
 
           <!-- Empty state -->
-          <div v-if="!hasAnything" class="text-center py-8 text-gray-400">
+          <div v-if="!hasAnything" class="text-center py-8 text-gray-400 dark:text-gray-500">
             No data available. Add information to your vault first.
           </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 flex justify-between items-center">
-          <span class="text-xs text-gray-400">
+        <div class="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
+          <span class="text-xs text-gray-400 dark:text-gray-500">
             {{ totalSelected }} items selected
           </span>
           <div class="flex gap-3">
             <button
               type="button"
               @click="$emit('cancel')"
-              class="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+              class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
             >
               Cancel
             </button>

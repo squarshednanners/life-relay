@@ -7,7 +7,7 @@
       :form-data="computers"
     />
 
-    <div class="bg-white rounded-lg shadow p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
       <DynamicForm
         :schema="computerServersSchema"
         :model-value="computers"

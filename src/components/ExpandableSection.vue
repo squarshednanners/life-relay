@@ -1,11 +1,11 @@
 <template>
-  <div class="border border-gray-200 rounded-lg">
+  <div class="border border-gray-200 dark:border-gray-700 rounded-lg">
     <button
       @click="isExpanded = !isExpanded"
-      class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors rounded-t-lg"
+      class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors rounded-t-lg"
       :class="{ 'rounded-b-lg': !isExpanded }"
     >
-      <span class="font-medium text-gray-900">{{ label }}</span>
+      <span class="font-medium text-gray-900 dark:text-gray-100">{{ label }}</span>
       <svg
         class="w-5 h-5 text-gray-500 transition-transform"
         :class="{ 'rotate-180': isExpanded }"
@@ -18,7 +18,7 @@
     </button>
     <div
       v-show="isExpanded"
-      class="p-4 border-t border-gray-200"
+      class="p-4 border-t border-gray-200 dark:border-gray-700"
     >
       <slot />
     </div>

@@ -1,7 +1,7 @@
 <template>
   <div class="mb-6">
     <div class="flex items-center justify-between">
-      <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
         <span v-if="icon" class="text-3xl">{{ icon }}</span>
         {{ title }}
       </h2>
@@ -13,10 +13,10 @@
         {{ completeness.filled }}/{{ completeness.total }} fields
       </span>
     </div>
-    <p v-if="description" class="text-gray-600 mt-1">{{ description }}</p>
+    <p v-if="description" class="text-gray-600 dark:text-gray-400 mt-1">{{ description }}</p>
     <div
       v-if="completeness.total > 0"
-      class="mt-2 w-full bg-gray-200 rounded-full h-1.5"
+      class="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5"
     >
       <div
         class="h-1.5 rounded-full transition-all duration-500"

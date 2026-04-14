@@ -5,9 +5,28 @@
       description="Application settings and data management"
     />
 
-    <div class="bg-white rounded-lg shadow p-6 space-y-6">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-6">
+      <!-- Appearance -->
       <div>
-        <h3 class="text-lg font-semibold mb-4">Data Management</h3>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Appearance</h3>
+        <div class="flex gap-2">
+          <button
+            v-for="option in themeOptions"
+            :key="option.value"
+            @click="setTheme(option.value)"
+            class="px-4 py-2 text-sm font-medium rounded-lg border transition-colors"
+            :class="theme === option.value
+              ? 'bg-primary-100 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-300'
+              : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'"
+          >
+            {{ option.label }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Data Management -->
+      <div>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Data Management</h3>
         <div class="space-y-3">
           <button
             @click="exportData"
@@ -28,28 +47,29 @@
             Delete All Data
           </button>
         </div>
-        <p class="mt-4 text-sm text-gray-600">
+        <p class="mt-4 text-sm text-gray-600 dark:text-gray-400">
           <strong>Note:</strong> You can optionally encrypt exported files with a password to protect your sensitive data.
         </p>
       </div>
 
+      <!-- About -->
       <div>
-        <h3 class="text-lg font-semibold mb-4">About</h3>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">About</h3>
         <div class="space-y-4">
           <div class="flex items-center gap-3">
             <LifeRelayLogo size="lg" />
             <div>
-              <p class="font-semibold text-gray-900">Life Relay</p>
-              <p class="text-sm text-gray-500">Version 2.0.0</p>
+              <p class="font-semibold text-gray-900 dark:text-gray-100">Life Relay</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Version 2.0.0</p>
             </div>
           </div>
-          <p class="text-sm text-gray-600">
+          <p class="text-sm text-gray-600 dark:text-gray-400">
             Privacy-first, offline-capable estate planning application. All data is stored locally in your
             browser using IndexedDB. No servers, no cloud, no tracking. Your information never leaves your device.
           </p>
           <div>
-            <h4 class="text-sm font-semibold text-gray-700 mb-2">Key Features</h4>
-            <ul class="text-sm text-gray-600 space-y-1.5">
+            <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Key Features</h4>
+            <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1.5">
               <li class="flex items-start gap-2">
                 <span class="text-green-500 mt-0.5 flex-shrink-0">&check;</span>
                 <span>26 organized sections across 8 categories covering finances, insurance, digital assets, legal documents, and more</span>
@@ -76,10 +96,6 @@
               </li>
               <li class="flex items-start gap-2">
                 <span class="text-green-500 mt-0.5 flex-shrink-0">&check;</span>
-                <span>Quick start templates to get going fast (General, Crypto Holder, Retiree, Young Adult)</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-green-500 mt-0.5 flex-shrink-0">&check;</span>
                 <span>Progress tracking dashboard with 90-day review reminders</span>
               </li>
               <li class="flex items-start gap-2">
@@ -88,8 +104,8 @@
               </li>
             </ul>
           </div>
-          <div class="pt-2 border-t border-gray-100">
-            <p class="text-xs text-gray-400">
+          <div class="pt-2 border-t border-gray-100 dark:border-gray-700">
+            <p class="text-xs text-gray-400 dark:text-gray-500">
               Built with Vue 3, TypeScript, Tailwind CSS, IndexedDB, and pdf-lib. All PDF generation happens client-side.
             </p>
           </div>
@@ -126,6 +142,8 @@
 import { ref } from 'vue'
 import { useLegacyStore } from '@/store'
 import { useToast } from '@/composables/useToast'
+import { useTheme } from '@/composables/useTheme'
+import type { ThemeMode } from '@/composables/useTheme'
 import SectionHeader from '@/components/SectionHeader.vue'
 import LifeRelayLogo from '@/components/LifeRelayLogo.vue'
 import PasswordPromptModal from '@/components/PasswordPromptModal.vue'
@@ -133,7 +151,14 @@ import { isEncrypted } from '@/utils/encryption'
 
 const store = useLegacyStore()
 const { showToast } = useToast()
+const { theme, setTheme } = useTheme()
 const fileInput = ref<HTMLInputElement | null>(null)
+
+const themeOptions: { label: string; value: ThemeMode }[] = [
+  { label: 'Light', value: 'light' },
+  { label: 'Dark', value: 'dark' },
+  { label: 'System', value: 'system' },
+]
 
 // Password modal state
 const showPasswordModal = ref(false)
@@ -170,7 +195,7 @@ async function handleFileImport(event: Event) {
   try {
     const text = await file.text()
     pendingFileContent.value = text
-    
+
     // Check if file is encrypted
     if (isEncrypted(text)) {
       // Show password prompt for encrypted import
@@ -195,7 +220,7 @@ async function handleFileImport(event: Event) {
 
 async function handlePasswordConfirm(password: string) {
   showPasswordModal.value = false
-  
+
   try {
     if (pendingAction.value === 'export') {
       // Export with encryption
@@ -224,7 +249,7 @@ async function handlePasswordConfirm(password: string) {
 
 async function handlePasswordSkip() {
   showPasswordModal.value = false
-  
+
   try {
     if (pendingAction.value === 'export') {
       // Export without encryption
@@ -263,4 +288,3 @@ async function deleteAllData() {
   }
 }
 </script>
-

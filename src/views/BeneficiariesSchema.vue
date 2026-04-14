@@ -7,7 +7,7 @@
       :form-data="beneficiaries"
     />
 
-    <div class="bg-white rounded-lg shadow p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
       <DynamicForm
         :schema="beneficiariesSchema"
         :model-value="beneficiaries"

@@ -516,6 +516,7 @@
       "platform": "Example Email/Cloud Provider",
       "username": "john.doe",
       "email": "john.doe@example.com",
+      "password": "",
       "passwordHint": "See password manager",
       "recoveryEmail": "jane.doe@example.com",
       "notes": "Inactive Account Manager set to notify spouse after 6 months."
@@ -524,6 +525,7 @@
       "platform": "Example Cloud / Device Provider",
       "username": "john.doe@example.com",
       "email": "john.doe@example.com",
+      "password": "",
       "passwordHint": "See password manager",
       "recoveryEmail": "jane.doe@example.com",
       "notes": "Family Sharing organizer. Legacy Contact: spouse. 2TB cloud storage."
@@ -532,6 +534,7 @@
       "platform": "Example Social Network",
       "username": "johndoe",
       "email": "john.doe@example.com",
+      "password": "",
       "passwordHint": "See password manager",
       "recoveryEmail": "jane.doe@example.com",
       "notes": "Memorialization contact: spouse. Privacy settings: Friends only."
@@ -540,6 +543,7 @@
       "platform": "Example Professional Network",
       "username": "johndoe",
       "email": "john.doe@example.com",
+      "password": "",
       "passwordHint": "See password manager",
       "recoveryEmail": "",
       "notes": "Professional profile. May want to memorialize or remove."
@@ -548,6 +552,7 @@
       "platform": "Example Code Hosting",
       "username": "johndoe-dev",
       "email": "john.doe@example.com",
+      "password": "",
       "passwordHint": "See password manager",
       "recoveryEmail": "",
       "notes": "Contains personal and open-source projects. Some repos may have value."
@@ -556,6 +561,7 @@
       "platform": "Example Online Retailer",
       "username": "john.doe@example.com",
       "email": "john.doe@example.com",
+      "password": "",
       "passwordHint": "See password manager",
       "recoveryEmail": "",
       "notes": "Membership and digital purchases."

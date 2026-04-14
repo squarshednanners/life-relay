@@ -25,9 +25,9 @@
           <!-- Section Divider -->
           <template v-if="field.sectionDivider && (!field.name || field.name.startsWith('_'))">
             <div
-              :class="field.sectionDivider.showBorder !== false ? 'col-span-1 md:col-span-2 border-t pt-4 mt-2' : 'col-span-1 md:col-span-2 pt-2'"
+              :class="field.sectionDivider.showBorder !== false ? 'col-span-1 md:col-span-2 border-t border-gray-200 dark:border-gray-600 pt-4 mt-2' : 'col-span-1 md:col-span-2 pt-2'"
             >
-              <h4 v-if="field.sectionDivider.label" class="text-sm font-semibold text-gray-700 mb-2">
+              <h4 v-if="field.sectionDivider.label" class="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                 {{ field.sectionDivider.label }}
               </h4>
             </div>

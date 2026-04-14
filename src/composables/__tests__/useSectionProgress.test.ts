@@ -4,7 +4,7 @@ import type { DeathboxData } from '@/models/DeathboxData'
 import * as fs from 'fs'
 import * as path from 'path'
 
-const testDataPath = path.resolve(__dirname, '../../../test-data.json')
+const testDataPath = path.resolve(__dirname, '../../../examples/sample-vault.json')
 const testData: DeathboxData = JSON.parse(fs.readFileSync(testDataPath, 'utf-8'))
 
 describe('hasSectionData', () => {
