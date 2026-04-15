@@ -94,6 +94,8 @@ export interface FormFieldSchema {
   sectionDivider?: {
     label?: string // Optional label for the section
     showBorder?: boolean // Show border above this field (default: true)
+    collapsible?: boolean // If true, fields after this divider can be collapsed (until next divider or end of schema)
+    defaultExpanded?: boolean // Whether the collapsible section is expanded by default (default: true)
   }
   
   // Expandable section (collapsible group of fields)

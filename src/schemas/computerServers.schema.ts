@@ -119,11 +119,106 @@ export const computerServersSchema: FormSectionSchema = {
       fullWidth: true,
       rows: 3,
     },
+
+    // ===== Physical Access =====
+    {
+      sectionDivider: {
+        label: 'Physical Access',
+        collapsible: true,
+      },
+    },
+    {
+      name: 'physicalLocation',
+      label: 'Physical Location',
+      type: 'text',
+      placeholder: 'e.g. Home office desk, basement rack, closet shelf',
+      colSpan: 2,
+      fullWidth: true,
+    },
+    {
+      name: 'powerOnInstructions',
+      label: 'How to Power On / Boot',
+      type: 'textarea',
+      placeholder: 'e.g. Press front power button. Server boots automatically — wait 2 minutes before accessing UI. UPS battery in cabinet below.',
+      colSpan: 2,
+      fullWidth: true,
+      rows: 2,
+      helpText: 'Especially important for headless servers, custom builds, or unusual hardware',
+    },
+
+    // ===== Backup & Remote Access =====
+    {
+      sectionDivider: {
+        label: 'Backup & Remote Access',
+        collapsible: true,
+      },
+    },
+    {
+      name: 'backupLocation',
+      label: 'Backup Location',
+      type: 'textarea',
+      placeholder: 'e.g. Time Machine to NAS at 192.168.1.50, daily snapshot to Backblaze B2 (account in Digital Assets), critical files synced to iCloud',
+      colSpan: 2,
+      fullWidth: true,
+      rows: 2,
+    },
+    {
+      name: 'remoteAccess',
+      label: 'Remote Access Setup',
+      type: 'textarea',
+      placeholder: 'e.g. Tailscale (login via Google account), TeamViewer ID 123-456-789, SSH on port 22 from local network only',
+      colSpan: 2,
+      fullWidth: true,
+      rows: 2,
+      helpText: 'How an heir or trusted person could access this remotely if needed',
+    },
+
+    // ===== What To Do With It =====
+    {
+      sectionDivider: {
+        label: 'What To Do With It',
+        collapsible: true,
+      },
+    },
+    {
+      name: 'importantData',
+      label: 'Important Data to Preserve',
+      type: 'textarea',
+      placeholder: 'e.g. Family photos in /Users/john/Pictures (back up before wiping). Tax records in /Documents/Taxes. Crypto wallet files in /home/john/.bitcoin (DO NOT DELETE — see Crypto Assets).',
+      colSpan: 2,
+      fullWidth: true,
+      rows: 3,
+    },
+    {
+      name: 'sensitiveData',
+      label: 'Sensitive Data to Wipe',
+      type: 'textarea',
+      placeholder: 'e.g. Browser saved passwords, work files under NDA, medical records folder. Use full-disk wipe before disposing.',
+      colSpan: 2,
+      fullWidth: true,
+      rows: 2,
+    },
+    {
+      name: 'finalAction',
+      label: 'Preferred Final Action',
+      type: 'select',
+      colSpan: 2,
+      fullWidth: true,
+      options: [
+        { label: '', value: '' },
+        { label: 'Keep — heir continues using it', value: 'keep' },
+        { label: 'Sell after wiping', value: 'sell' },
+        { label: 'Donate after wiping', value: 'donate' },
+        { label: 'Wipe and recycle', value: 'recycle' },
+        { label: 'Securely destroy (physical destruction of drives)', value: 'destroy' },
+      ],
+    },
+
     {
       name: 'notes',
       label: 'Notes',
       type: 'textarea',
-      placeholder: 'Additional notes',
+      placeholder: 'Anything else useful',
       colSpan: 2,
       fullWidth: true,
       rows: 2,

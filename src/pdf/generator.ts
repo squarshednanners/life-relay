@@ -1,4 +1,4 @@
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
+import { PDFDocument, PDFRef, PDFArray, PDFDict, PDFName, PDFNumber, PDFString, rgb, StandardFonts } from 'pdf-lib'
 import type { PDFPage, PDFFont } from 'pdf-lib'
 import type { DeathboxData } from '@/models/DeathboxData'
 import { getSchemasByGroup } from '@/schemas/index'
@@ -494,6 +494,118 @@ export async function generatePDFDocument(
     p.drawText(txt, {
       x: (PAGE_W - tw) / 2, y: 24, size: 8, font, color: GRAY,
     })
+  }
+
+  /* ── PDF outline (bookmarks) for sidebar navigation ──── */
+  // Group entries become top-level outline items; section entries nest under their group.
+
+  const context = pdfDoc.context
+  const catalog = pdfDoc.catalog
+
+  // Build hierarchical structure: groups contain sections
+  type OutlineItem = { label: string; pageNum: number; children: OutlineItem[] }
+  const outlineRoots: OutlineItem[] = []
+  let currentGroup: OutlineItem | null = null
+
+  for (const entry of tocEntries) {
+    if (entry.level === 'group') {
+      currentGroup = { label: entry.label, pageNum: entry.pageNum, children: [] }
+      outlineRoots.push(currentGroup)
+    } else if (currentGroup) {
+      currentGroup.children.push({ label: entry.label, pageNum: entry.pageNum, children: [] })
+    }
+  }
+
+  if (outlineRoots.length > 0) {
+    // Outline root dict
+    const outlineRootRef = context.nextRef()
+
+    // Recursively register outline items, returning their refs
+    function registerItem(item: OutlineItem, parentRef: PDFRef): { ref: PDFRef; lastChildRef?: PDFRef } {
+      const itemRef = context.nextRef()
+      const childRefs: PDFRef[] = []
+
+      // First pass: allocate refs for children
+      for (let _i = 0; _i < item.children.length; _i++) {
+        childRefs.push(context.nextRef())
+      }
+
+      const dict = context.obj({
+        Title: PDFString.of(sanitize(item.label)),
+        Parent: parentRef,
+        Dest: PDFArray.withContext(context),
+      }) as PDFDict
+      dict.set(PDFName.of('Title'), PDFString.of(sanitize(item.label)))
+      dict.set(PDFName.of('Parent'), parentRef)
+
+      // Destination: [pageRef /XYZ left top zoom]
+      const pageRef = pdfDoc.getPage(item.pageNum - 1).ref
+      const destArray = PDFArray.withContext(context)
+      destArray.push(pageRef)
+      destArray.push(PDFName.of('XYZ'))
+      destArray.push(PDFNumber.of(0))
+      destArray.push(PDFNumber.of(PAGE_H))
+      destArray.push(PDFNumber.of(0))
+      dict.set(PDFName.of('Dest'), destArray)
+
+      if (childRefs.length > 0) {
+        dict.set(PDFName.of('First'), childRefs[0])
+        dict.set(PDFName.of('Last'), childRefs[childRefs.length - 1])
+        dict.set(PDFName.of('Count'), PDFNumber.of(childRefs.length))
+      }
+
+      context.assign(itemRef, dict)
+
+      // Recursively register children, linking siblings via Prev/Next
+      for (let i = 0; i < item.children.length; i++) {
+        const childItem = item.children[i]
+        const childRef = childRefs[i]
+        const childDict = context.obj({}) as PDFDict
+        childDict.set(PDFName.of('Title'), PDFString.of(sanitize(childItem.label)))
+        childDict.set(PDFName.of('Parent'), itemRef)
+
+        const childPageRef = pdfDoc.getPage(childItem.pageNum - 1).ref
+        const childDest = PDFArray.withContext(context)
+        childDest.push(childPageRef)
+        childDest.push(PDFName.of('XYZ'))
+        childDest.push(PDFNumber.of(0))
+        childDest.push(PDFNumber.of(PAGE_H))
+        childDest.push(PDFNumber.of(0))
+        childDict.set(PDFName.of('Dest'), childDest)
+
+        if (i > 0) childDict.set(PDFName.of('Prev'), childRefs[i - 1])
+        if (i < childRefs.length - 1) childDict.set(PDFName.of('Next'), childRefs[i + 1])
+
+        context.assign(childRef, childDict)
+      }
+
+      return { ref: itemRef }
+    }
+
+    // Build top-level items
+    const topRefs: PDFRef[] = []
+    for (const root of outlineRoots) {
+      const { ref } = registerItem(root, outlineRootRef)
+      topRefs.push(ref)
+    }
+
+    // Link top-level siblings
+    for (let i = 0; i < topRefs.length; i++) {
+      const itemDict = context.lookup(topRefs[i]) as PDFDict
+      if (i > 0) itemDict.set(PDFName.of('Prev'), topRefs[i - 1])
+      if (i < topRefs.length - 1) itemDict.set(PDFName.of('Next'), topRefs[i + 1])
+    }
+
+    // Build outline root
+    const outlineRootDict = context.obj({}) as PDFDict
+    outlineRootDict.set(PDFName.of('Type'), PDFName.of('Outlines'))
+    outlineRootDict.set(PDFName.of('First'), topRefs[0])
+    outlineRootDict.set(PDFName.of('Last'), topRefs[topRefs.length - 1])
+    outlineRootDict.set(PDFName.of('Count'), PDFNumber.of(outlineRoots.length))
+    context.assign(outlineRootRef, outlineRootDict)
+
+    catalog.set(PDFName.of('Outlines'), outlineRootRef)
+    catalog.set(PDFName.of('PageMode'), PDFName.of('UseOutlines'))
   }
 
   return pdfDoc.save()

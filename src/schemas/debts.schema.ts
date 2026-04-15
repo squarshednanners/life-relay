@@ -44,6 +44,15 @@ export const debtsSchema: FormSectionSchema = {
       colSpan: 1,
     },
     {
+      name: 'cosigner',
+      label: 'Cosigner / Guarantor',
+      type: 'text',
+      placeholder: 'Name of anyone else liable for this debt',
+      colSpan: 2,
+      fullWidth: true,
+      helpText: 'A cosigner remains responsible for the debt — critical for the executor to know',
+    },
+    {
       name: 'notes',
       label: 'Notes',
       type: 'textarea',

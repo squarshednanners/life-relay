@@ -58,6 +58,13 @@
           {{ isGeneratingEmergency ? 'Generating...' : 'Emergency One-Page Sheet' }}
         </button>
         <button
+          @click="generateWalletCard"
+          :disabled="isGeneratingWalletCard"
+          class="px-4 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50"
+        >
+          {{ isGeneratingWalletCard ? 'Generating...' : 'Wallet Cards (printable)' }}
+        </button>
+        <button
           @click="saveData"
           :disabled="isLoading"
           class="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
@@ -158,6 +165,7 @@ import { useToast } from '@/composables/useToast'
 import { generatePDFDocument } from '@/pdf/generator'
 import { generateEmergencySheet } from '@/pdf/emergencySheet'
 import type { EmergencySheetSelections } from '@/pdf/emergencySheet'
+import { generateWalletCardPdf } from '@/pdf/walletCardPdf'
 import SectionHeader from '@/components/SectionHeader.vue'
 import EmergencySheetModal from '@/components/EmergencySheetModal.vue'
 import PdfExportModal from '@/components/PdfExportModal.vue'
@@ -171,6 +179,27 @@ const { showToast } = useToast()
 const fileInput = ref<HTMLInputElement | null>(null)
 const isGenerating = ref(false)
 const isGeneratingEmergency = ref(false)
+const isGeneratingWalletCard = ref(false)
+
+async function generateWalletCard() {
+  if (!store.data || isGeneratingWalletCard.value) return
+  isGeneratingWalletCard.value = true
+  try {
+    const bytes = await generateWalletCardPdf(store.data)
+    const blob = new Blob([bytes as BlobPart], { type: 'application/pdf' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'life-relay-wallet-cards.pdf'
+    a.click()
+    URL.revokeObjectURL(url)
+    showToast('Wallet cards generated!', 'success')
+  } catch (e) {
+    showToast('Error generating wallet cards', 'error')
+  } finally {
+    isGeneratingWalletCard.value = false
+  }
+}
 
 const isLoading = computed(() => store.isLoading)
 

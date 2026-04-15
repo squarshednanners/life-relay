@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-4">
     <template v-for="(group, groupIndex) in fieldGroups" :key="groupIndex">
-      <!-- Expandable Section -->
+      <!-- Expandable Section (from expandableSectionId) -->
       <ExpandableSection
         v-if="group.isExpandable && group.label"
         :label="group.label || ''"
@@ -19,10 +19,46 @@
         </div>
       </ExpandableSection>
 
+      <!-- Collapsible Section Divider -->
+      <div
+        v-else-if="group.isCollapsibleDivider"
+        :class="group.showBorder !== false ? 'border-t border-gray-200 dark:border-gray-600 pt-3 mt-2' : 'pt-2'"
+      >
+        <button
+          type="button"
+          @click="toggleSection(group.collapseKey!, group.defaultExpanded === false)"
+          class="w-full flex items-center justify-between text-left mb-3 group hover:opacity-80 transition-opacity"
+        >
+          <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-200">
+            {{ group.label }}
+          </h4>
+          <svg
+            class="w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform"
+            :class="{ 'rotate-180': !isCollapsed(group.collapseKey!, group.defaultExpanded === false) }"
+            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+          </svg>
+        </button>
+        <div
+          v-show="!isCollapsed(group.collapseKey!, group.defaultExpanded === false)"
+          class="grid grid-cols-1 md:grid-cols-2 gap-4"
+        >
+          <template v-for="(field, fieldIndex) in group.fields" :key="field.name || `field-${fieldIndex}`">
+            <FieldRenderer
+              :field="field"
+              :model-value="modelValue"
+              :index="index"
+              @update:field="updateField"
+            />
+          </template>
+        </div>
+      </div>
+
       <!-- Regular Fields Group -->
       <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <template v-for="(field, fieldIndex) in group.fields" :key="field.name || `divider-${fieldIndex}`">
-          <!-- Section Divider -->
+          <!-- Section Divider (non-collapsible) -->
           <template v-if="field.sectionDivider && (!field.name || field.name.startsWith('_'))">
             <div
               :class="field.sectionDivider.showBorder !== false ? 'col-span-1 md:col-span-2 border-t border-gray-200 dark:border-gray-600 pt-4 mt-2' : 'col-span-1 md:col-span-2 pt-2'"
@@ -53,6 +89,7 @@ import type { FormSectionSchema, FormFieldSchema } from '@/models/FormSchema'
 import { getVisibleFields } from '@/models/FormSchema'
 import ExpandableSection from './ExpandableSection.vue'
 import FieldRenderer from './FieldRenderer.vue'
+import { useCollapsedSections } from '@/composables/useCollapsedSections'
 
 const props = defineProps<{
   schema: FormSectionSchema
@@ -64,65 +101,68 @@ const emit = defineEmits<{
   'update:modelValue': [value: any]
 }>()
 
+const { isCollapsed, setCollapsed } = useCollapsedSections()
+
+function toggleSection(key: string, defaultCollapsed: boolean) {
+  // When toggling, look up current state (respecting default) and flip
+  const currentlyCollapsed = isCollapsed(key, defaultCollapsed)
+  setCollapsed(key, !currentlyCollapsed)
+}
+
 const visibleFields = computed(() => {
   return getVisibleFields(props.schema.fields, props.modelValue)
 })
 
-// Helper type for field groups
-type FieldGroupWithId = {
+type FieldGroup = {
   isExpandable: boolean
+  isCollapsibleDivider?: boolean
   label?: string
   defaultExpanded?: boolean
+  showBorder?: boolean
+  collapseKey?: string
   fields: FormFieldSchema[]
   expandableId?: string
 }
 
-// Group fields by expandable sections
+// Group fields by section dividers (collapsible) and expandable sections
 const fieldGroups = computed(() => {
-  const groups: Array<{
-    isExpandable: boolean
-    label?: string
-    defaultExpanded?: boolean
-    fields: FormFieldSchema[]
-  }> = []
-  
-  let currentGroup: FieldGroupWithId | null = null
+  const groups: FieldGroup[] = []
+  let currentGroup: FieldGroup | null = null
+
+  function flush() {
+    if (currentGroup && currentGroup.fields.length > 0) {
+      groups.push(currentGroup)
+    }
+    currentGroup = null
+  }
 
   visibleFields.value.forEach(field => {
-    // Skip section dividers in grouping (they'll be rendered separately)
+    // Section divider
     if (field.sectionDivider && (!field.name || field.name.startsWith('_'))) {
-      // Save current group if exists
-      if (currentGroup && currentGroup.fields.length > 0) {
-        groups.push({
-          isExpandable: currentGroup.isExpandable,
-          label: currentGroup.label,
-          defaultExpanded: currentGroup.defaultExpanded,
-          fields: currentGroup.fields,
-        })
-        currentGroup = null
+      flush()
+
+      if (field.sectionDivider.collapsible) {
+        // Start a new collapsible group — subsequent fields belong to it until next divider
+        currentGroup = {
+          isExpandable: false,
+          isCollapsibleDivider: true,
+          label: field.sectionDivider.label,
+          defaultExpanded: field.sectionDivider.defaultExpanded ?? true,
+          showBorder: field.sectionDivider.showBorder,
+          collapseKey: `${props.schema.sectionKey}.${field.sectionDivider.label || 'section'}`,
+          fields: [],
+        }
+      } else {
+        // Non-collapsible divider — render as a one-field group like before
+        groups.push({ isExpandable: false, fields: [field] })
       }
-      // Add divider as its own group
-      groups.push({
-        isExpandable: false,
-        fields: [field],
-      })
       return
     }
 
-    // Check if field belongs to an expandable section
+    // Expandable section (from expandableSectionId)
     if (field.expandableSectionId) {
-      // If starting a new expandable section
       if (!currentGroup || currentGroup.expandableId !== field.expandableSectionId) {
-        // Save previous group if exists
-        if (currentGroup && currentGroup.fields.length > 0) {
-          groups.push({
-            isExpandable: currentGroup.isExpandable,
-            label: currentGroup.label,
-            defaultExpanded: currentGroup.defaultExpanded,
-            fields: currentGroup.fields,
-          })
-        }
-        // Start new expandable group
+        flush()
         currentGroup = {
           isExpandable: true,
           label: field.expandableSectionLabel || field.label || '',
@@ -131,46 +171,21 @@ const fieldGroups = computed(() => {
           expandableId: field.expandableSectionId,
         }
       } else {
-        // Add to current expandable group
         currentGroup.fields.push(field)
       }
-    } else {
-      // Regular field (not in expandable section)
-      // Save previous expandable group if exists
-      if (currentGroup && currentGroup.isExpandable) {
-        groups.push({
-          isExpandable: true,
-          label: currentGroup.label,
-          defaultExpanded: currentGroup.defaultExpanded,
-          fields: currentGroup.fields,
-        })
-        currentGroup = null
-      }
-      
-      // Add to regular group
-      if (!currentGroup || currentGroup.isExpandable) {
-        currentGroup = {
-          isExpandable: false,
-          fields: [],
-        }
-      }
-      currentGroup.fields.push(field)
+      return
     }
+
+    // Regular field
+    if (!currentGroup || (currentGroup.isExpandable && !currentGroup.isCollapsibleDivider)) {
+      // If we were in an expandableSectionId group, flush and start a new plain group
+      flush()
+      currentGroup = { isExpandable: false, fields: [] }
+    }
+    currentGroup.fields.push(field)
   })
 
-  // Add last group
-  if (currentGroup) {
-    const group: FieldGroupWithId = currentGroup
-    if (group.fields.length > 0) {
-      groups.push({
-        isExpandable: group.isExpandable,
-        label: group.label,
-        defaultExpanded: group.defaultExpanded,
-        fields: group.fields,
-      })
-    }
-  }
-
+  flush()
   return groups
 })
 
@@ -197,14 +212,13 @@ dependentFields.value.forEach(field => {
     },
     (newVal) => {
       if (newVal == null) return
-      // Only auto-populate if the dependent field is currently empty
       const parts = targetField.split('.')
       let currentValue = props.modelValue
       for (const part of parts) {
         if (currentValue == null) break
         currentValue = currentValue[part]
       }
-      if (currentValue) return // Don't overwrite non-empty values
+      if (currentValue) return
 
       const transformedValue = transform ? transform(newVal) : newVal
       updateField(targetField, transformedValue)
@@ -214,16 +228,13 @@ dependentFields.value.forEach(field => {
 })
 
 function updateField(fieldName: string, value: any) {
-  // Support nested paths like "singleKey.walletLabel"
   const parts = fieldName.split('.')
   if (parts.length === 1) {
-    // Simple field update
     emit('update:modelValue', {
       ...props.modelValue,
       [fieldName]: value,
     })
   } else {
-    // Nested field update
     const newValue = { ...props.modelValue }
     let current: any = newValue
     for (let i = 0; i < parts.length - 1; i++) {

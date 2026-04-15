@@ -3,9 +3,9 @@ import type { FormSectionSchema } from '@/models/FormSchema'
 export const propertySchema: FormSectionSchema = {
   sectionKey: 'property',
   title: 'Property & Real Estate',
-  description: 'Real estate holdings, property ownership, and mortgages',
+  description: 'Real estate holdings, ownership, access, utilities, and the details your family would need to manage or sell the property',
   isArray: true,
-  arrayItemLabel: (index) => `Property ${index + 1}`,
+  arrayItemLabel: (_, item) => item?.address || 'Property',
   pdfGroup: 'Property & Household',
   fields: [
     {
@@ -20,14 +20,14 @@ export const propertySchema: FormSectionSchema = {
       name: 'type',
       label: 'Type',
       type: 'text',
-      placeholder: 'House, Condo, Land, etc.',
+      placeholder: 'House, Condo, Land, Vacation Home, etc.',
       colSpan: 1,
     },
     {
       name: 'ownership',
       label: 'Ownership',
       type: 'text',
-      placeholder: 'Sole, Joint, Trust, etc.',
+      placeholder: 'Sole, Joint, Trust, LLC, etc.',
       colSpan: 1,
     },
     {
@@ -38,17 +38,174 @@ export const propertySchema: FormSectionSchema = {
       colSpan: 1,
     },
     {
+      name: 'yearBuilt',
+      label: 'Year Built',
+      type: 'text',
+      placeholder: 'e.g. 1995',
+      colSpan: 1,
+    },
+    {
+      name: 'lotSize',
+      label: 'Lot Size',
+      type: 'text',
+      placeholder: 'e.g. 0.25 acres, 10,890 sq ft',
+      colSpan: 1,
+    },
+    {
+      name: 'parcelNumber',
+      label: 'Parcel / APN Number',
+      type: 'text',
+      placeholder: 'Assessor parcel number',
+      colSpan: 1,
+    },
+    {
       name: 'mortgageInfo',
       label: 'Mortgage Information',
       type: 'textarea',
-      placeholder: 'Mortgage details, lender, balance, etc.',
+      placeholder: 'Lender, loan number, balance, payment, etc.',
       colSpan: 2,
       fullWidth: true,
       rows: 2,
     },
     {
+      name: 'annualPropertyTax',
+      label: 'Annual Property Tax',
+      type: 'currency',
+      placeholder: '$0.00',
+      colSpan: 1,
+    },
+    {
+      name: 'hoaInfo',
+      label: 'HOA / Association',
+      type: 'text',
+      placeholder: 'HOA name, dues, contact',
+      colSpan: 1,
+    },
+
+    // ===== Access & Security =====
+    {
       sectionDivider: {
-        label: 'Property Manager',
+        label: 'Access & Security',
+        collapsible: true,
+      },
+    },
+    {
+      name: 'keyLocation',
+      label: 'Spare Key Location',
+      type: 'text',
+      placeholder: 'e.g. With trusted neighbor, lockbox by side gate, hidden under planter',
+      colSpan: 2,
+      fullWidth: true,
+      helpText: 'Where can your family find a way in if they don\'t have a key?',
+    },
+    {
+      name: 'garageCode',
+      label: 'Garage Code',
+      type: 'password',
+      placeholder: 'Garage door keypad code',
+      colSpan: 1,
+      manualEntry: true,
+    },
+    {
+      name: 'doorCode',
+      label: 'Door / Smart Lock Code',
+      type: 'password',
+      placeholder: 'Front door / smart lock code',
+      colSpan: 1,
+      manualEntry: true,
+    },
+    {
+      name: 'alarmCode',
+      label: 'Alarm Code',
+      type: 'password',
+      placeholder: 'Security system disarm code',
+      colSpan: 1,
+      manualEntry: true,
+    },
+    // ===== Utilities & Systems =====
+    {
+      sectionDivider: {
+        label: 'Utilities & Systems',
+        collapsible: true,
+      },
+    },
+    {
+      name: 'waterSource',
+      label: 'Water Source',
+      type: 'select',
+      colSpan: 1,
+      options: [
+        { label: '', value: '' },
+        { label: 'Municipal / City', value: 'municipal' },
+        { label: 'Well', value: 'well' },
+        { label: 'Shared / Community', value: 'shared' },
+        { label: 'Other', value: 'other' },
+      ],
+    },
+    {
+      name: 'sewerType',
+      label: 'Sewer / Septic',
+      type: 'select',
+      colSpan: 1,
+      options: [
+        { label: '', value: '' },
+        { label: 'Municipal Sewer', value: 'municipal' },
+        { label: 'Septic', value: 'septic' },
+        { label: 'Other', value: 'other' },
+      ],
+    },
+    {
+      name: 'waterShutoffLocation',
+      label: 'Water Shutoff Location',
+      type: 'textarea',
+      placeholder: 'e.g. Main shutoff in basement near water heater. Outside shutoff at curb box near mailbox.',
+      colSpan: 2,
+      fullWidth: true,
+      rows: 2,
+    },
+    {
+      name: 'gasShutoffLocation',
+      label: 'Gas Shutoff Location',
+      type: 'textarea',
+      placeholder: 'e.g. Outside on east wall next to meter. Use crescent wrench to turn 90 degrees.',
+      colSpan: 2,
+      fullWidth: true,
+      rows: 2,
+    },
+    {
+      name: 'electricalPanelLocation',
+      label: 'Electrical Panel Location',
+      type: 'text',
+      placeholder: 'e.g. Garage west wall, behind shelving',
+      colSpan: 2,
+      fullWidth: true,
+    },
+    {
+      name: 'wellSepticDetails',
+      label: 'Well / Septic Details',
+      type: 'textarea',
+      placeholder: 'Well shutoff location, septic tank location, last pumped date, service company, filter info, etc.',
+      colSpan: 2,
+      fullWidth: true,
+      rows: 3,
+      helpText: 'Important if you have a well or septic — your family won\'t know these by default',
+    },
+    {
+      name: 'hvacInfo',
+      label: 'HVAC / Heating & Cooling',
+      type: 'textarea',
+      placeholder: 'Furnace location, AC unit location, filter size, service company, last serviced',
+      colSpan: 2,
+      fullWidth: true,
+      rows: 2,
+    },
+
+    // ===== Property Manager (existing, kept for rentals) =====
+    {
+      sectionDivider: {
+        label: 'Property Manager (rentals)',
+        collapsible: true,
+        defaultExpanded: false,
       },
     },
     {
@@ -88,15 +245,32 @@ export const propertySchema: FormSectionSchema = {
       fullWidth: true,
       rows: 2,
     },
+
+    // ===== Important Details =====
     {
-      name: 'notes',
-      label: 'Notes',
+      sectionDivider: {
+        label: 'Important Details',
+        collapsible: true,
+      },
+    },
+    {
+      name: 'propertyLines',
+      label: 'Property Lines & Easements',
       type: 'textarea',
-      placeholder: 'Additional notes',
+      placeholder: 'e.g. Survey on file in safe. Fence on south side is 2ft inside actual line. Utility easement runs along back.',
       colSpan: 2,
       fullWidth: true,
       rows: 2,
     },
+    {
+      name: 'notes',
+      label: 'Additional Notes',
+      type: 'textarea',
+      placeholder: 'Quirks, unwritten rules, recurring issues, things only you know — e.g. "the upstairs bathroom faucet has to be turned a specific way", "neighbor has a verbal agreement about the shared driveway", "the basement floods if the sump pump fails — backup sump in garage"',
+      colSpan: 2,
+      fullWidth: true,
+      rows: 4,
+      helpText: 'Capture the things your family would never know to ask about',
+    },
   ],
 }
-

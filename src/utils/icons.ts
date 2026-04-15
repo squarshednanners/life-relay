@@ -1,6 +1,7 @@
 // Icon mapping for sections and navigation
 export const SECTION_ICONS: Record<string, string> = {
   'Dashboard': '📊',
+  'For My Family': '📖',
   'People & Personal Info': '👤',
   'People & Personal Information': '👤',
   'Beneficiaries': '👥',

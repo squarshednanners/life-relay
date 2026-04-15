@@ -5,7 +5,10 @@ export const vehiclesSchema: FormSectionSchema = {
   title: 'Vehicles',
   description: 'Cars, trucks, boats, motorcycles, and other vehicles',
   isArray: true,
-  arrayItemLabel: (index) => `Vehicle ${index + 1}`,
+  arrayItemLabel: (_, item) => {
+    const parts = [item?.year, item?.make, item?.model].filter(Boolean)
+    return parts.length > 0 ? parts.join(' ') : 'Vehicle'
+  },
   pdfGroup: 'Property & Household',
   fields: [
     {
@@ -51,8 +54,20 @@ export const vehiclesSchema: FormSectionSchema = {
       colSpan: 1,
     },
     {
+      name: 'keyLocation',
+      label: 'Key / Fob Location',
+      type: 'text',
+      placeholder: 'e.g. Hook by garage door, spare in home safe',
+      colSpan: 2,
+      fullWidth: true,
+      helpText: 'Where are the keys, fobs, and any spare keys?',
+    },
+
+    // ===== Title & Registration =====
+    {
       sectionDivider: {
         label: 'Title & Registration',
+        collapsible: true,
       },
     },
     {
@@ -70,13 +85,6 @@ export const vehiclesSchema: FormSectionSchema = {
       colSpan: 1,
     },
     {
-      name: 'lienholder',
-      label: 'Lienholder',
-      type: 'text',
-      placeholder: 'Lienholder (if any)',
-      colSpan: 1,
-    },
-    {
       name: 'registrationLocation',
       label: 'Registration Location',
       type: 'text',
@@ -90,11 +98,44 @@ export const vehiclesSchema: FormSectionSchema = {
       placeholder: 'Registration number',
       colSpan: 1,
     },
+
+    // ===== Loan / Lien =====
+    {
+      sectionDivider: {
+        label: 'Loan / Lien',
+        collapsible: true,
+        defaultExpanded: false,
+      },
+    },
+    {
+      name: 'lienholder',
+      label: 'Lienholder',
+      type: 'text',
+      placeholder: 'Lender holding the loan (if any)',
+      colSpan: 1,
+    },
+    {
+      name: 'lienholderPhone',
+      label: 'Lienholder Phone',
+      type: 'tel',
+      placeholder: '(800) 555-0100',
+      colSpan: 1,
+      helpText: 'Needed to get a payoff quote or release the lien',
+    },
+    {
+      name: 'loanAccountNumber',
+      label: 'Loan Account Number',
+      type: 'text',
+      placeholder: 'Loan account #',
+      colSpan: 2,
+      fullWidth: true,
+    },
+
     {
       name: 'notes',
       label: 'Notes',
       type: 'textarea',
-      placeholder: 'Additional notes',
+      placeholder: 'Insurance reference, mechanical issues, scheduled maintenance, anything else useful',
       colSpan: 2,
       fullWidth: true,
       rows: 2,

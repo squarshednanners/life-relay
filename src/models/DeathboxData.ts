@@ -61,6 +61,9 @@ export interface DeathboxData {
   skippedSections?: string[] // Section paths marked as "not applicable" / skipped
   lastReviewedAt?: string // ISO date of last vault review
 
+  // UI state (persisted with the vault so it travels with backups)
+  collapsedSections?: Record<string, boolean> // key: "schemaKey.dividerLabel" -> isCollapsed
+
   updatedAt: string
   // Index signature allows any additional properties defined by schemas
   [key: string]: any

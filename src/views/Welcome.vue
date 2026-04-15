@@ -51,7 +51,7 @@
       </div>
       <div class="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
         <div class="bg-white rounded-xl border border-gray-200 p-6 text-center hover:shadow-md transition-shadow">
-          <div class="text-3xl mb-3">&#x20BF;</div>
+          <div class="text-3xl mb-3 text-orange-500 font-bold">&#x20BF;</div>
           <h3 class="font-semibold text-gray-900 mb-1">Crypto Holders</h3>
           <p class="text-sm text-gray-500">Create a crypto recovery plan — document wallets, seed phrase locations, exchange access, and multi-sig configurations so heirs can actually recover your assets.</p>
         </div>

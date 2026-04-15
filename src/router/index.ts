@@ -40,6 +40,7 @@ import FinalWishesAndServicesSchema from '@/views/FinalWishesAndServicesSchema.v
 import PetCareSchema from '@/views/PetCareSchema.vue'
 import PhotosAndMediaSchema from '@/views/PhotosAndMediaSchema.vue'
 import EstatePlanningGuide from '@/views/WillPreparation.vue'
+import Runbook from '@/views/Runbook.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -293,6 +294,12 @@ const router = createRouter({
       name: 'estate-planning',
       component: EstatePlanningGuide,
       meta: { title: 'Estate Planning Guide | Life Relay' },
+    },
+    {
+      path: '/runbook',
+      name: 'runbook',
+      component: Runbook,
+      meta: { title: 'For My Family | Life Relay' },
     },
     {
       path: '/settings',

@@ -22,7 +22,8 @@
       "Bash(sed -i 's/bg-gray-50 /bg-gray-50 dark:bg-gray-800\\\\/50 /g' \"$f\")",
       "Bash(sed -i 's/border-gray-300/border-gray-300 dark:border-gray-600/g' \"$f\")",
       "Bash(npm test:*)",
-      "WebFetch(domain:web.public-pool.io)"
+      "WebFetch(domain:web.public-pool.io)",
+      "Bash(grep -n '\"\"debts\"\"' examples/sample-vault.json)"
     ]
   }
 }

@@ -148,6 +148,7 @@ const navigationGroups = [
     name: 'Overview',
     items: [
       { name: 'Dashboard', path: '/dashboard' },
+      { name: 'For My Family', path: '/runbook' },
       { name: 'Estate Planning', path: '/estate-planning' },
     ],
   },

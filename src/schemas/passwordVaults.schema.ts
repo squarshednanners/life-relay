@@ -112,6 +112,44 @@ export const passwordVaultsSchema: FormSectionSchema = {
       fullWidth: true,
       rows: 3,
     },
+
+    // ===== Heir / Emergency Access =====
+    {
+      sectionDivider: {
+        label: 'Heir / Emergency Access',
+        collapsible: true,
+      },
+    },
+    {
+      name: 'emergencyAccessSetup',
+      label: 'Emergency / Legacy Contact Setup',
+      type: 'textarea',
+      placeholder: 'e.g. 1Password Emergency Kit shared with Jane Doe; Bitwarden Emergency Access set up for jane@example.com with 7-day wait period',
+      colSpan: 2,
+      fullWidth: true,
+      rows: 2,
+      helpText: 'Most password managers support an emergency contact who can request access after a wait period — document who is set up here',
+    },
+    {
+      name: 'vaultBackupLocation',
+      label: 'Vault Backup Location',
+      type: 'textarea',
+      placeholder: 'e.g. Encrypted backup on USB drive in home safe; Vaultwarden DB backed up nightly to NAS at /backups/vault/',
+      colSpan: 2,
+      fullWidth: true,
+      rows: 2,
+      helpText: 'Especially important for self-hosted vaults — if the server dies, where are the backups?',
+    },
+    {
+      name: 'emergencyKitLocation',
+      label: 'Emergency Kit / Recovery Code Location',
+      type: 'text',
+      placeholder: 'e.g. Printed Emergency Kit in home safe',
+      colSpan: 2,
+      fullWidth: true,
+      helpText: '1Password Emergency Kit, Bitwarden recovery code, etc.',
+    },
+
     {
       name: 'notes',
       label: 'Notes',
