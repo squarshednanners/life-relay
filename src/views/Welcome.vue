@@ -322,13 +322,13 @@
               Venmo
             </a>
             <a
-              href="https://buymeacoffee.com/squarshednanners"
+              href="https://ko-fi.com/squarshednanners"
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#FFDD00] text-gray-900 rounded-lg hover:bg-[#e6c800] transition-colors text-sm font-medium"
+              class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#FF5E5B] text-white rounded-lg hover:bg-[#e64e4b] transition-colors text-sm font-medium"
             >
               <span class="text-lg">&#9749;</span>
-              Buy Me a Coffee
+              Ko-fi
             </a>
           </div>
         </div>
