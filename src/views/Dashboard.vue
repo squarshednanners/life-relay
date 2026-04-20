@@ -88,7 +88,7 @@
           <ol class="text-sm text-blue-800 dark:text-blue-300 space-y-1.5 list-decimal list-inside">
             <li>Fill in the sections that matter to you using the sidebar — skip what doesn't apply.</li>
             <li>Your data saves automatically to this browser's local storage.</li>
-            <li><strong>Export your vault</strong> using the button above — save the encrypted .json file to a USB drive, cloud storage, or safe location. This is your portable backup.</li>
+            <li><strong>Export your vault</strong> using the button above — save the encrypted Life Relay file to a USB drive, cloud storage, or safe location. This is your portable backup.</li>
             <li>Generate PDFs (full vault, emergency sheet, or attorney prep) to print and store physically.</li>
             <li>Come back periodically to review and re-export as things change.</li>
           </ol>

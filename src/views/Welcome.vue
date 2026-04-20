@@ -103,8 +103,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
               </svg>
             </div>
-          <h3 class="font-semibold text-gray-900 mb-2">Emergency Information Card</h3>
-            <p class="text-sm text-gray-500 leading-relaxed">Generate a one-page emergency sheet PDF with key contacts, medical info, and important document locations. Print and store in your family emergency binder.</p>
+          <h3 class="font-semibold text-gray-900 mb-2">Emergency Sheet &amp; Wallet Cards</h3>
+            <p class="text-sm text-gray-500 leading-relaxed">Generate a one-page emergency sheet with key contacts, medical info, and document locations — plus a printable sheet of credit-card-sized cards to carry in a wallet or glovebox.</p>
           </div>
 
           <div class="group rounded-xl border border-gray-200 p-6 hover:border-primary-300 hover:shadow-md transition-all">
@@ -130,11 +130,11 @@
           <div class="group rounded-xl border border-gray-200 p-6 hover:border-primary-300 hover:shadow-md transition-all">
             <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-green-200 transition-colors">
               <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
               </svg>
             </div>
-            <h3 class="font-semibold text-gray-900 mb-2">Important Documents Organizer</h3>
-            <p class="text-sm text-gray-500 leading-relaxed">Full vault PDF, one-page emergency sheet, and attorney preparation summary. Export as your printable in-case-of-death folder. All generated client-side.</p>
+            <h3 class="font-semibold text-gray-900 mb-2">For My Family Runbook</h3>
+            <p class="text-sm text-gray-500 leading-relaxed">A step-by-step guide your family can follow after your death — from the first 48 hours through probate and long-term wrap-up. Each step links back to the exact information in your vault.</p>
           </div>
         </div>
       </div>
@@ -143,7 +143,7 @@
     <!-- What's Covered Section -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <div class="text-center mb-10">
-        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">26 Sections Across 8 Categories</h2>
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">36 Sections Across 8 Categories</h2>
         <p class="text-gray-500 max-w-xl mx-auto">From bank accounts to burial preferences — organized logically so you can fill in what matters and skip the rest.</p>
       </div>
 
@@ -168,8 +168,8 @@
             <div class="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-3">
               1
             </div>
-            <h3 class="font-semibold text-gray-900 mb-1">Pick a Template</h3>
-            <p class="text-sm text-gray-500">Choose a quick start template that matches your situation, or start from scratch.</p>
+            <h3 class="font-semibold text-gray-900 mb-1">Open the Dashboard</h3>
+            <p class="text-sm text-gray-500">Start fresh or import a previously exported vault. No sign-up — your data stays on your device.</p>
           </div>
           <div class="text-center">
             <div class="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-3">
@@ -182,8 +182,8 @@
             <div class="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-3">
               3
             </div>
-            <h3 class="font-semibold text-gray-900 mb-1">Export & Print</h3>
-            <p class="text-sm text-gray-500">Generate PDFs — full vault, emergency sheet, or attorney prep summary. Export encrypted JSON backups.</p>
+            <h3 class="font-semibold text-gray-900 mb-1">Export &amp; Print</h3>
+            <p class="text-sm text-gray-500">Generate PDFs — full vault, emergency sheet, wallet cards, attorney prep summary, or family runbook. Export encrypted Life Relay file backups.</p>
           </div>
           <div class="text-center">
             <div class="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-3">
@@ -213,7 +213,7 @@
           <div>
             <div class="text-2xl mb-2">&#x1F510;</div>
             <h3 class="font-semibold mb-1">Encrypted Exports</h3>
-            <p class="text-sm text-gray-400">AES-256 password encryption for JSON backups. Your data, your password.</p>
+            <p class="text-sm text-gray-400">AES-256 password encryption for Life Relay file backups. Your data, your password.</p>
           </div>
           <div>
             <div class="text-2xl mb-2">&#x1F4F1;</div>
@@ -382,11 +382,11 @@ function copyToClipboard(text: string, id: string) {
 const sectionHighlights = [
   { name: 'People & Contacts', description: 'Personal info, beneficiaries, executors, attorneys, trustees, and key contacts.' },
   { name: 'Security & Access', description: 'Password vaults, computers, phones, and authenticator apps with backup codes.' },
-  { name: 'Insurance, Medical & Benefits', description: 'Health and life insurance, medical info, and employment benefits.' },
-  { name: 'Finances', description: 'Bank accounts, credit cards, debts, income sources, and retirement/investment accounts.' },
+  { name: 'Insurance, Medical & Benefits', description: 'Health, life, and other insurance policies, medical info, and employment benefits.' },
+  { name: 'Finances', description: 'Bank accounts, credit cards, debts, income, retirement/investment accounts, loyalty programs, and tax info.' },
   { name: 'Digital & Crypto Assets', description: 'Online accounts, cryptocurrency wallets, exchanges, seed phrase locations, and multi-sig configs.' },
   { name: 'Property & Household', description: 'Real estate, vehicles, business ownership, utilities, and subscriptions.' },
-  { name: 'Documents & Storage', description: 'Legal documents, trusts, physical storage locations, and asset documents like deeds and titles.' },
-  { name: 'Final Wishes', description: 'Letter of instruction, funeral and burial preferences, pet care plans, photos, and personal notes.' },
+  { name: 'Documents & Storage', description: 'Legal documents, trusts, physical storage, asset documents like deeds and titles, vault backups, and pending legal matters.' },
+  { name: 'Final Wishes', description: 'Letter of instruction, funeral and burial preferences, pet care plans, photos, and free-form notes.' },
 ]
 </script>

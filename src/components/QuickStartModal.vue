@@ -23,7 +23,7 @@
             class="w-full px-4 py-3 text-left border-2 border-gray-200 dark:border-gray-700 rounded-lg hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 transition-colors"
           >
             <div class="font-medium text-gray-900 dark:text-gray-100">Import Existing Vault</div>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Restore from a previously exported .json file</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Restore from a previously exported Life Relay file</p>
           </button>
           <button
             type="button"

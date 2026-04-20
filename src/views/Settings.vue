@@ -72,7 +72,7 @@
             <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1.5">
               <li class="flex items-start gap-2">
                 <span class="text-green-500 mt-0.5 flex-shrink-0">&check;</span>
-                <span>26 organized sections across 8 categories covering finances, insurance, digital assets, legal documents, and more</span>
+                <span>36 organized sections across 8 categories covering finances, insurance, digital assets, legal documents, and more</span>
               </li>
               <li class="flex items-start gap-2">
                 <span class="text-green-500 mt-0.5 flex-shrink-0">&check;</span>
@@ -92,7 +92,7 @@
               </li>
               <li class="flex items-start gap-2">
                 <span class="text-green-500 mt-0.5 flex-shrink-0">&check;</span>
-                <span>AES-256 encrypted JSON import/export for secure backups</span>
+                <span>AES-256 encrypted Life Relay file import/export for secure backups</span>
               </li>
               <li class="flex items-start gap-2">
                 <span class="text-green-500 mt-0.5 flex-shrink-0">&check;</span>
