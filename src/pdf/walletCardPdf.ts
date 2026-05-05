@@ -1,12 +1,20 @@
+/**
+ * Wallet Card PDF — credit-card-sized "in case of emergency" card. Layout: US
+ * Letter page with 8 cards (2 cols x 4 rows) printed on cardstock and cut.
+ *
+ * Schema-as-truth: field selection (owner name, allergies, blood type, contact
+ * names + phones) flows from `pdfViews.walletCard` schema tags. Renderer-side
+ * concerns: card geometry, fonts, the cross-reference logic that filters
+ * medicalInfo by people[0].id, and the fallback to beneficiaries when fewer
+ * than 4 contacts are tagged.
+ */
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import type { PDFFont } from 'pdf-lib'
 import type { DeathboxData } from '@/models/DeathboxData'
-
-/**
- * Generate a credit-card-sized "in case of emergency" card PDF.
- * Layout: US Letter page with 8 cards (2 columns x 4 rows) for easy printing.
- * Each card is roughly the size of a standard credit card (3.375" x 2.125").
- */
+import {
+  collectFieldsByPdfView,
+  type CollectedItem,
+} from './schemaPdfViews'
 
 const TEAL = rgb(0.06, 0.46, 0.43)
 const DARK = rgb(0.15, 0.15, 0.15)
@@ -15,8 +23,8 @@ const WHITE = rgb(1, 1, 1)
 
 const PAGE_W = 612
 const PAGE_H = 792
-const CARD_W = 243   // 3.375 inch
-const CARD_H = 153   // 2.125 inch
+const CARD_W = 243 // 3.375 inch
+const CARD_H = 153 // 2.125 inch
 const COLS = 2
 const ROWS = 4
 const H_GAP = 18
@@ -28,10 +36,10 @@ const Y_OFFSET = (PAGE_H - GRID_H) / 2
 
 function sanitize(s: string): string {
   return s
-    .replace(/[\u2018\u2019\u2032]/g, "'")
-    .replace(/[\u201C\u201D]/g, '"')
-    .replace(/\u2014/g, '--')
-    .replace(/\u2013/g, '-')
+    .replace(/[‘’′]/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/—/g, '--')
+    .replace(/–/g, '-')
     .replace(/[^\x20-\x7E\n\r\t]/g, '?')
 }
 
@@ -44,64 +52,99 @@ function truncate(s: string, maxW: number, size: number, font: PDFFont): string 
   return text
 }
 
-interface ContactLine {
-  label: string
-  name: string
-  phone: string
+interface WalletCardData {
+  owner: string
+  bloodType: string
+  allergies: string
+  contacts: Array<{ label: string; name: string; phone: string }>
 }
 
-function gatherContacts(data: DeathboxData): { owner: string; contacts: ContactLine[]; bloodType: string; allergies: string } {
-  const owner = data.people?.[0]?.name || ''
-  const medicalInfo = data.medicalInfo?.find((m: any) => m.personId === data.people?.[0]?.id) as any
-  const bloodType = medicalInfo?.notes?.match(/blood type:?\s*([A-Z]B?\+?-?)/i)?.[1] || ''
-  const allergies = medicalInfo?.allergies || ''
+/**
+ * Find a single field value in a collected item by field name.
+ * Returns empty string if missing or empty.
+ */
+function fieldValue(item: CollectedItem, fieldName: string): string {
+  return item.fields.find((f) => f.fieldName === fieldName)?.value ?? ''
+}
 
-  const contacts = (data.importantContacts as any[]) || []
+/**
+ * Pull out the wallet card's data from schema-tagged sections plus the small
+ * amount of cross-section logic the renderer needs (owner = people[0],
+ * medicalInfo filtered by personId match, beneficiary fallback).
+ */
+function gatherCardData(data: DeathboxData): WalletCardData {
+  const sections = collectFieldsByPdfView('walletCard', data)
+  const sectionByKey = new Map(sections.map((s) => [s.sectionKey, s]))
 
-  // Roles ranked by priority for the wallet card
-  const PRIORITY = [
-    { label: 'Spouse / Emergency', match: ['spouse', 'emergency contact'] },
-    { label: 'Executor', match: ['executor'] },
-    { label: 'Attorney', match: ['attorney', 'lawyer'] },
-    { label: 'Doctor', match: ['doctor', 'physician'] },
-    { label: 'Trustee', match: ['trustee'] },
-  ]
+  // Owner — first person tagged for walletCard (itemLimit:1 enforced by schema)
+  const peopleSection = sectionByKey.get('people')
+  const ownerItem = peopleSection?.items[0]
+  const owner = ownerItem ? fieldValue(ownerItem, 'name') : ''
+  const ownerId = String(ownerItem?.itemId ?? '')
 
-  const result: ContactLine[] = []
-  for (const slot of PRIORITY) {
-    const found = contacts.find(c => c.role && slot.match.some(m => c.role.toLowerCase().includes(m)))
-    if (found && (found.phone || found.name)) {
-      result.push({
-        label: slot.label,
-        name: found.name || '',
-        phone: found.phone || '',
-      })
-    }
-    if (result.length >= 4) break
+  // Medical — find the medicalInfo entry matching the owner's id (cross-section).
+  // The schema tags allergies + a notes-derived blood type for walletCard;
+  // we look up the right item ourselves.
+  let bloodType = ''
+  let allergies = ''
+  const medicalSection = sectionByKey.get('medicalInfo')
+  const ownerMedical = medicalSection?.items.find(
+    (item) => String(item.data.personId ?? '') === ownerId,
+  ) ?? medicalSection?.items[0]
+  if (ownerMedical) {
+    bloodType = fieldValue(ownerMedical, 'notes') // schema's format extracts blood type
+    allergies = fieldValue(ownerMedical, 'allergies')
   }
 
-  // If we have fewer than 4 contacts, fill with beneficiaries
-  if (result.length < 4) {
-    const beneficiaries = (data.beneficiaries as any[]) || []
-    for (const b of beneficiaries) {
-      if (result.length >= 4) break
-      if (b.phone) {
-        result.push({ label: 'Beneficiary', name: b.name || '', phone: b.phone })
+  // Contacts — important contacts sorted + limited by schema; renderer
+  // converts each item into a {label, name, phone} row.
+  const contactRows: Array<{ label: string; name: string; phone: string }> = []
+  const contactsSection = sectionByKey.get('importantContacts')
+  if (contactsSection) {
+    for (const item of contactsSection.items) {
+      contactRows.push({
+        label: item.itemLabel ?? 'Contact',
+        name: fieldValue(item, 'name'),
+        phone: fieldValue(item, 'phone'),
+      })
+    }
+  }
+
+  // Beneficiary fallback — fill any remaining slots up to 4 with beneficiaries
+  // that have a phone number. Schema-tagged for walletCard with label 'Beneficiary'.
+  if (contactRows.length < 4) {
+    const beneficiariesSection = sectionByKey.get('beneficiaries')
+    if (beneficiariesSection) {
+      for (const item of beneficiariesSection.items) {
+        if (contactRows.length >= 4) break
+        const phone = fieldValue(item, 'phone')
+        if (!phone) continue
+        contactRows.push({
+          label: item.itemLabel ?? 'Beneficiary',
+          name: fieldValue(item, 'name'),
+          phone,
+        })
       }
     }
   }
 
-  return { owner, contacts: result, bloodType, allergies }
+  return { owner, bloodType, allergies, contacts: contactRows }
 }
 
 function drawCard(
-  page: any, x: number, y: number,
-  info: { owner: string; contacts: ContactLine[]; bloodType: string; allergies: string },
-  font: PDFFont, bold: PDFFont,
+  page: ReturnType<PDFDocument['addPage']>,
+  x: number,
+  y: number,
+  info: WalletCardData,
+  font: PDFFont,
+  bold: PDFFont,
 ) {
   // Card background
   page.drawRectangle({
-    x, y, width: CARD_W, height: CARD_H,
+    x,
+    y,
+    width: CARD_W,
+    height: CARD_H,
     color: WHITE,
     borderColor: rgb(0.7, 0.7, 0.7),
     borderWidth: 0.5,
@@ -109,14 +152,25 @@ function drawCard(
 
   // Top teal banner
   page.drawRectangle({
-    x, y: y + CARD_H - 22, width: CARD_W, height: 22, color: TEAL,
+    x,
+    y: y + CARD_H - 22,
+    width: CARD_W,
+    height: 22,
+    color: TEAL,
   })
   page.drawText('In Case of Emergency', {
-    x: x + 8, y: y + CARD_H - 15, size: 9, font: bold, color: WHITE,
+    x: x + 8,
+    y: y + CARD_H - 15,
+    size: 9,
+    font: bold,
+    color: WHITE,
   })
   page.drawText('Life Relay', {
     x: x + CARD_W - bold.widthOfTextAtSize('Life Relay', 8) - 8,
-    y: y + CARD_H - 14, size: 8, font: bold, color: WHITE,
+    y: y + CARD_H - 14,
+    size: 8,
+    font: bold,
+    color: WHITE,
   })
 
   let cy = y + CARD_H - 32
@@ -125,7 +179,11 @@ function drawCard(
   if (info.owner) {
     const ownerTxt = truncate(info.owner, CARD_W - 16, 9, bold)
     page.drawText(ownerTxt, {
-      x: x + 8, y: cy, size: 9, font: bold, color: DARK,
+      x: x + 8,
+      y: cy,
+      size: 9,
+      font: bold,
+      color: DARK,
     })
     cy -= 11
   }
@@ -137,7 +195,11 @@ function drawCard(
     if (info.allergies) med.push(`Allergies: ${info.allergies}`)
     const medTxt = truncate(med.join(' | '), CARD_W - 16, 7, font)
     page.drawText(medTxt, {
-      x: x + 8, y: cy, size: 7, font, color: GRAY,
+      x: x + 8,
+      y: cy,
+      size: 7,
+      font,
+      color: GRAY,
     })
     cy -= 10
   } else {
@@ -148,7 +210,8 @@ function drawCard(
   page.drawLine({
     start: { x: x + 8, y: cy },
     end: { x: x + CARD_W - 8, y: cy },
-    thickness: 0.3, color: rgb(0.85, 0.85, 0.85),
+    thickness: 0.3,
+    color: rgb(0.85, 0.85, 0.85),
   })
   cy -= 10
 
@@ -158,47 +221,69 @@ function drawCard(
     // Label
     const labelTxt = truncate(c.label + ':', 70, 7, bold)
     page.drawText(labelTxt, {
-      x: x + 8, y: cy, size: 7, font: bold, color: TEAL,
+      x: x + 8,
+      y: cy,
+      size: 7,
+      font: bold,
+      color: TEAL,
     })
     // Name + phone
     const nameLine = c.name ? truncate(c.name, CARD_W - 90, 8, font) : ''
     if (nameLine) {
       page.drawText(nameLine, {
-        x: x + 78, y: cy, size: 8, font, color: DARK,
+        x: x + 78,
+        y: cy,
+        size: 8,
+        font,
+        color: DARK,
       })
     }
     cy -= 9
     if (c.phone) {
       const phoneTxt = truncate(c.phone, CARD_W - 90, 8, bold)
       page.drawText(phoneTxt, {
-        x: x + 78, y: cy, size: 8, font: bold, color: DARK,
+        x: x + 78,
+        y: cy,
+        size: 8,
+        font: bold,
+        color: DARK,
       })
       cy -= 11
     }
   }
 }
 
-export async function generateWalletCardPdf(data: DeathboxData): Promise<Uint8Array> {
+export async function generateWalletCardPdf(
+  data: DeathboxData,
+): Promise<Uint8Array> {
   const pdf = await PDFDocument.create()
   const font = await pdf.embedFont(StandardFonts.Helvetica)
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold)
   const italic = await pdf.embedFont(StandardFonts.HelveticaOblique)
 
-  const info = gatherContacts(data)
+  const info = gatherCardData(data)
   const page = pdf.addPage([PAGE_W, PAGE_H])
 
   // Header above grid
   const headerTxt = 'Emergency Wallet Cards — Print on cardstock and cut to size'
   const headerW = font.widthOfTextAtSize(headerTxt, 9)
   page.drawText(headerTxt, {
-    x: (PAGE_W - headerW) / 2, y: PAGE_H - 36, size: 9, font: italic, color: GRAY,
+    x: (PAGE_W - headerW) / 2,
+    y: PAGE_H - 36,
+    size: 9,
+    font: italic,
+    color: GRAY,
   })
 
   // Cut guide note
   const cutTxt = 'Standard credit card size: 3.375" x 2.125". Cut along the borders.'
   const cutW = font.widthOfTextAtSize(cutTxt, 8)
   page.drawText(cutTxt, {
-    x: (PAGE_W - cutW) / 2, y: PAGE_H - 50, size: 8, font, color: GRAY,
+    x: (PAGE_W - cutW) / 2,
+    y: PAGE_H - 50,
+    size: 8,
+    font,
+    color: GRAY,
   })
 
   // Grid of identical cards
@@ -214,7 +299,11 @@ export async function generateWalletCardPdf(data: DeathboxData): Promise<Uint8Ar
   const footTxt = 'liferelay.app'
   const footW = font.widthOfTextAtSize(footTxt, 7)
   page.drawText(footTxt, {
-    x: (PAGE_W - footW) / 2, y: 24, size: 7, font, color: GRAY,
+    x: (PAGE_W - footW) / 2,
+    y: 24,
+    size: 7,
+    font,
+    color: GRAY,
   })
 
   return pdf.save()

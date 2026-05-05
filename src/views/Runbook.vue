@@ -86,24 +86,33 @@ import { useLegacyStore } from '@/store'
 import SectionHeader from '@/components/SectionHeader.vue'
 import { runbookPhases, runbookDonts } from '@/data/runbookSteps'
 import { generateRunbookPdfDocument } from '@/pdf/runbookPdf'
+import { collectFieldsByPdfView } from '@/pdf/schemaPdfViews'
+import { schemaRegistry } from '@/schemas'
 
 const store = useLegacyStore()
 const phases = runbookPhases
 const donts = runbookDonts
 const generating = ref(false)
 
-// Pull executor, attorney, primary doctor, and trustee out of important contacts
-const PRIORITY_ROLES = ['Executor', 'Attorney', 'Trustee', 'Doctor', 'Accountant / CPA', 'Financial Advisor']
-
+// Quick contacts — schema-driven via pdfViews.runbookQuickContacts on the
+// importantContacts schema. The role priority list lives in the schema as
+// a single source of truth (shared with the runbook PDF generator).
 const quickContacts = computed(() => {
-  const contacts = (store.data?.importantContacts as any[]) || []
-  const filtered = contacts.filter(c => c.role && PRIORITY_ROLES.some(r => c.role.toLowerCase().includes(r.toLowerCase())))
-  // Sort by priority order
-  return filtered.sort((a, b) => {
-    const aIdx = PRIORITY_ROLES.findIndex(r => a.role.toLowerCase().includes(r.toLowerCase()))
-    const bIdx = PRIORITY_ROLES.findIndex(r => b.role.toLowerCase().includes(r.toLowerCase()))
-    return aIdx - bIdx
-  })
+  if (!store.data) return []
+  const sections = collectFieldsByPdfView('runbookQuickContacts', store.data)
+  const section = sections.find((s) => s.sectionKey === 'importantContacts')
+  if (!section) return []
+  const priorityRoles =
+    schemaRegistry.importantContacts.pdfViews?.runbookQuickContacts?.itemSortPriority ?? []
+  return section.items
+    .filter((item) =>
+      priorityRoles.includes(String(item.data.role ?? '')),
+    )
+    .map((item) => ({
+      name: item.fields.find((f) => f.fieldName === 'name')?.value ?? '',
+      role: item.fields.find((f) => f.fieldName === 'role')?.value ?? '',
+      phone: item.fields.find((f) => f.fieldName === 'phone')?.value ?? '',
+    }))
 })
 
 async function generateRunbookPdf() {

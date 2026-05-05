@@ -29,7 +29,8 @@
       "Bash(py C:/Users/BradBass/workspaces/legacybox/_bmad/scripts/resolve_customization.py --skill C:/Users/BradBass/workspaces/legacybox/.claude/skills/bmad-create-ux-design --key workflow)",
       "Bash(python C:/Users/BradBass/workspaces/legacybox/_bmad/scripts/resolve_customization.py --skill C:/Users/BradBass/workspaces/legacybox/.claude/skills/bmad-create-ux-design --key workflow)",
       "PowerShell(Get-Content *)",
-      "Bash(npx vitest *)"
+      "Bash(npx vitest *)",
+      "Bash(npx vue-tsc *)"
     ]
   }
 }

@@ -3,6 +3,8 @@ import type { PDFPage, PDFFont } from 'pdf-lib'
 import type { DeathboxData } from '@/models/DeathboxData'
 import { runbookPhases, runbookDonts } from '@/data/runbookSteps'
 import { drawGeneratedBy } from '@/pdf/pdfBranding'
+import { collectFieldsByPdfView } from '@/pdf/schemaPdfViews'
+import { schemaRegistry } from '@/schemas'
 
 const TEAL = rgb(0.06, 0.46, 0.43)
 const DARK = rgb(0.15, 0.15, 0.15)
@@ -93,31 +95,46 @@ export async function generateRunbookPdfDocument(data: DeathboxData): Promise<Ui
   }
   y -= 110
 
-  // Quick contacts (if we have them)
-  const PRIORITY_ROLES = ['Executor', 'Attorney', 'Trustee', 'Doctor', 'Accountant', 'Financial Advisor']
-  const contacts = (data.importantContacts as any[]) || []
-  const quick = contacts
-    .filter(c => c.role && PRIORITY_ROLES.some(r => c.role.toLowerCase().includes(r.toLowerCase())))
-    .slice(0, 8)
+  // Quick contacts — schema-driven via pdfViews.runbookPdf on importantContacts.
+  // The schema declares which roles qualify (itemSortPriority list) and the
+  // overall cap (itemLimit). The renderer reads the priority list from the
+  // schema for the inclusion filter — single source of truth.
+  const collectedSections = collectFieldsByPdfView('runbookPdf', data)
+  const contactsSection = collectedSections.find(
+    (s) => s.sectionKey === 'importantContacts',
+  )
+  const priorityRoles =
+    schemaRegistry.importantContacts.pdfViews?.runbookPdf?.itemSortPriority ?? []
+  const quickItems = contactsSection
+    ? contactsSection.items.filter((item) =>
+        priorityRoles.includes(String(item.data.role ?? '')),
+      )
+    : []
 
-  if (quick.length > 0) {
+  if (quickItems.length > 0) {
     page!.drawText('Key People to Contact', {
       x: MARGIN, y, size: 13, font: bold, color: DARK,
     })
     y -= 18
-    for (const c of quick) {
+    for (const item of quickItems) {
       ensure(28)
-      page!.drawText(sanitize(c.name || 'Unnamed'), {
+      const nameField = item.fields.find((f) => f.fieldName === 'name')
+      const roleField = item.fields.find((f) => f.fieldName === 'role')
+      const phoneField = item.fields.find((f) => f.fieldName === 'phone')
+
+      const name = nameField?.value ?? 'Unnamed'
+      page!.drawText(sanitize(name), {
         x: MARGIN, y, size: 10, font: bold, color: DARK,
       })
-      const role = c.role ? `  -  ${sanitize(c.role)}` : ''
-      const nameW = bold.widthOfTextAtSize(sanitize(c.name || 'Unnamed'), 10)
-      if (role) {
-        page!.drawText(role, { x: MARGIN + nameW, y, size: 9, font, color: GRAY })
+      const nameW = bold.widthOfTextAtSize(sanitize(name), 10)
+      if (roleField?.value) {
+        page!.drawText(`  -  ${sanitize(roleField.value)}`, {
+          x: MARGIN + nameW, y, size: 9, font, color: GRAY,
+        })
       }
       y -= 12
-      if (c.phone) {
-        page!.drawText(sanitize(c.phone), {
+      if (phoneField?.value) {
+        page!.drawText(sanitize(phoneField.value), {
           x: MARGIN + 12, y, size: 10, font, color: DARK,
         })
         y -= 12

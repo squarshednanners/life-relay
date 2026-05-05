@@ -17,6 +17,22 @@ export const peopleSchema: FormSectionSchema = {
     notes: '',
   }),
   pdfGroup: 'People & Contacts',
+  pdfViews: {
+    emergencySheet: {
+      sectionLabel: 'PERSONAL INFORMATION',
+      pickerLabel: 'Personal Information',
+    },
+    walletCard: {
+      // First person is treated as the vault owner; only their name appears
+      // on the wallet card.
+      itemLimit: 1,
+    },
+    attorneyPrep: {
+      sectionLabel: 'Personal Information',
+      // attorneyPrep uses person.name as the bold item heading
+      itemLabel: (item) => String(item.name ?? ''),
+    },
+  },
   fields: [
     {
       name: 'name',
@@ -24,12 +40,22 @@ export const peopleSchema: FormSectionSchema = {
       type: 'text',
       placeholder: 'Full name',
       colSpan: 1,
+      pdfViews: {
+        emergencySheet: { include: true, priority: 10 },
+        walletCard: { include: true, priority: 10 },
+        // attorneyPrep uses name as the item heading via itemLabel; the field
+        // itself is not included as a regular field row.
+      },
     },
     {
       name: 'dateOfBirth',
       label: 'Date of Birth',
       type: 'date',
       colSpan: 1,
+      pdfViews: {
+        emergencySheet: { include: true, priority: 20, label: 'DOB' },
+        attorneyPrep: { include: true, priority: 10, label: 'Date of Birth' },
+      },
     },
     {
       name: 'socialSecurityNumber',
@@ -38,6 +64,9 @@ export const peopleSchema: FormSectionSchema = {
       placeholder: 'XXX-XX-XXXX',
       colSpan: 1,
       manualEntry: true,
+      pdfViews: {
+        attorneyPrep: { include: true, priority: 20, label: 'SSN' },
+      },
     },
     {
       name: 'address',
@@ -47,6 +76,10 @@ export const peopleSchema: FormSectionSchema = {
       colSpan: 2,
       fullWidth: true,
       rows: 2,
+      pdfViews: {
+        emergencySheet: { include: true, priority: 40 },
+        attorneyPrep: { include: true, priority: 50 },
+      },
     },
     {
       name: 'phone',
@@ -54,6 +87,10 @@ export const peopleSchema: FormSectionSchema = {
       type: 'tel',
       placeholder: '(555) 123-4567',
       colSpan: 1,
+      pdfViews: {
+        emergencySheet: { include: true, priority: 30, label: 'Phone' },
+        attorneyPrep: { include: true, priority: 30, label: 'Phone' },
+      },
     },
     {
       name: 'email',
@@ -61,6 +98,9 @@ export const peopleSchema: FormSectionSchema = {
       type: 'email',
       placeholder: 'email@example.com',
       colSpan: 1,
+      pdfViews: {
+        attorneyPrep: { include: true, priority: 40, label: 'Email' },
+      },
     },
     {
       name: 'notes',

@@ -7,6 +7,12 @@ export const propertySchema: FormSectionSchema = {
   isArray: true,
   arrayItemLabel: (_, item) => item?.address || 'Property',
   pdfGroup: 'Property & Household',
+  pdfViews: {
+    attorneyPrep: {
+      sectionLabel: 'Property & Real Estate',
+      itemLabel: (item) => String(item.address ?? '') || 'Property',
+    },
+  },
   fields: [
     {
       name: 'address',
@@ -15,6 +21,7 @@ export const propertySchema: FormSectionSchema = {
       placeholder: 'Property Address',
       colSpan: 2,
       fullWidth: true,
+      // Used as item heading via attorneyPrep itemLabel; not a regular field.
     },
     {
       name: 'type',
@@ -22,6 +29,9 @@ export const propertySchema: FormSectionSchema = {
       type: 'text',
       placeholder: 'House, Condo, Land, Vacation Home, etc.',
       colSpan: 1,
+      pdfViews: {
+        attorneyPrep: { include: true, priority: 10, label: 'Type' },
+      },
     },
     {
       name: 'ownership',
@@ -29,6 +39,9 @@ export const propertySchema: FormSectionSchema = {
       type: 'text',
       placeholder: 'Sole, Joint, Trust, LLC, etc.',
       colSpan: 1,
+      pdfViews: {
+        attorneyPrep: { include: true, priority: 20, label: 'Ownership' },
+      },
     },
     {
       name: 'estimatedValue',
@@ -36,6 +49,13 @@ export const propertySchema: FormSectionSchema = {
       type: 'currency',
       placeholder: '$0.00',
       colSpan: 1,
+      pdfViews: {
+        attorneyPrep: {
+          include: true,
+          priority: 30,
+          label: 'Estimated Value',
+        },
+      },
     },
     {
       name: 'yearBuilt',
@@ -66,6 +86,14 @@ export const propertySchema: FormSectionSchema = {
       colSpan: 2,
       fullWidth: true,
       rows: 2,
+      pdfSkipIfEmpty: true,
+      pdfViews: {
+        attorneyPrep: {
+          include: true,
+          priority: 40,
+          label: 'Mortgage Info',
+        },
+      },
     },
     {
       name: 'annualPropertyTax',

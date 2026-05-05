@@ -7,6 +7,16 @@ export const debtsSchema: FormSectionSchema = {
   isArray: true,
   arrayItemLabel: (index) => `Debt ${index + 1}`,
   pdfGroup: 'Finances',
+  pdfViews: {
+    attorneyPrep: {
+      sectionLabel: 'Debts & Obligations',
+      itemLabel: (item) => {
+        const creditor = String(item.creditor ?? '')
+        const type = String(item.type ?? '')
+        return [creditor, type].filter(Boolean).join(' — ') || 'Debt'
+      },
+    },
+  },
   fields: [
     {
       name: 'creditor',
@@ -21,6 +31,9 @@ export const debtsSchema: FormSectionSchema = {
       type: 'text',
       placeholder: 'Account #',
       colSpan: 1,
+      pdfViews: {
+        attorneyPrep: { include: true, priority: 10, label: 'Account #' },
+      },
     },
     {
       name: 'type',
@@ -35,6 +48,9 @@ export const debtsSchema: FormSectionSchema = {
       type: 'currency',
       placeholder: '$0.00',
       colSpan: 1,
+      pdfViews: {
+        attorneyPrep: { include: true, priority: 20, label: 'Balance' },
+      },
     },
     {
       name: 'monthlyPayment',
@@ -42,6 +58,13 @@ export const debtsSchema: FormSectionSchema = {
       type: 'currency',
       placeholder: '$0.00',
       colSpan: 1,
+      pdfViews: {
+        attorneyPrep: {
+          include: true,
+          priority: 30,
+          label: 'Monthly Payment',
+        },
+      },
     },
     {
       name: 'cosigner',

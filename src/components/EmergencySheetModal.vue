@@ -5,87 +5,87 @@
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
       @click.self="$emit('cancel')"
     >
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[85vh] flex flex-col">
+      <div
+        class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[85vh] flex flex-col"
+      >
         <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Emergency One-Page Sheet</h2>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Select which items to include on your emergency sheet.</p>
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            Emergency One-Page Sheet
+          </h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Select which items to include on your emergency sheet.
+          </p>
         </div>
 
         <div class="overflow-y-auto flex-1 p-6 space-y-5">
-          <!-- People -->
-          <section v-if="people.length > 0">
-            <SectionToggle label="Personal Information" :count="selectedPeople.length" :total="people.length" @toggle-all="togglePeople">
-              <div v-for="person in people" :key="person.id" class="flex items-center gap-2 py-1">
-                <input type="checkbox" :value="person.id" v-model="selectedPeople" class="rounded text-primary-600" />
-                <span class="text-sm text-gray-700 dark:text-gray-300">{{ person.name || 'Unnamed' }}</span>
+          <!-- Schema-driven section list. Adding a new schema with
+               pdfViews.emergencySheet metadata automatically appears here,
+               provided its sectionKey is mapped in SECTION_SELECTION_CONFIG. -->
+          <section
+            v-for="section in renderableSections"
+            :key="section.sectionKey"
+          >
+            <!-- Multi-item section (array): SectionToggle with per-item checkboxes -->
+            <template v-if="getSectionMode(section.sectionKey) !== 'boolean'">
+              <SectionToggle
+                :label="getPickerLabel(section)"
+                :count="getSectionSelectedCount(section.sectionKey)"
+                :total="section.items.length"
+                @toggle-all="toggleAllItems(section)"
+              >
+                <div
+                  v-for="(item, idx) in section.items"
+                  :key="getItemKey(section.sectionKey, item, idx)"
+                  class="flex items-center gap-2 py-1"
+                >
+                  <input
+                    type="checkbox"
+                    :value="getItemSelectionValue(section.sectionKey, item, idx)"
+                    v-model="sectionSelections[section.sectionKey]"
+                    class="rounded text-primary-600"
+                  />
+                  <span class="text-sm text-gray-700 dark:text-gray-300">
+                    {{ getItemDisplayLabel(section, item, idx) }}
+                  </span>
+                </div>
+              </SectionToggle>
+            </template>
+
+            <!-- Singleton section: single boolean toggle -->
+            <template v-else>
+              <div class="flex items-center gap-2 py-1">
+                <input
+                  type="checkbox"
+                  v-model="booleanSelections[section.sectionKey]"
+                  class="rounded text-primary-600"
+                />
+                <span
+                  class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  {{ getPickerLabel(section) }}
+                </span>
+                <span
+                  v-if="section.sectionKey === 'healthInsurance'"
+                  class="text-xs text-gray-400 dark:text-gray-500"
+                >
+                  {{ healthInsuranceSummary }}
+                </span>
               </div>
-            </SectionToggle>
-          </section>
-
-          <!-- Important Contacts -->
-          <section v-if="contacts.length > 0">
-            <SectionToggle label="Key Contacts" :count="selectedContacts.length" :total="contacts.length" @toggle-all="toggleContacts">
-              <div v-for="(contact, idx) in contacts" :key="idx" class="flex items-center gap-2 py-1">
-                <input type="checkbox" :value="idx" v-model="selectedContacts" class="rounded text-primary-600" />
-                <span class="text-sm text-gray-700 dark:text-gray-300">{{ [contact.name, contact.role].filter(Boolean).join(' - ') || 'Unnamed' }}</span>
-              </div>
-            </SectionToggle>
-          </section>
-
-          <!-- Health Insurance -->
-          <section v-if="hasHealthInsurance">
-            <div class="flex items-center gap-2 py-1">
-              <input type="checkbox" v-model="includeHealthInsurance" class="rounded text-primary-600" />
-              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Health Insurance</span>
-              <span class="text-xs text-gray-400 dark:text-gray-500">{{ healthInsuranceSummary }}</span>
-            </div>
-          </section>
-
-          <!-- Medical Info -->
-          <section v-if="medicalInfoItems.length > 0">
-            <SectionToggle label="Medical Information" :count="selectedMedical.length" :total="medicalInfoItems.length" @toggle-all="toggleMedical">
-              <div v-for="(med, idx) in medicalInfoItems" :key="idx" class="flex items-center gap-2 py-1">
-                <input type="checkbox" :value="idx" v-model="selectedMedical" class="rounded text-primary-600" />
-                <span class="text-sm text-gray-700 dark:text-gray-300">{{ getPersonName(med.personId) || `Medical Record ${idx + 1}` }}</span>
-              </div>
-            </SectionToggle>
-          </section>
-
-          <!-- Physical Storage -->
-          <section v-if="storageLocations.length > 0">
-            <SectionToggle label="Key Document Locations" :count="selectedStorage.length" :total="storageLocations.length" @toggle-all="toggleStorage">
-              <div v-for="loc in storageLocations" :key="loc.id" class="flex items-center gap-2 py-1">
-                <input type="checkbox" :value="loc.id" v-model="selectedStorage" class="rounded text-primary-600" />
-                <span class="text-sm text-gray-700 dark:text-gray-300">{{ [loc.name, loc.locationType].filter(Boolean).join(' - ') || 'Unnamed' }}</span>
-              </div>
-            </SectionToggle>
-          </section>
-
-          <!-- Crypto Assets -->
-          <section v-if="cryptoAssets.length > 0">
-            <SectionToggle label="Cryptocurrency Assets" :count="selectedCrypto.length" :total="cryptoAssets.length" @toggle-all="toggleCrypto">
-              <div v-for="(asset, idx) in cryptoAssets" :key="idx" class="flex items-center gap-2 py-1">
-                <input type="checkbox" :value="idx" v-model="selectedCrypto" class="rounded text-primary-600" />
-                <span class="text-sm text-gray-700 dark:text-gray-300">{{ cryptoAssetLabel(asset) }}</span>
-              </div>
-            </SectionToggle>
-          </section>
-
-          <!-- Legal Documents -->
-          <section v-if="hasLegalDocuments">
-            <div class="flex items-center gap-2 py-1">
-              <input type="checkbox" v-model="includeLegalDocuments" class="rounded text-primary-600" />
-              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Legal Documents</span>
-            </div>
+            </template>
           </section>
 
           <!-- Empty state -->
-          <div v-if="!hasAnything" class="text-center py-8 text-gray-400 dark:text-gray-500">
+          <div
+            v-if="renderableSections.length === 0"
+            class="text-center py-8 text-gray-400 dark:text-gray-500"
+          >
             No data available. Add information to your vault first.
           </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
+        <div
+          class="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center"
+        >
           <span class="text-xs text-gray-400 dark:text-gray-500">
             {{ totalSelected }} items selected
           </span>
@@ -113,8 +113,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { computed, watch, reactive } from 'vue'
 import type { DeathboxData } from '@/models/DeathboxData'
+import {
+  collectFieldsByPdfView,
+  type CollectedSection,
+  type CollectedItem,
+} from '@/pdf/schemaPdfViews'
+import { schemaRegistry } from '@/schemas'
 import SectionToggle from './EmergencySheetSectionToggle.vue'
 
 export interface EmergencySheetSelections {
@@ -137,114 +143,228 @@ const emit = defineEmits<{
   generate: [selections: EmergencySheetSelections]
 }>()
 
-const selectedPeople = ref<string[]>([])
-const selectedContacts = ref<number[]>([])
-const includeHealthInsurance = ref(true)
-const selectedMedical = ref<number[]>([])
-const selectedStorage = ref<string[]>([])
-const selectedCrypto = ref<number[]>([])
-const includeLegalDocuments = ref(true)
+/**
+ * Selection-mode mapping per section. The picker UI is schema-driven (the
+ * sections, labels, and item labels come from `pdfViews.emergencySheet`
+ * metadata), but the *selection rules* per section are inherently a contract
+ * with the bespoke EmergencySheetSelections shape consumed by the PDF
+ * generator. Adding a new schema-tagged section requires:
+ *   1. Tag it in the schema with `pdfViews.emergencySheet`
+ *   2. Add an entry here mapping its sectionKey to a selection mode
+ *   3. Add a slot to EmergencySheetSelections + applySelections() in the PDF
+ * Until v1.5+ harmonizes the selection model, this duplication is bounded
+ * and explicit at the picker/PDF boundary.
+ */
+type SectionMode = 'ids' | 'indices' | 'boolean'
 
-const people = computed(() => props.data?.people ?? [])
-const contacts = computed(() => props.data?.importantContacts ?? [])
-const medicalInfoItems = computed(() => props.data?.medicalInfo ?? [])
-const storageLocations = computed(() => props.data?.physicalStorageLocations ?? [])
-const cryptoAssets = computed(() => props.data?.cryptoAssets ?? [])
+const SECTION_SELECTION_CONFIG: Record<
+  string,
+  {
+    mode: SectionMode
+    /** Key into EmergencySheetSelections to emit. */
+    selectionsKey: keyof EmergencySheetSelections
+  }
+> = {
+  people: { mode: 'ids', selectionsKey: 'people' },
+  importantContacts: { mode: 'indices', selectionsKey: 'contacts' },
+  healthInsurance: { mode: 'boolean', selectionsKey: 'includeHealthInsurance' },
+  medicalInfo: { mode: 'indices', selectionsKey: 'medical' },
+  physicalStorageLocations: { mode: 'ids', selectionsKey: 'storage' },
+  cryptoAssets: { mode: 'indices', selectionsKey: 'crypto' },
+  legalDocuments: { mode: 'boolean', selectionsKey: 'includeLegalDocuments' },
+}
 
-const hasHealthInsurance = computed(() => {
-  const hi = props.data?.healthInsurance as any
-  if (Array.isArray(hi)) return hi.length > 0
-  return !!(hi && (hi.provider || hi.policyNumber))
+// --------------------------------------------------------------------------
+// Schema-driven section discovery
+// --------------------------------------------------------------------------
+const collectedSections = computed<CollectedSection[]>(() => {
+  if (!props.data) return []
+  return collectFieldsByPdfView('emergencySheet', props.data)
 })
 
+/**
+ * Renderable sections: from the collected sections, drop ones whose section
+ * key is not mapped in SECTION_SELECTION_CONFIG (sections we don't yet know
+ * how to select for) and drop empty array sections.
+ */
+const renderableSections = computed<CollectedSection[]>(() => {
+  return collectedSections.value.filter((section) => {
+    if (!SECTION_SELECTION_CONFIG[section.sectionKey]) return false
+    return section.items.length > 0
+  })
+})
+
+function getSectionMode(sectionKey: string): SectionMode {
+  return SECTION_SELECTION_CONFIG[sectionKey]?.mode ?? 'indices'
+}
+
+function getPickerLabel(section: CollectedSection): string {
+  // Prefer schema's view-scoped pickerLabel; fall back to title (sectionLabel
+  // is for the print rendering and may be ALL-CAPS).
+  const schema = props.data
+    ? collectedSections.value.find((s) => s.sectionKey === section.sectionKey)
+    : null
+  if (!schema) return section.sectionLabel
+  // sectionLabel is the print-side label; for the picker we want the friendly
+  // mixed-case label. The CollectedSection only carries `sectionLabel` from
+  // the helper, so we re-resolve from the schema registry directly.
+  return resolveSchemaPickerLabel(section.sectionKey) ?? section.sectionLabel
+}
+
+// --------------------------------------------------------------------------
+// Per-section selection state
+// --------------------------------------------------------------------------
+//
+// `sectionSelections` holds either string[] (ids mode) or number[] (indices
+// mode) per section key.
+// `booleanSelections` holds toggle state for boolean-mode sections.
+const sectionSelections = reactive<Record<string, Array<string | number>>>({})
+const booleanSelections = reactive<Record<string, boolean>>({})
+
+function getItemSelectionValue(
+  sectionKey: string,
+  item: CollectedItem,
+  index: number,
+): string | number {
+  const mode = getSectionMode(sectionKey)
+  if (mode === 'ids') return String(item.itemId ?? '')
+  return index
+}
+
+function getItemKey(
+  sectionKey: string,
+  item: CollectedItem,
+  index: number,
+): string {
+  const mode = getSectionMode(sectionKey)
+  if (mode === 'ids' && item.itemId) return `${sectionKey}:${item.itemId}`
+  return `${sectionKey}:${index}`
+}
+
+function getItemDisplayLabel(
+  section: CollectedSection,
+  item: CollectedItem,
+  idx: number,
+): string {
+  // Prefer the schema-tagged itemLabel (computed by collectFieldsByPdfView).
+  if (item.itemLabel && item.itemLabel.trim() !== '') return item.itemLabel
+  // Fallback: schema's arrayItemLabel was already applied; if it returned
+  // empty, use a generic placeholder.
+  return `${getPickerLabel(section).replace(/s$/, '')} ${idx + 1}`
+}
+
+function getSectionSelectedCount(sectionKey: string): number {
+  return sectionSelections[sectionKey]?.length ?? 0
+}
+
+function toggleAllItems(section: CollectedSection) {
+  const current = sectionSelections[section.sectionKey] ?? []
+  if (current.length === section.items.length) {
+    sectionSelections[section.sectionKey] = []
+    return
+  }
+  const allValues = section.items.map((item, idx) =>
+    getItemSelectionValue(section.sectionKey, item, idx),
+  )
+  sectionSelections[section.sectionKey] = allValues
+}
+
+// --------------------------------------------------------------------------
+// Health-insurance summary (informational decoration)
+// --------------------------------------------------------------------------
 const healthInsuranceSummary = computed(() => {
   const hi = props.data?.healthInsurance
-  if (Array.isArray(hi)) return hi.map((p: any) => p.provider).filter(Boolean).join(', ') || ''
-  return (hi as any)?.provider || ''
-})
-
-const hasLegalDocuments = computed(() => {
-  const ld = props.data?.legalDocuments
-  return !!(ld && (ld.willLocation || ld.powerOfAttorney || ld.livingWill || ld.poaAgent))
-})
-
-const hasAnything = computed(() =>
-  people.value.length > 0 ||
-  contacts.value.length > 0 ||
-  hasHealthInsurance.value ||
-  medicalInfoItems.value.length > 0 ||
-  storageLocations.value.length > 0 ||
-  cryptoAssets.value.length > 0 ||
-  hasLegalDocuments.value
-)
-
-const totalSelected = computed(() =>
-  selectedPeople.value.length +
-  selectedContacts.value.length +
-  (includeHealthInsurance.value && hasHealthInsurance.value ? 1 : 0) +
-  selectedMedical.value.length +
-  selectedStorage.value.length +
-  selectedCrypto.value.length +
-  (includeLegalDocuments.value && hasLegalDocuments.value ? 1 : 0)
-)
-
-function getPersonName(personId?: string): string {
-  if (!personId) return ''
-  const person = people.value.find(p => p.id === personId)
-  return person?.name || ''
-}
-
-function togglePeople() {
-  selectedPeople.value = selectedPeople.value.length === people.value.length
-    ? [] : people.value.map(p => p.id)
-}
-
-function toggleContacts() {
-  selectedContacts.value = selectedContacts.value.length === contacts.value.length
-    ? [] : contacts.value.map((_, i) => i)
-}
-
-function toggleMedical() {
-  selectedMedical.value = selectedMedical.value.length === medicalInfoItems.value.length
-    ? [] : medicalInfoItems.value.map((_, i) => i)
-}
-
-function toggleStorage() {
-  selectedStorage.value = selectedStorage.value.length === storageLocations.value.length
-    ? [] : storageLocations.value.map(s => s.id)
-}
-
-function toggleCrypto() {
-  selectedCrypto.value = selectedCrypto.value.length === cryptoAssets.value.length
-    ? [] : cryptoAssets.value.map((_, i) => i)
-}
-
-function cryptoAssetLabel(asset: any): string {
-  return asset.nickname || asset.type || [asset.blockchain, asset.storageType].filter(Boolean).join(' - ') || 'Unnamed Asset'
-}
-
-// Select all by default when modal opens
-watch(() => props.isOpen, (isOpen) => {
-  if (isOpen) {
-    selectedPeople.value = people.value.map(p => p.id)
-    selectedContacts.value = contacts.value.map((_, i) => i)
-    includeHealthInsurance.value = true
-    selectedMedical.value = medicalInfoItems.value.map((_, i) => i)
-    selectedStorage.value = storageLocations.value.map(s => s.id)
-    selectedCrypto.value = cryptoAssets.value.map((_, i) => i)
-    includeLegalDocuments.value = true
+  if (Array.isArray(hi)) {
+    return (
+      hi
+        .map((p: { provider?: string }) => p.provider)
+        .filter(Boolean)
+        .join(', ') || ''
+    )
   }
+  return ((hi as { provider?: string } | undefined)?.provider ?? '') || ''
 })
 
+// --------------------------------------------------------------------------
+// Total selected count (across all sections)
+// --------------------------------------------------------------------------
+const totalSelected = computed(() => {
+  let count = 0
+  for (const section of renderableSections.value) {
+    const mode = getSectionMode(section.sectionKey)
+    if (mode === 'boolean') {
+      if (booleanSelections[section.sectionKey]) count += 1
+    } else {
+      count += sectionSelections[section.sectionKey]?.length ?? 0
+    }
+  }
+  return count
+})
+
+// --------------------------------------------------------------------------
+// Default-select-all-on-open (preserves existing UX)
+// --------------------------------------------------------------------------
+watch(
+  () => props.isOpen,
+  (isOpen) => {
+    if (!isOpen) return
+    for (const section of renderableSections.value) {
+      const mode = getSectionMode(section.sectionKey)
+      if (mode === 'boolean') {
+        booleanSelections[section.sectionKey] = true
+      } else {
+        const allValues = section.items.map((item, idx) =>
+          getItemSelectionValue(section.sectionKey, item, idx),
+        )
+        sectionSelections[section.sectionKey] = allValues
+      }
+    }
+  },
+)
+
+// --------------------------------------------------------------------------
+// Emit in legacy EmergencySheetSelections shape
+// --------------------------------------------------------------------------
 function handleGenerate() {
-  emit('generate', {
-    people: selectedPeople.value,
-    contacts: selectedContacts.value,
-    includeHealthInsurance: includeHealthInsurance.value,
-    medical: selectedMedical.value,
-    storage: selectedStorage.value,
-    crypto: selectedCrypto.value,
-    includeLegalDocuments: includeLegalDocuments.value,
-  })
+  // Build selections from per-section state. Sections not mapped here default
+  // to empty / false — they won't appear in the PDF.
+  const selections: EmergencySheetSelections = {
+    people: [],
+    contacts: [],
+    includeHealthInsurance: false,
+    medical: [],
+    storage: [],
+    crypto: [],
+    includeLegalDocuments: false,
+  }
+
+  // Build via untyped record then cast on emit (TS index-signature gymnastics).
+  const out: Record<string, boolean | string[] | number[]> = {
+    ...selections,
+  } as unknown as Record<string, boolean | string[] | number[]>
+  for (const sectionKey of Object.keys(SECTION_SELECTION_CONFIG)) {
+    const cfg = SECTION_SELECTION_CONFIG[sectionKey]
+    if (!cfg) continue
+    if (cfg.mode === 'boolean') {
+      out[cfg.selectionsKey] = booleanSelections[sectionKey] ?? false
+    } else if (cfg.mode === 'ids') {
+      out[cfg.selectionsKey] = (sectionSelections[sectionKey] ?? []).map((v) =>
+        String(v),
+      )
+    } else if (cfg.mode === 'indices') {
+      out[cfg.selectionsKey] = (sectionSelections[sectionKey] ?? []).map((v) =>
+        Number(v),
+      )
+    }
+  }
+
+  emit('generate', out as unknown as EmergencySheetSelections)
+}
+
+function resolveSchemaPickerLabel(sectionKey: string): string | undefined {
+  const schema = schemaRegistry[sectionKey]
+  if (!schema) return undefined
+  const viewMeta = schema.pdfViews?.emergencySheet
+  return viewMeta?.pickerLabel ?? schema.title
 }
 </script>

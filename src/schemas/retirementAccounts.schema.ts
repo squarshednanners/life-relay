@@ -7,6 +7,16 @@ export const retirementAccountsSchema: FormSectionSchema = {
   isArray: true,
   arrayItemLabel: (index) => `Account ${index + 1}`,
   pdfGroup: 'Finances',
+  pdfViews: {
+    attorneyPrep: {
+      sectionLabel: 'Retirement & Investment Accounts',
+      itemLabel: (item) => {
+        const inst = String(item.institution ?? '')
+        const type = String(item.type ?? '')
+        return [inst, type].filter(Boolean).join(' — ') || 'Account'
+      },
+    },
+  },
   fields: [
     {
       name: 'type',
@@ -35,6 +45,9 @@ export const retirementAccountsSchema: FormSectionSchema = {
       type: 'text',
       placeholder: 'Account #',
       colSpan: 1,
+      pdfViews: {
+        attorneyPrep: { include: true, priority: 10, label: 'Account #' },
+      },
     },
     {
       name: 'beneficiaries',
@@ -46,6 +59,20 @@ export const retirementAccountsSchema: FormSectionSchema = {
       },
       colSpan: 2,
       fullWidth: true,
+      pdfSkipIfEmpty: true,
+      pdfViews: {
+        attorneyPrep: {
+          include: true,
+          priority: 30,
+          label: 'Beneficiaries',
+          format: (value) => {
+            if (!Array.isArray(value)) return ''
+            return value
+              .map((b) => String((b as Record<string, unknown>).customName ?? '') || 'Designated')
+              .join(', ')
+          },
+        },
+      },
     },
     {
       name: 'balance',
@@ -53,6 +80,9 @@ export const retirementAccountsSchema: FormSectionSchema = {
       type: 'currency',
       placeholder: '$0.00',
       colSpan: 1,
+      pdfViews: {
+        attorneyPrep: { include: true, priority: 20, label: 'Balance' },
+      },
     },
     {
       name: 'notes',

@@ -27,6 +27,78 @@ export type VisibilityCondition = {
   and?: VisibilityCondition[] // Additional conditions that must all be true (AND logic)
 }
 
+/**
+ * Bespoke PDF / UI views that declare schema-field membership via `pdfViews`
+ * metadata on field and section schemas. Each named view has a thin renderer
+ * (PDF generator or Vue component) driven by these tags — adding a field to
+ * a schema with the appropriate tag automatically propagates to the view.
+ *
+ * - emergencySheet: one-page emergency information sheet (PDF)
+ * - walletCard: credit-card-sized wallet card (PDF)
+ * - attorneyPrep: attorney prep packet (PDF)
+ * - runbookPdf: household runbook PDF
+ * - runbookQuickContacts: "Key People to Contact" section on the For My Family view
+ *
+ * Note: the full vault PDF (`generator.ts` via `schemaToPdf.ts`) is already
+ * fully schema-driven and does NOT use this view system — every visible field
+ * appears unless `pdfSkipIfEmpty` filters it.
+ */
+export type PdfViewName =
+  | 'emergencySheet'
+  | 'walletCard'
+  | 'attorneyPrep'
+  | 'runbookPdf'
+  | 'runbookQuickContacts'
+
+export interface PdfFieldViewMembership {
+  /** Field is included in the view. Required to participate. */
+  include: boolean
+  /** Lower number = renders earlier within its section. Default: declaration order. */
+  priority?: number
+  /** Logical sub-section within the view (e.g., 'criticalContacts' on the runbook). */
+  section?: string
+  /** Override label for this view (defaults to `pdfLabel` then `label`). */
+  label?: string
+  /**
+   * Custom value formatter for this view (defaults to `pdfFormat` then String()).
+   * Receives the field's raw value plus the containing item and the full
+   * DeathboxData context, enabling cross-section resolves (e.g.,
+   * `personId → person.name` lookup against `data.people`).
+   */
+  format?: (
+    value: any,
+    item: Record<string, unknown>,
+    fullData: any,
+  ) => string
+}
+
+export interface PdfSectionViewMembership {
+  /** Section participates in the view (default: implied true if any field is tagged). */
+  include?: boolean
+  /** Section label override for this view in the printed/rendered output
+   *  (defaults to schema `title`). E.g., "PERSONAL INFORMATION" for the
+   *  emergency sheet header. */
+  sectionLabel?: string
+  /** Section label override for the picker UI specifically (e.g., the
+   *  EmergencySheetModal section toggle). When the print label is ALL-CAPS
+   *  but the UI should be mixed case. Defaults to schema `title`. */
+  pickerLabel?: string
+  /** Field name on array items used as a sort key (e.g., 'role' for importantContacts). */
+  itemSortKey?: string
+  /** Explicit priority list of `itemSortKey` values (e.g., ['Executor', 'Attorney', ...]).
+   *  Items with values outside the list sort after, in natural order. */
+  itemSortPriority?: string[]
+  /** Maximum number of items to render in this view (e.g., wallet card has space for 3). */
+  itemLimit?: number
+  /**
+   * Override the per-item heading rendered above its fields in this view.
+   * Receives the raw item plus the full DeathboxData for cross-section lookups
+   * (e.g., `personId → person.name`). Defaults to `arrayItemLabel` if defined,
+   * else undefined (no heading). Empty string suppresses the heading.
+   */
+  itemLabel?: (item: Record<string, unknown>, fullData: any) => string
+}
+
 export interface FormFieldSchema {
   // Field identification
   // Note: name, label, and type are optional when sectionDivider is used
@@ -47,10 +119,16 @@ export interface FormFieldSchema {
   // Conditional visibility
   visible?: VisibilityCondition | VisibilityCondition[] // Show/hide based on other fields
   
-  // PDF generation
+  // PDF generation (full vault PDF via schemaToPdf.ts)
   pdfLabel?: string // Optional different label for PDF
   pdfFormat?: (value: any) => string // Custom formatter for PDF
   pdfSkipIfEmpty?: boolean // Skip in PDF if empty
+
+  // Bespoke PDF / UI views (emergency sheet, wallet card, runbook, etc.)
+  // See PdfViewName + PdfFieldViewMembership for the contract. Adding a field
+  // here with `include: true` automatically propagates it to that view's
+  // thin renderer — no PDF code change needed.
+  pdfViews?: Partial<Record<PdfViewName, PdfFieldViewMembership>>
   
   // Manual entry (for sensitive fields like passwords, PINs, seed phrases)
   manualEntry?: boolean // If true, allows user to mark field for manual entry in PDF
@@ -119,9 +197,13 @@ export interface FormSectionSchema {
   // Fields
   fields: FormFieldSchema[]
   
-  // Grouping (for PDF)
+  // Grouping (for full vault PDF)
   pdfGroup?: string // Which PDF group this section belongs to
-  
+
+  // Per-view section-level metadata for bespoke PDF / UI views.
+  // See PdfViewName + PdfSectionViewMembership for the contract.
+  pdfViews?: Partial<Record<PdfViewName, PdfSectionViewMembership>>
+
   // Conditional section visibility
   visible?: VisibilityCondition | VisibilityCondition[]
 }
