@@ -11,7 +11,7 @@
   "bugs": {
     "url": "https://github.com/squarshednanners/life-relay/issues"
   },
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build",

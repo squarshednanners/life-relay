@@ -4,7 +4,7 @@
 
 Website: https://liferelay.app
 Source: https://github.com/squarshednanners/life-relay
-License: MIT
+License: FSL-1.1-MIT (source-available; converts to MIT after 2 years)
 Price: Free — no subscriptions, no premium tiers, no hidden costs
 
 ## What It Does
@@ -23,7 +23,7 @@ It also serves as a preparation tool for creating a will or trust — the Estate
 - Crypto recovery plan documentation including hardware wallets, seed phrase locations, exchange accounts, and multisig configurations with heir recovery instructions.
 - Digital inheritance support: document online accounts, cloud storage, social media, and digital purchases for your family.
 - Installable as a Progressive Web App (PWA) — works fully offline after first load.
-- Open source (MIT license).
+- Source-available under FSL-1.1-MIT (becomes MIT after 2 years).
 
 ## Who It's For
 

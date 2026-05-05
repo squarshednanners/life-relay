@@ -23,7 +23,13 @@
       "Bash(sed -i 's/border-gray-300/border-gray-300 dark:border-gray-600/g' \"$f\")",
       "Bash(npm test:*)",
       "WebFetch(domain:web.public-pool.io)",
-      "Bash(grep -n '\"\"debts\"\"' examples/sample-vault.json)"
+      "Bash(grep -n '\"\"debts\"\"' examples/sample-vault.json)",
+      "WebSearch",
+      "Bash(python3 *)",
+      "Bash(py C:/Users/BradBass/workspaces/legacybox/_bmad/scripts/resolve_customization.py --skill C:/Users/BradBass/workspaces/legacybox/.claude/skills/bmad-create-ux-design --key workflow)",
+      "Bash(python C:/Users/BradBass/workspaces/legacybox/_bmad/scripts/resolve_customization.py --skill C:/Users/BradBass/workspaces/legacybox/.claude/skills/bmad-create-ux-design --key workflow)",
+      "PowerShell(Get-Content *)",
+      "Bash(npx vitest *)"
     ]
   }
 }
