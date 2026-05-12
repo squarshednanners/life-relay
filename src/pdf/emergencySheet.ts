@@ -13,15 +13,18 @@
  * concern. The user-facing item picker (EmergencySheetSelections) also lives
  * here because selection is per-render, not per-schema.
  */
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
+import { PDFDocument, rgb } from 'pdf-lib'
+import type { PDFFont } from 'pdf-lib'
 import type { DeathboxData } from '@/models/DeathboxData'
 import { drawLifeRelayMark, drawGeneratedBy } from './pdfBranding'
+import { embedPdfFonts } from './fonts'
+import { drawWitnessLine, WITNESS_LINE_DEFAULT_HEIGHT } from './witnessLine'
 import {
   collectFieldsByPdfView,
   type CollectedItem,
   type CollectedSection,
 } from './schemaPdfViews'
-import { pdfColor } from '@/tokens'
+import { pdfColor, pdfPage, pdfSpacing } from '@/tokens'
 
 export interface EmergencySheetSelections {
   people: string[]
@@ -33,9 +36,9 @@ export interface EmergencySheetSelections {
   includeLegalDocuments: boolean
 }
 
-const PAGE_WIDTH = 612
-const PAGE_HEIGHT = 792
-const MARGIN = 36
+const PAGE_WIDTH = pdfPage.widthPt
+const PAGE_HEIGHT = pdfPage.heightPt
+const MARGIN = pdfPage.marginEmergencySheet
 const COL_GAP = 16
 const CONTENT_WIDTH = PAGE_WIDTH - 2 * MARGIN
 const COL_WIDTH = (CONTENT_WIDTH - COL_GAP) / 2
@@ -166,8 +169,10 @@ export async function generateEmergencySheet(
   selections: EmergencySheetSelections,
 ): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create()
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
-  const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+  const fonts = await embedPdfFonts(pdfDoc)
+  const font: PDFFont = fonts.bodyRegular
+  const bold: PDFFont = fonts.bodyMedium
+  const heading: PDFFont = fonts.headingMedium
   const page = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT])
 
   let y = PAGE_HEIGHT - MARGIN
@@ -183,12 +188,12 @@ export async function generateEmergencySheet(
   })
 
   const title = 'EMERGENCY INFORMATION SHEET'
-  const titleWidth = bold.widthOfTextAtSize(title, 16)
+  const titleWidth = heading.widthOfTextAtSize(title, 16)
   page.drawText(title, {
     x: (PAGE_WIDTH - titleWidth) / 2,
     y: y - headerHeight + 27,
     size: 16,
-    font: bold,
+    font: heading,
     color: rgb(...pdfColor.white),
   })
   y -= headerHeight + 8
@@ -214,20 +219,26 @@ export async function generateEmergencySheet(
   const sectionGap = 6
 
   function drawSectionTitle(text: string, x: number, colW: number) {
-    page.drawRectangle({
+    // Witness Line — 3pt accent-700 left border. Cross-surface primitive
+    // (same as the screen <WitnessSection> wrapper and the full-vault PDF's
+    // section headers). Replaces the prior grey banner background; the
+    // title text is offset right by `pdfSpacing.witnessLinePaddingLeftPt`
+    // (24pt) to give the line its breathing room.
+    drawWitnessLine(page, {
       x,
-      y: y - 2,
-      width: colW,
-      height: 14,
-      color: rgb(...pdfColor.bgSectionTitle),
+      yTop: y + WITNESS_LINE_DEFAULT_HEIGHT - 3,
+      yBottom: y - 3,
     })
     page.drawText(sanitize(text), {
-      x: x + 4,
+      x: x + pdfSpacing.witnessLinePaddingLeftPt,
       y: y + 1,
       size: sectionTitleSize,
-      font: bold,
+      font: heading,
       color: rgb(...pdfColor.textMedium),
     })
+    // Suppress the unused colW parameter — kept in the signature so the
+    // function can grow back to column-aware rendering without API churn.
+    void colW
     y -= 16
   }
 
@@ -408,7 +419,7 @@ export async function generateEmergencySheet(
       color: rgb(...pdfColor.textMuted),
     })
     y -= 14
-    drawGeneratedBy(page, font, PAGE_WIDTH, y)
+    drawGeneratedBy(page, fonts, PAGE_WIDTH, y)
   }
 
   // Logo mark in bottom-left corner

@@ -9,6 +9,10 @@ import {
   shadow,
   icon,
   breakpoint,
+  pdfPage,
+  pdfTypeScale,
+  pdfFont,
+  pdfSpacing,
   hslStringToRgb,
   hexStringToRgb,
   pdfRgb,
@@ -73,6 +77,97 @@ describe('design tokens — categorical coverage', () => {
     expect(tokens.color).toBe(color);
     expect(tokens.typography).toBe(typography);
     expect(tokens.witnessLine).toBe(witnessLine);
+    expect(tokens.pdfPage).toBe(pdfPage);
+    expect(tokens.pdfTypeScale).toBe(pdfTypeScale);
+    expect(tokens.pdfFont).toBe(pdfFont);
+    expect(tokens.pdfSpacing).toBe(pdfSpacing);
+  });
+});
+
+describe('design tokens — PDF geometry (Story 1.2)', () => {
+  it('exports US Letter page dimensions in points', () => {
+    expect(pdfPage.widthPt).toBe(612);
+    expect(pdfPage.heightPt).toBe(792);
+  });
+
+  it('exports per-generator margins matching current generator constants', () => {
+    expect(pdfPage.marginGenerator).toBe(54);
+    expect(pdfPage.marginEmergencySheet).toBe(36);
+    expect(pdfPage.marginAttorneyPrep).toBe(50);
+    expect(pdfPage.marginRunbook).toBe(54);
+  });
+
+  it('all page tokens are positive integers (pdf-lib expects pt numbers)', () => {
+    for (const value of Object.values(pdfPage)) {
+      expect(typeof value).toBe('number');
+      expect(value).toBeGreaterThan(0);
+      expect(Number.isInteger(value)).toBe(true);
+    }
+  });
+});
+
+describe('design tokens — PDF type scale (Story 1.2)', () => {
+  it('mirrors UX type-scale tokens at PDF point values', () => {
+    // Per UX Step 8: display-xl 48 / display-lg 36 / heading-xl 28 / heading-lg 22
+    // heading-md 18 / body-md 16 / body-sm 14 / label 14 / caption 13 / mono-md 16 / mono-sm 14
+    expect(pdfTypeScale.displayXl).toBe(48);
+    expect(pdfTypeScale.displayLg).toBe(36);
+    expect(pdfTypeScale.headingXl).toBe(28);
+    expect(pdfTypeScale.headingLg).toBe(22);
+    expect(pdfTypeScale.headingMd).toBe(18);
+    expect(pdfTypeScale.bodyLg).toBe(18);
+    expect(pdfTypeScale.bodyMd).toBe(16);
+    expect(pdfTypeScale.bodySm).toBe(14);
+    expect(pdfTypeScale.label).toBe(14);
+    expect(pdfTypeScale.caption).toBe(13);
+    expect(pdfTypeScale.monoMd).toBe(16);
+    expect(pdfTypeScale.monoSm).toBe(14);
+  });
+
+  it('exposes a title-page size step for the full-vault PDF brand heading', () => {
+    // generator.ts brand text is 42pt — declared as its own token to keep
+    // the value findable.
+    expect(pdfTypeScale.titlePage).toBe(42);
+  });
+
+  it('all scale tokens are positive numbers', () => {
+    for (const value of Object.values(pdfTypeScale)) {
+      expect(typeof value).toBe('number');
+      expect(value).toBeGreaterThan(0);
+    }
+  });
+
+  it('aligns numerically with the screen typography scale where the roles overlap', () => {
+    // The screen scale stores [size, lineHeight] tuples in px. PDF tokens are
+    // pt numbers. PDFs render text at the same numeric size as the screen.
+    const screenBodyMdPx = parseFloat(typography.scale['body-md'][0]);
+    expect(pdfTypeScale.bodyMd).toBe(screenBodyMdPx);
+    const screenHeadingMdPx = parseFloat(typography.scale['heading-md'][0]);
+    expect(pdfTypeScale.headingMd).toBe(screenHeadingMdPx);
+  });
+});
+
+describe('design tokens — PDF font roles (Story 1.2)', () => {
+  it('exports the 6 role identifiers required by Story 1.2 AC2', () => {
+    expect(pdfFont.headingRegular).toBe('source-serif-4-regular');
+    expect(pdfFont.headingMedium).toBe('source-serif-4-medium');
+    expect(pdfFont.headingItalic).toBe('source-serif-4-italic');
+    expect(pdfFont.bodyRegular).toBe('inter-regular');
+    expect(pdfFont.bodyMedium).toBe('inter-medium');
+    expect(pdfFont.monoRegular).toBe('jetbrains-mono-regular');
+  });
+
+  it('role identifiers are unique', () => {
+    const ids = Object.values(pdfFont);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+describe('design tokens — PDF spacing (Story 1.2)', () => {
+  it('exports Witness Line padding-left in PDF points (matches screen space-6)', () => {
+    // Screen: tokens.spacing.witnessLinePaddingLeft = '1.5rem' (24px).
+    // PDF: numeric 24 (pt).
+    expect(pdfSpacing.witnessLinePaddingLeftPt).toBe(24);
   });
 });
 

@@ -1,10 +1,12 @@
-import { PDFDocument, PDFRef, PDFArray, PDFDict, PDFName, PDFNumber, PDFString, rgb, StandardFonts } from 'pdf-lib'
+import { PDFDocument, PDFRef, PDFArray, PDFDict, PDFName, PDFNumber, PDFString, rgb } from 'pdf-lib'
 import type { PDFPage, PDFFont } from 'pdf-lib'
 import type { DeathboxData } from '@/models/DeathboxData'
 import { getSchemasByGroup } from '@/schemas/index'
 import { addSchemaSectionToPDF } from '@/pdf/schemaToPdf'
 import { drawGeneratedBy } from '@/pdf/pdfBranding'
-import { pdfColor } from '@/tokens'
+import { embedPdfFonts } from '@/pdf/fonts'
+import { drawWitnessLine, WITNESS_LINE_DEFAULT_HEIGHT } from '@/pdf/witnessLine'
+import { pdfColor, pdfPage, pdfTypeScale, pdfSize, pdfSpacing } from '@/tokens'
 
 /* ── Design tokens (legacy aliases for the local file) ────────── */
 
@@ -13,9 +15,9 @@ const DARK       = rgb(...pdfColor.textDark)
 const GRAY       = rgb(...pdfColor.textGray)
 const RULE_COLOR = rgb(...pdfColor.ruleColor)
 
-const PAGE_W    = 612 // US Letter
-const PAGE_H    = 792
-const MARGIN    = 54  // 0.75 in
+const PAGE_W    = pdfPage.widthPt
+const PAGE_H    = pdfPage.heightPt
+const MARGIN    = pdfPage.marginGenerator
 const CONTENT_W = PAGE_W - 2 * MARGIN
 
 const GROUP_ORDER = [
@@ -104,8 +106,12 @@ export async function generatePDFDocument(
   includedSections?: Set<string>,
 ): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create()
-  const font   = await pdfDoc.embedFont(StandardFonts.Helvetica)
-  const bold   = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+  const fonts = await embedPdfFonts(pdfDoc)
+  // Local aliases — body text uses Inter; headings upgrade to `heading`
+  // (Source Serif 4 Medium) at specific use-sites below.
+  const font: PDFFont = fonts.bodyRegular
+  const bold: PDFFont = fonts.bodyMedium
+  const heading: PDFFont = fonts.headingMedium
 
   let page: PDFPage = null as any
   let y = PAGE_H - MARGIN
@@ -147,12 +153,12 @@ export async function generatePDFDocument(
       x: MARGIN,
       y,
       size: 13,
-      font: bold,
+      font: heading,
       color: DARK,
     })
     y -= 5
     // Partial underline — extends to ~half content width or text width, whichever is smaller
-    const ruleW = Math.min(bold.widthOfTextAtSize(clean, 13) + 16, CONTENT_W * 0.5)
+    const ruleW = Math.min(heading.widthOfTextAtSize(clean, 13) + 16, CONTENT_W * 0.5)
     page.drawLine({
       start: { x: MARGIN, y },
       end: { x: MARGIN + ruleW, y },
@@ -179,17 +185,16 @@ export async function generatePDFDocument(
       y -= 10
     }
 
-    // Left accent bar
-    page.drawRectangle({
+    // Witness Line — cross-surface primitive (3pt accent-700, same as screen
+    // <WitnessSection> wrapper). Replaces the prior teal accent bar.
+    drawWitnessLine(page, {
       x: MARGIN,
-      y: y - 3,
-      width: 3,
-      height: 15,
-      color: TEAL,
+      yTop: y + WITNESS_LINE_DEFAULT_HEIGHT - 3,
+      yBottom: y - 3,
     })
 
     page.drawText(sanitize(text), {
-      x: MARGIN + 12,
+      x: MARGIN + pdfSpacing.witnessLinePaddingLeftPt,
       y,
       size: 11,
       font: bold,
@@ -282,17 +287,19 @@ export async function generatePDFDocument(
 
   // Brand name
   const brandText = 'Life Relay'
-  const brandW = bold.widthOfTextAtSize(brandText, 42)
+  const brandSize = pdfTypeScale.titlePage
+  const brandW = heading.widthOfTextAtSize(brandText, brandSize)
   page.drawText(brandText, {
-    x: (PAGE_W - brandW) / 2, y, size: 42, font: bold, color: TEAL,
+    x: (PAGE_W - brandW) / 2, y, size: brandSize, font: heading, color: TEAL,
   })
   y -= 30
 
   // Subtitle
   const sub = 'Legacy Information Document'
-  const subW = font.widthOfTextAtSize(sub, 14)
+  const subSize = pdfTypeScale.bodySm
+  const subW = font.widthOfTextAtSize(sub, subSize)
   page.drawText(sub, {
-    x: (PAGE_W - subW) / 2, y, size: 14, font, color: GRAY,
+    x: (PAGE_W - subW) / 2, y, size: subSize, font, color: GRAY,
   })
   y -= 40
 
@@ -300,17 +307,18 @@ export async function generatePDFDocument(
   page.drawLine({
     start: { x: PAGE_W / 2 - 60, y },
     end: { x: PAGE_W / 2 + 60, y },
-    thickness: 0.5,
+    thickness: pdfSize.thinRule,
     color: RULE_COLOR,
   })
   y -= 30
 
-  // Disclaimer
+  // Disclaimer — 9.5pt is below the UX scale; pdfSize-namespaced.
   const disc = 'This document provides organized personal, financial, and logistical information '
     + 'intended to assist executors, family members, and authorized representatives. '
     + 'It is not a legal document or will, but serves as a practical reference guide.'
-  for (const line of wrapText(disc, CONTENT_W - 40, 9.5, font)) {
-    page.drawText(line, { x: MARGIN + 20, y, size: 9.5, font, color: GRAY })
+  const discSize = 9.5 // renderer-side: between pdfSize.body (9) and pdfSize.itemHeading (10)
+  for (const line of wrapText(disc, CONTENT_W - 40, discSize, font)) {
+    page.drawText(line, { x: MARGIN + 20, y, size: discSize, font, color: GRAY })
     y -= 14
   }
   y -= 24
@@ -328,9 +336,9 @@ export async function generatePDFDocument(
       if (y < 120) break
       if (person.name) {
         const n = sanitize(person.name)
-        const nW = bold.widthOfTextAtSize(n, 18)
+        const nW = heading.widthOfTextAtSize(n, 18)
         page.drawText(n, {
-          x: (PAGE_W - nW) / 2, y, size: 18, font: bold, color: DARK,
+          x: (PAGE_W - nW) / 2, y, size: 18, font: heading, color: DARK,
         })
         y -= 22
       }
@@ -350,17 +358,20 @@ export async function generatePDFDocument(
     }
   }
 
-  // Date at bottom of title page
+  // Date at bottom of title page. Positioned with explicit clearance above
+  // the "Generated on" line drawn by `drawGeneratedBy` — the two dates are
+  // semantically distinct (data update vs PDF generation) and must remain
+  // visually separated.
   if (data.updatedAt) {
     const dt = sanitize(`Last updated ${new Date(data.updatedAt).toLocaleDateString()}`)
     const dw = font.widthOfTextAtSize(dt, 9)
     page.drawText(dt, {
-      x: (PAGE_W - dw) / 2, y: MARGIN + 36, size: 9, font, color: GRAY,
+      x: (PAGE_W - dw) / 2, y: MARGIN + 54, size: 9, font, color: GRAY,
     })
   }
 
   // Generated by branding
-  drawGeneratedBy(page, font, PAGE_W, MARGIN + 20)
+  drawGeneratedBy(page, fonts, PAGE_W, MARGIN + 20)
 
   /* ── Reserve TOC page (filled in after content is rendered) ── */
 
@@ -395,7 +406,7 @@ export async function generatePDFDocument(
     tocEntries.push({ label: groupName, pageNum: pdfDoc.getPageCount(), level: 'group' })
 
     page.drawText(groupClean, {
-      x: MARGIN, y, size: 16, font: bold, color: TEAL,
+      x: MARGIN, y, size: 16, font: heading, color: TEAL,
     })
     y -= 7
     page.drawLine({
@@ -449,7 +460,7 @@ export async function generatePDFDocument(
   tocY -= 6
 
   tocPage.drawText('Contents', {
-    x: MARGIN, y: tocY, size: 18, font: bold, color: TEAL,
+    x: MARGIN, y: tocY, size: 18, font: heading, color: TEAL,
   })
   tocY -= 8
   tocPage.drawLine({
@@ -466,7 +477,7 @@ export async function generatePDFDocument(
     const isGroup = entry.level === 'group'
     const indent = isGroup ? 0 : 18
     const sz = isGroup ? 12 : 10
-    const f = isGroup ? bold : font
+    const f = isGroup ? heading : font
     const c = isGroup ? DARK : GRAY
 
     // Entry label

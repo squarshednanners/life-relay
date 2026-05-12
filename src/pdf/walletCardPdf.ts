@@ -15,22 +15,23 @@
  * declare which fields participate; this renderer decides where they sit.
  * See `schemaPdfViews.ts` "Boundary" doc for the policy.
  */
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
+import { PDFDocument, rgb } from 'pdf-lib'
 import type { PDFFont } from 'pdf-lib'
 import type { DeathboxData } from '@/models/DeathboxData'
+import { embedPdfFonts } from './fonts'
 import {
   collectFieldsByPdfView,
   type CollectedItem,
 } from './schemaPdfViews'
-import { pdfColor } from '@/tokens'
+import { pdfColor, pdfPage } from '@/tokens'
 
 const TEAL = rgb(...pdfColor.brandTeal)
 const DARK = rgb(...pdfColor.textDark)
 const GRAY = rgb(...pdfColor.textGray)
 const WHITE = rgb(...pdfColor.white)
 
-const PAGE_W = 612
-const PAGE_H = 792
+const PAGE_W = pdfPage.widthPt
+const PAGE_H = pdfPage.heightPt
 const CARD_W = 243 // 3.375 inch
 const CARD_H = 153 // 2.125 inch
 const COLS = 2
@@ -248,6 +249,12 @@ function drawCard(
     }
     cy -= 9
     if (c.phone) {
+      // Phone rendered in Inter Medium (not JetBrains Mono): mono advance
+      // widths at 8pt overflow the wallet card's narrow phone slot for full
+      // international numbers. The UX "vault-data → mono" guide targets
+      // strings where character-by-character distinguishability matters
+      // (BIP-39 words, account numbers, fingerprints). Phones don't fall in
+      // that category — dial-pad spacing convention works in any font.
       const phoneTxt = truncate(c.phone, CARD_W - 90, 8, bold)
       page.drawText(phoneTxt, {
         x: x + 78,
@@ -265,9 +272,10 @@ export async function generateWalletCardPdf(
   data: DeathboxData,
 ): Promise<Uint8Array> {
   const pdf = await PDFDocument.create()
-  const font = await pdf.embedFont(StandardFonts.Helvetica)
-  const bold = await pdf.embedFont(StandardFonts.HelveticaBold)
-  const italic = await pdf.embedFont(StandardFonts.HelveticaOblique)
+  const fonts = await embedPdfFonts(pdf)
+  const font: PDFFont = fonts.bodyRegular
+  const bold: PDFFont = fonts.bodyMedium
+  const italic: PDFFont = fonts.headingItalic
 
   const info = gatherCardData(data)
   const page = pdf.addPage([PAGE_W, PAGE_H])

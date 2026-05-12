@@ -270,8 +270,18 @@ export const pdfColor = {
   ruleColor: [0.82, 0.82, 0.82] as RgbTuple,
 } as const;
 
+/**
+ * PDF-specific small-text + layout scale.
+ *
+ * These sizes are smaller than the UX-spec scale (which starts at 13pt) and
+ * exist because PDFs need denser typography for footers, inline labels,
+ * checklists, and other secondary content where a 14pt minimum would waste
+ * paper. The UX scale (`pdfTypeScale`) is the source of truth for body-text
+ * and heading-level content; this scale is the source of truth for everything
+ * smaller plus layout primitives (line heights, stroke widths).
+ */
 export const pdfSize = {
-  // Common font sizes
+  // Small text (below UX scale)
   body: 9,
   bodySmall: 8,
   bodyTiny: 7,
@@ -280,8 +290,10 @@ export const pdfSize = {
   caption: 7,
   pageNumber: 7,
 
-  // Headings
+  // Inter-tier headings (between bodyMd 16 and headingMd 18, or item-level)
   itemHeading: 10,
+  itemHeadingPlus: 11,
+  inlineCallout: 12,
   sectionTitle: 9,
   sectionTitleAttorneyPrep: 10,
 
@@ -291,6 +303,88 @@ export const pdfSize = {
   // Stroke widths
   thinRule: 0.5,
   borderWidth: 1,
+} as const;
+
+// ============================================================================
+// PDF PAGE GEOMETRY (Story 1.2)
+// ============================================================================
+//
+// US Letter dimensions in pdf-lib points (72pt = 1 inch). Per-generator margins
+// preserve the visual layout of the existing 5 generators while keeping every
+// coordinate origin in the token module.
+
+export const pdfPage = {
+  widthPt: 612, // 8.5 in
+  heightPt: 792, // 11 in
+  // Margins picked to match each generator's pre-tokenization layout:
+  marginGenerator: 54, // full vault PDF — 0.75 in
+  marginEmergencySheet: 36, // emergency sheet — 0.5 in (denser one-page layout)
+  marginAttorneyPrep: 50, // attorney prep packet
+  marginRunbook: 54, // runbook ("For My Family")
+} as const;
+
+// ============================================================================
+// PDF TYPE SCALE (Story 1.2)
+// ============================================================================
+//
+// Numeric pt values aligned with the UX type scale (UX Step 8). Screen scale
+// stores [size, lineHeight] tuples in px; PDF scale stores raw pt numbers
+// since pdf-lib's `drawText({ size })` expects a number. Sizes are numerically
+// equal across surfaces (16px on screen = 16pt in print) so visual continuity
+// holds.
+//
+// `titlePage` is an extra step beyond the UX scale for the full vault PDF's
+// brand heading. Marketing-style display sizes are intentionally above the
+// core scale.
+
+export const pdfTypeScale = {
+  displayXl: 48,
+  displayLg: 36,
+  titlePage: 42, // full vault PDF brand heading
+  headingXl: 28,
+  headingLg: 22,
+  headingMd: 18,
+  bodyLg: 18,
+  bodyMd: 16,
+  bodySm: 14,
+  label: 14,
+  caption: 13,
+  monoMd: 16,
+  monoSm: 14,
+} as const;
+
+// ============================================================================
+// PDF FONT ROLES (Story 1.2)
+// ============================================================================
+//
+// Role identifiers consumed by `src/pdf/fonts.ts`. Generators reference roles
+// (`pdfFont.headingMedium`), never filenames. The loader maps each role to a
+// static-instance TTF subset under `public/fonts/`.
+//
+// Locked decisions (architecture.md §Design-Token-Bridge, UX §Typeface-Pairing):
+// - Source Serif 4 — Regular 400, Medium 500, Italic 400 (headings)
+// - Inter           — Regular 400, Medium 500 (body / UI)
+// - JetBrains Mono  — Regular 400 (vault-data values)
+
+export const pdfFont = {
+  headingRegular: 'source-serif-4-regular',
+  headingMedium: 'source-serif-4-medium',
+  headingItalic: 'source-serif-4-italic',
+  bodyRegular: 'inter-regular',
+  bodyMedium: 'inter-medium',
+  monoRegular: 'jetbrains-mono-regular',
+} as const;
+
+// ============================================================================
+// PDF SPACING (Story 1.2)
+// ============================================================================
+//
+// Numeric pt values for PDF coordinate-space. `witnessLinePaddingLeftPt`
+// mirrors the screen `spacing.witnessLinePaddingLeft` ('1.5rem' = 24px) so the
+// Witness Line content offset is identical across surfaces.
+
+export const pdfSpacing = {
+  witnessLinePaddingLeftPt: 24, // pdf-lib pt; matches screen space-6
 } as const;
 
 // ============================================================================
@@ -309,6 +403,10 @@ export const tokens = {
   breakpoint,
   pdfColor,
   pdfSize,
+  pdfPage,
+  pdfTypeScale,
+  pdfFont,
+  pdfSpacing,
 } as const;
 
 export type Tokens = typeof tokens;
