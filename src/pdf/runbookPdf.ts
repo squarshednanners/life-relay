@@ -5,12 +5,13 @@ import { runbookPhases, runbookDonts } from '@/data/runbookSteps'
 import { drawGeneratedBy } from '@/pdf/pdfBranding'
 import { collectFieldsByPdfView } from '@/pdf/schemaPdfViews'
 import { schemaRegistry } from '@/schemas'
+import { pdfColor } from '@/tokens'
 
-const TEAL = rgb(0.06, 0.46, 0.43)
-const DARK = rgb(0.15, 0.15, 0.15)
-const GRAY = rgb(0.45, 0.45, 0.45)
-const AMBER = rgb(0.71, 0.42, 0.04)
-const RULE = rgb(0.82, 0.82, 0.82)
+const TEAL = rgb(...pdfColor.brandTeal)
+const DARK = rgb(...pdfColor.textDark)
+const GRAY = rgb(...pdfColor.textGray)
+const AMBER = rgb(...pdfColor.amber)
+const RULE = rgb(...pdfColor.ruleColor)
 
 const PAGE_W = 612
 const PAGE_H = 792
@@ -80,7 +81,7 @@ export async function generateRunbookPdfDocument(data: DeathboxData): Promise<Ui
   // Intro box
   page!.drawRectangle({
     x: MARGIN, y: y - 90, width: CONTENT_W, height: 90,
-    color: rgb(0.95, 0.99, 0.98),
+    color: rgb(...pdfColor.bgRunbookIntro),
     borderColor: TEAL, borderWidth: 0.5,
   })
   let introY = y - 18
@@ -118,6 +119,9 @@ export async function generateRunbookPdfDocument(data: DeathboxData): Promise<Ui
     y -= 18
     for (const item of quickItems) {
       ensure(28)
+      // Layout-side field placement: name/role on row 1, phone on row 2.
+      // Schema controls inclusion; this renderer controls where each appears.
+      // See schemaPdfViews.ts "Boundary" doc.
       const nameField = item.fields.find((f) => f.fieldName === 'name')
       const roleField = item.fields.find((f) => f.fieldName === 'role')
       const phoneField = item.fields.find((f) => f.fieldName === 'phone')
@@ -178,7 +182,7 @@ export async function generateRunbookPdfDocument(data: DeathboxData): Promise<Ui
       // Number badge
       page!.drawCircle({
         x: MARGIN + 9, y: y - 4, size: 9,
-        color: rgb(0.93, 0.99, 0.97),
+        color: rgb(...pdfColor.bgRunbookCircle),
         borderColor: TEAL, borderWidth: 0.7,
       })
       const numStr = String(i + 1)

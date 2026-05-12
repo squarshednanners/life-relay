@@ -1,0 +1,178 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`walletCardPdf — gatherCardData cross-section join > matches the snapshot for the canonical fixture 1`] = `
+{
+  "allergies": "Penicillin, shellfish",
+  "bloodType": "A+",
+  "contacts": [
+    {
+      "label": "Executor",
+      "name": "Margaret Hill",
+      "phone": "(555) 110-2200",
+    },
+    {
+      "label": "Attorney",
+      "name": "David Chen",
+      "phone": "(555) 220-3300",
+    },
+    {
+      "label": "Doctor",
+      "name": "Dr. Anil Patel",
+      "phone": "(555) 330-4400",
+    },
+    {
+      "label": "Accountant / CPA",
+      "name": "Susan Kim",
+      "phone": "(555) 440-5500",
+    },
+  ],
+  "owner": "Eleanor Vance",
+}
+`;
+
+exports[`walletCardPdf — schema-driven data plan > matches the snapshot for the canonical fixture 1`] = `
+[
+  {
+    "items": [
+      {
+        "fields": [
+          {
+            "fieldName": "name",
+            "label": "Full Name",
+            "value": "Eleanor Vance",
+          },
+        ],
+        "itemId": "person-1",
+        "itemLabel": "Eleanor Vance",
+      },
+    ],
+    "sectionKey": "people",
+    "sectionLabel": "People & Personal Information",
+  },
+  {
+    "items": [
+      {
+        "fields": [
+          {
+            "fieldName": "name",
+            "label": "Name",
+            "value": "Thomas Vance",
+          },
+          {
+            "fieldName": "phone",
+            "label": "Phone",
+            "value": "(555) 020-4050",
+          },
+        ],
+        "itemId": "beneficiary-1",
+        "itemLabel": "Beneficiary",
+      },
+      {
+        "fields": [
+          {
+            "fieldName": "name",
+            "label": "Name",
+            "value": "Hannah Vance",
+          },
+          {
+            "fieldName": "phone",
+            "label": "Phone",
+            "value": undefined,
+          },
+        ],
+        "itemId": "beneficiary-2",
+        "itemLabel": "Beneficiary",
+      },
+    ],
+    "sectionKey": "beneficiaries",
+    "sectionLabel": "Beneficiaries",
+  },
+  {
+    "items": [
+      {
+        "fields": [
+          {
+            "fieldName": "name",
+            "label": "Name",
+            "value": "Margaret Hill",
+          },
+          {
+            "fieldName": "phone",
+            "label": "Phone",
+            "value": "(555) 110-2200",
+          },
+        ],
+        "itemLabel": "Executor",
+      },
+      {
+        "fields": [
+          {
+            "fieldName": "name",
+            "label": "Name",
+            "value": "David Chen",
+          },
+          {
+            "fieldName": "phone",
+            "label": "Phone",
+            "value": "(555) 220-3300",
+          },
+        ],
+        "itemLabel": "Attorney",
+      },
+      {
+        "fields": [
+          {
+            "fieldName": "name",
+            "label": "Name",
+            "value": "Dr. Anil Patel",
+          },
+          {
+            "fieldName": "phone",
+            "label": "Phone",
+            "value": "(555) 330-4400",
+          },
+        ],
+        "itemLabel": "Doctor",
+      },
+      {
+        "fields": [
+          {
+            "fieldName": "name",
+            "label": "Name",
+            "value": "Susan Kim",
+          },
+          {
+            "fieldName": "phone",
+            "label": "Phone",
+            "value": "(555) 440-5500",
+          },
+        ],
+        "itemLabel": "Accountant / CPA",
+      },
+    ],
+    "sectionKey": "importantContacts",
+    "sectionLabel": "Important Contacts",
+  },
+  {
+    "items": [
+      {
+        "fields": [
+          {
+            "fieldName": "notes",
+            "label": "Blood",
+            "value": "A+",
+          },
+          {
+            "fieldName": "allergies",
+            "label": "Allergies",
+            "value": "Penicillin, shellfish",
+          },
+        ],
+        "itemLabel": "Medical Info 1",
+      },
+    ],
+    "sectionKey": "medicalInfo",
+    "sectionLabel": "Medical Information",
+  },
+]
+`;

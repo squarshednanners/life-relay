@@ -219,6 +219,81 @@ export const breakpoint = {
 } as const;
 
 // ============================================================================
+// PDF
+// ============================================================================
+//
+// PDF generators use neutral grays + an existing teal brand color. Tokens
+// preserve the legacy palette so the visual output is byte-identical to the
+// pre-token-bridge version. Future story can migrate the brand color to the
+// new Deep Warm Umber accent if Brad decides the PDFs should rebrand.
+//
+// All values exposed as 0-1 RGB tuples (pdf-lib's `rgb()` arg shape) so PDF
+// code never calls `pdfRgb()` for pure-PDF colors.
+
+export const pdfColor = {
+  // Brand
+  brandTeal: [0.06, 0.46, 0.43] as RgbTuple, // existing brand teal #0F756E
+
+  // Status / accent
+  emergencyRed: [0.8, 0.15, 0.15] as RgbTuple,
+  amber: [0.71, 0.42, 0.04] as RgbTuple,
+  amberText: [0.5, 0.4, 0.1] as RgbTuple,
+  amberBorder: [0.85, 0.7, 0.3] as RgbTuple,
+
+  // Pure black & white
+  black: [0, 0, 0] as RgbTuple,
+  white: [1, 1, 1] as RgbTuple,
+
+  // Text emphasis levels (neutral grays)
+  textHeavy: [0.1, 0.1, 0.1] as RgbTuple,
+  textDark: [0.15, 0.15, 0.15] as RgbTuple,
+  textMedium: [0.2, 0.2, 0.2] as RgbTuple,
+  textChecklist: [0.3, 0.3, 0.3] as RgbTuple,
+  textBrandDate: [0.35, 0.35, 0.35] as RgbTuple,
+  textLabel: [0.4, 0.4, 0.4] as RgbTuple,
+  textGray: [0.45, 0.45, 0.45] as RgbTuple,
+  textMuted: [0.5, 0.5, 0.5] as RgbTuple,
+
+  // Section header text (slightly purple-tinted)
+  sectionHeaderText: [0.2, 0.2, 0.3] as RgbTuple,
+
+  // Backgrounds
+  bgSectionHeader: [0.93, 0.93, 0.95] as RgbTuple, // attorney prep section header
+  bgSectionTitle: [0.93, 0.93, 0.93] as RgbTuple,  // emergency sheet section title
+  bgDisclaimerCream: [1, 0.97, 0.9] as RgbTuple,
+  bgRunbookIntro: [0.95, 0.99, 0.98] as RgbTuple,
+  bgRunbookCircle: [0.93, 0.99, 0.97] as RgbTuple,
+
+  // Borders / dividers
+  dividerLight: [0.85, 0.85, 0.85] as RgbTuple,
+  dividerMedium: [0.7, 0.7, 0.7] as RgbTuple,
+  ruleColor: [0.82, 0.82, 0.82] as RgbTuple,
+} as const;
+
+export const pdfSize = {
+  // Common font sizes
+  body: 9,
+  bodySmall: 8,
+  bodyTiny: 7,
+  label: 8,
+  labelSmall: 7,
+  caption: 7,
+  pageNumber: 7,
+
+  // Headings
+  itemHeading: 10,
+  sectionTitle: 9,
+  sectionTitleAttorneyPrep: 10,
+
+  // Layout sizes
+  lineHeight: 13,
+
+  // Stroke widths
+  thinRule: 0.5,
+  borderWidth: 1,
+} as const;
+
+// ============================================================================
 // UNIFIED EXPORT
 // ============================================================================
 
@@ -232,6 +307,8 @@ export const tokens = {
   shadow,
   icon,
   breakpoint,
+  pdfColor,
+  pdfSize,
 } as const;
 
 export type Tokens = typeof tokens;

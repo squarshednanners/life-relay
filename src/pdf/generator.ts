@@ -4,13 +4,14 @@ import type { DeathboxData } from '@/models/DeathboxData'
 import { getSchemasByGroup } from '@/schemas/index'
 import { addSchemaSectionToPDF } from '@/pdf/schemaToPdf'
 import { drawGeneratedBy } from '@/pdf/pdfBranding'
+import { pdfColor } from '@/tokens'
 
-/* ── Design tokens ───────────────────────────────────────── */
+/* ── Design tokens (legacy aliases for the local file) ────────── */
 
-const TEAL       = rgb(0.06, 0.46, 0.43)
-const DARK       = rgb(0.15, 0.15, 0.15)
-const GRAY       = rgb(0.45, 0.45, 0.45)
-const RULE_COLOR = rgb(0.82, 0.82, 0.82)
+const TEAL       = rgb(...pdfColor.brandTeal)
+const DARK       = rgb(...pdfColor.textDark)
+const GRAY       = rgb(...pdfColor.textGray)
+const RULE_COLOR = rgb(...pdfColor.ruleColor)
 
 const PAGE_W    = 612 // US Letter
 const PAGE_H    = 792

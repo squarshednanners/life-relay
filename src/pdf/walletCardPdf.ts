@@ -7,6 +7,13 @@
  * concerns: card geometry, fonts, the cross-reference logic that filters
  * medicalInfo by people[0].id, and the fallback to beneficiaries when fewer
  * than 4 contacts are tagged.
+ *
+ * Why this file still references field names like 'name' and 'phone' by string
+ * (in `gatherCardData`): the wallet-card layout places specific fields at
+ * specific positions on the card (row 1 = name, row 2 = phone), and joins
+ * sections by id (medicalInfo where personId === owner.id). Schema tags
+ * declare which fields participate; this renderer decides where they sit.
+ * See `schemaPdfViews.ts` "Boundary" doc for the policy.
  */
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import type { PDFFont } from 'pdf-lib'
@@ -15,11 +22,12 @@ import {
   collectFieldsByPdfView,
   type CollectedItem,
 } from './schemaPdfViews'
+import { pdfColor } from '@/tokens'
 
-const TEAL = rgb(0.06, 0.46, 0.43)
-const DARK = rgb(0.15, 0.15, 0.15)
-const GRAY = rgb(0.45, 0.45, 0.45)
-const WHITE = rgb(1, 1, 1)
+const TEAL = rgb(...pdfColor.brandTeal)
+const DARK = rgb(...pdfColor.textDark)
+const GRAY = rgb(...pdfColor.textGray)
+const WHITE = rgb(...pdfColor.white)
 
 const PAGE_W = 612
 const PAGE_H = 792
@@ -52,7 +60,7 @@ function truncate(s: string, maxW: number, size: number, font: PDFFont): string 
   return text
 }
 
-interface WalletCardData {
+export interface WalletCardData {
   owner: string
   bloodType: string
   allergies: string
@@ -72,7 +80,7 @@ function fieldValue(item: CollectedItem, fieldName: string): string {
  * amount of cross-section logic the renderer needs (owner = people[0],
  * medicalInfo filtered by personId match, beneficiary fallback).
  */
-function gatherCardData(data: DeathboxData): WalletCardData {
+export function gatherCardData(data: DeathboxData): WalletCardData {
   const sections = collectFieldsByPdfView('walletCard', data)
   const sectionByKey = new Map(sections.map((s) => [s.sectionKey, s]))
 
@@ -146,7 +154,7 @@ function drawCard(
     width: CARD_W,
     height: CARD_H,
     color: WHITE,
-    borderColor: rgb(0.7, 0.7, 0.7),
+    borderColor: rgb(...pdfColor.dividerMedium),
     borderWidth: 0.5,
   })
 
@@ -211,7 +219,7 @@ function drawCard(
     start: { x: x + 8, y: cy },
     end: { x: x + CARD_W - 8, y: cy },
     thickness: 0.3,
-    color: rgb(0.85, 0.85, 0.85),
+    color: rgb(...pdfColor.dividerLight),
   })
   cy -= 10
 

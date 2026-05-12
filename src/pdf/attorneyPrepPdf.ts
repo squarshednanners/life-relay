@@ -26,6 +26,7 @@ import {
   collectFieldsByPdfView,
   type CollectedSection,
 } from './schemaPdfViews'
+import { pdfColor } from '@/tokens'
 
 const PAGE_WIDTH = 612
 const PAGE_HEIGHT = 792
@@ -94,7 +95,7 @@ export async function generateAttorneyPrepPdf(
       y: 25,
       size: 7,
       font: italic,
-      color: rgb(0.5, 0.5, 0.5),
+      color: rgb(...pdfColor.textMuted),
     })
     const pNum = `Page ${pageCount}`
     page.drawText(pNum, {
@@ -102,7 +103,7 @@ export async function generateAttorneyPrepPdf(
       y: 25,
       size: 7,
       font,
-      color: rgb(0.5, 0.5, 0.5),
+      color: rgb(...pdfColor.textMuted),
     })
   }
 
@@ -133,7 +134,7 @@ export async function generateAttorneyPrepPdf(
       y,
       size: labelSize,
       font: bold,
-      color: rgb(0.4, 0.4, 0.4),
+      color: rgb(...pdfColor.textLabel),
     })
     const maxW = CONTENT_WIDTH - indent - labelW
     const words = clean.split(' ')
@@ -146,7 +147,7 @@ export async function generateAttorneyPrepPdf(
           y,
           size: fontSize,
           font,
-          color: rgb(0, 0, 0),
+          color: rgb(...pdfColor.black),
         })
         y -= lineHeight
         ensureSpace(lineHeight)
@@ -161,7 +162,7 @@ export async function generateAttorneyPrepPdf(
         y,
         size: fontSize,
         font,
-        color: rgb(0, 0, 0),
+        color: rgb(...pdfColor.black),
       })
     }
     y -= lineHeight
@@ -175,14 +176,14 @@ export async function generateAttorneyPrepPdf(
       y: y - 3,
       width: CONTENT_WIDTH,
       height: 18,
-      color: rgb(0.93, 0.93, 0.95),
+      color: rgb(...pdfColor.bgSectionHeader),
     })
     page.drawText(sanitize(text.toUpperCase()), {
       x: MARGIN + 6,
       y: y + 1,
       size: 10,
       font: bold,
-      color: rgb(0.2, 0.2, 0.3),
+      color: rgb(...pdfColor.sectionHeaderText),
     })
     y -= 24
   }
@@ -194,7 +195,7 @@ export async function generateAttorneyPrepPdf(
       y,
       size: fontSize + 1,
       font: bold,
-      color: rgb(0.1, 0.1, 0.1),
+      color: rgb(...pdfColor.textHeavy),
     })
     y -= lineHeight + 2
   }
@@ -238,7 +239,7 @@ export async function generateAttorneyPrepPdf(
     y,
     size: 18,
     font: bold,
-    color: rgb(0.06, 0.46, 0.43),
+    color: rgb(...pdfColor.brandTeal),
   })
   y -= 24
 
@@ -249,7 +250,7 @@ export async function generateAttorneyPrepPdf(
     y,
     size: 12,
     font,
-    color: rgb(0.4, 0.4, 0.4),
+    color: rgb(...pdfColor.textLabel),
   })
   y -= 16
 
@@ -261,7 +262,7 @@ export async function generateAttorneyPrepPdf(
     y,
     size: 10,
     font,
-    color: rgb(0.5, 0.5, 0.5),
+    color: rgb(...pdfColor.textMuted),
   })
   y -= 30
 
@@ -271,8 +272,8 @@ export async function generateAttorneyPrepPdf(
     y: y - 50,
     width: CONTENT_WIDTH,
     height: 55,
-    color: rgb(1, 0.97, 0.9),
-    borderColor: rgb(0.85, 0.7, 0.3),
+    color: rgb(...pdfColor.bgDisclaimerCream),
+    borderColor: rgb(...pdfColor.amberBorder),
     borderWidth: 1,
   })
   const disclaimerWords = ESTATE_PREP_DISCLAIMER.split(' ')
@@ -286,7 +287,7 @@ export async function generateAttorneyPrepPdf(
         y: dY,
         size: 8,
         font: italic,
-        color: rgb(0.5, 0.4, 0.1),
+        color: rgb(...pdfColor.amberText),
       })
       dY -= 11
       dLine = word
@@ -300,7 +301,7 @@ export async function generateAttorneyPrepPdf(
       y: dY,
       size: 8,
       font: italic,
-      color: rgb(0.5, 0.4, 0.1),
+      color: rgb(...pdfColor.amberText),
     })
   }
   y -= 70
@@ -423,7 +424,7 @@ export async function generateAttorneyPrepPdf(
       y,
       size: fontSize + 1,
       font: bold,
-      color: rgb(0.2, 0.2, 0.2),
+      color: rgb(...pdfColor.textMedium),
     })
     y -= lineHeight + 2
     for (const item of group.items) {
@@ -433,7 +434,7 @@ export async function generateAttorneyPrepPdf(
         y,
         size: fontSize,
         font,
-        color: rgb(0.3, 0.3, 0.3),
+        color: rgb(...pdfColor.textChecklist),
       })
       y -= lineHeight
     }

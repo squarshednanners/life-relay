@@ -11,6 +11,19 @@
  * Schema-as-truth: adding a new field to a schema with the appropriate
  * `pdfViews` tag automatically propagates to the named view with no code
  * change in the renderer.
+ *
+ * Boundary between schema and renderer (load-bearing — don't blur):
+ *  - Schema owns: which fields appear, item ordering (itemSortPriority),
+ *    field ordering (priority), labels, value formatting, item limits.
+ *  - Renderer owns: page geometry, fonts, where on the page a tagged field
+ *    appears, and any cross-section join logic the tag system can't express
+ *    (e.g., wallet card matches medicalInfo by people[0].id; falls back to
+ *    beneficiaries when fewer than 4 contacts are tagged).
+ *
+ * The renderer is allowed to look up specific field names on items returned
+ * by `collectFieldsByPdfView` (e.g., `item.fields.find(f => f.fieldName ===
+ * 'name')`) — this is layout-side selection, not content-side selection.
+ * Field inclusion is still 100% schema-controlled.
  */
 
 import { schemaRegistry } from '@/schemas';

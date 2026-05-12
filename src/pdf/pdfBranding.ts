@@ -1,7 +1,8 @@
 import { rgb } from 'pdf-lib'
 import type { PDFPage, PDFFont } from 'pdf-lib'
+import { pdfColor, pdfSize } from '@/tokens'
 
-const BRAND_TEAL = rgb(0.06, 0.46, 0.43)
+const BRAND_TEAL = rgb(...pdfColor.brandTeal)
 
 /**
  * Draws the Life Relay logo mark (relay baton with arcs) at the given position.
@@ -11,7 +12,7 @@ const BRAND_TEAL = rgb(0.06, 0.46, 0.43)
  */
 export function drawLifeRelayMark(page: PDFPage, x: number, y: number, size: number) {
   const s = size / 512
-  const white = rgb(1, 1, 1)
+  const white = rgb(...pdfColor.white)
 
   // Background square
   page.drawRectangle({
@@ -94,20 +95,20 @@ export function drawGeneratedBy(
   })
   const dateLine = `Generated on ${dateStr}`
   const brandLine = 'Life Relay -- liferelay.app'
-  const dateWidth = font.widthOfTextAtSize(dateLine, 9)
-  const brandWidth = font.widthOfTextAtSize(brandLine, 7)
+  const dateWidth = font.widthOfTextAtSize(dateLine, pdfSize.body)
+  const brandWidth = font.widthOfTextAtSize(brandLine, pdfSize.bodyTiny)
   page.drawText(dateLine, {
     x: (pageWidth - dateWidth) / 2,
     y: y + 11,
-    size: 9,
+    size: pdfSize.body,
     font,
-    color: rgb(0.35, 0.35, 0.35),
+    color: rgb(...pdfColor.textBrandDate),
   })
   page.drawText(brandLine, {
     x: (pageWidth - brandWidth) / 2,
     y,
-    size: 7,
+    size: pdfSize.bodyTiny,
     font,
-    color: rgb(0.45, 0.45, 0.45),
+    color: rgb(...pdfColor.textGray),
   })
 }

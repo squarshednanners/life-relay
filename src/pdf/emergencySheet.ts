@@ -21,6 +21,7 @@ import {
   type CollectedItem,
   type CollectedSection,
 } from './schemaPdfViews'
+import { pdfColor } from '@/tokens'
 
 export interface EmergencySheetSelections {
   people: string[]
@@ -178,7 +179,7 @@ export async function generateEmergencySheet(
     y: y - headerHeight + 15,
     width: PAGE_WIDTH,
     height: headerHeight,
-    color: rgb(0.8, 0.15, 0.15),
+    color: rgb(...pdfColor.emergencyRed),
   })
 
   const title = 'EMERGENCY INFORMATION SHEET'
@@ -188,7 +189,7 @@ export async function generateEmergencySheet(
     y: y - headerHeight + 27,
     size: 16,
     font: bold,
-    color: rgb(1, 1, 1),
+    color: rgb(...pdfColor.white),
   })
   y -= headerHeight + 8
 
@@ -201,7 +202,7 @@ export async function generateEmergencySheet(
     y,
     size: 7,
     font,
-    color: rgb(0.5, 0.5, 0.5),
+    color: rgb(...pdfColor.textMuted),
   })
   y -= 16
 
@@ -218,14 +219,14 @@ export async function generateEmergencySheet(
       y: y - 2,
       width: colW,
       height: 14,
-      color: rgb(0.93, 0.93, 0.93),
+      color: rgb(...pdfColor.bgSectionTitle),
     })
     page.drawText(sanitize(text), {
       x: x + 4,
       y: y + 1,
       size: sectionTitleSize,
       font: bold,
-      color: rgb(0.2, 0.2, 0.2),
+      color: rgb(...pdfColor.textMedium),
     })
     y -= 16
   }
@@ -236,7 +237,7 @@ export async function generateEmergencySheet(
       y,
       size: isCompact ? fontSize : fontSize + 1,
       font: bold,
-      color: isCompact ? rgb(0.15, 0.15, 0.15) : rgb(0, 0, 0),
+      color: isCompact ? rgb(...pdfColor.textDark) : rgb(...pdfColor.black),
     })
     y -= lineHeight
   }
@@ -256,7 +257,7 @@ export async function generateEmergencySheet(
       y,
       size: labelSize,
       font: bold,
-      color: rgb(0.4, 0.4, 0.4),
+      color: rgb(...pdfColor.textLabel),
     })
     const valMaxW = maxW - labelW
     const words = clean.split(' ')
@@ -269,7 +270,7 @@ export async function generateEmergencySheet(
           y,
           size: fontSize,
           font,
-          color: rgb(0, 0, 0),
+          color: rgb(...pdfColor.black),
         })
         y -= lineHeight
         line = word
@@ -283,7 +284,7 @@ export async function generateEmergencySheet(
         y,
         size: fontSize,
         font,
-        color: rgb(0, 0, 0),
+        color: rgb(...pdfColor.black),
       })
     }
     y -= lineHeight
@@ -392,7 +393,7 @@ export async function generateEmergencySheet(
       start: { x: MARGIN, y },
       end: { x: PAGE_WIDTH - MARGIN, y },
       thickness: 0.5,
-      color: rgb(0.7, 0.7, 0.7),
+      color: rgb(...pdfColor.dividerMedium),
     })
     y -= 12
 
@@ -404,7 +405,7 @@ export async function generateEmergencySheet(
       y,
       size: 7,
       font,
-      color: rgb(0.5, 0.5, 0.5),
+      color: rgb(...pdfColor.textMuted),
     })
     y -= 14
     drawGeneratedBy(page, font, PAGE_WIDTH, y)

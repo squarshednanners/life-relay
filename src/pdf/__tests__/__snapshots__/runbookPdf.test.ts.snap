@@ -1,0 +1,92 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`runbookPdf — schema-driven data plan > matches the snapshot for the canonical fixture 1`] = `
+[
+  {
+    "items": [
+      {
+        "fields": [
+          {
+            "fieldName": "name",
+            "label": "Name",
+            "value": "Margaret Hill",
+          },
+          {
+            "fieldName": "role",
+            "label": "Role",
+            "value": "Executor",
+          },
+          {
+            "fieldName": "phone",
+            "label": "Phone",
+            "value": "(555) 110-2200",
+          },
+        ],
+        "itemLabel": "Margaret Hill (Executor)",
+      },
+      {
+        "fields": [
+          {
+            "fieldName": "name",
+            "label": "Name",
+            "value": "David Chen",
+          },
+          {
+            "fieldName": "role",
+            "label": "Role",
+            "value": "Attorney",
+          },
+          {
+            "fieldName": "phone",
+            "label": "Phone",
+            "value": "(555) 220-3300",
+          },
+        ],
+        "itemLabel": "David Chen (Attorney)",
+      },
+      {
+        "fields": [
+          {
+            "fieldName": "name",
+            "label": "Name",
+            "value": "Dr. Anil Patel",
+          },
+          {
+            "fieldName": "role",
+            "label": "Role",
+            "value": "Doctor",
+          },
+          {
+            "fieldName": "phone",
+            "label": "Phone",
+            "value": "(555) 330-4400",
+          },
+        ],
+        "itemLabel": "Dr. Anil Patel (Doctor)",
+      },
+      {
+        "fields": [
+          {
+            "fieldName": "name",
+            "label": "Name",
+            "value": "Susan Kim",
+          },
+          {
+            "fieldName": "role",
+            "label": "Role",
+            "value": "Accountant / CPA",
+          },
+          {
+            "fieldName": "phone",
+            "label": "Phone",
+            "value": "(555) 440-5500",
+          },
+        ],
+        "itemLabel": "Susan Kim (Accountant / CPA)",
+      },
+    ],
+    "sectionKey": "importantContacts",
+    "sectionLabel": "Important Contacts",
+  },
+]
+`;
