@@ -19,8 +19,8 @@
         </p>
       </div>
       <button
-        @click="markReviewed"
         class="ml-4 px-3 py-1.5 text-sm bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex-shrink-0"
+        @click="markReviewed"
       >
         Mark Reviewed
       </button>
@@ -28,52 +28,54 @@
 
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
       <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Quick Actions</h3>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          Quick Actions
+        </h3>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <button
-          @click="exportData"
           class="px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+          @click="exportData"
         >
           Export Vault
         </button>
         <button
-          @click="importData"
           class="px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+          @click="importData"
         >
           Import Vault
         </button>
         <button
-          @click="generatePDF"
           :disabled="isGenerating"
           class="px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+          @click="generatePDF"
         >
           {{ isGenerating ? 'Generating...' : 'Download Full PDF' }}
         </button>
         <button
-          @click="generateEmergencyPDF"
           :disabled="isGeneratingEmergency"
           class="px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+          @click="generateEmergencyPDF"
         >
           {{ isGeneratingEmergency ? 'Generating...' : 'Emergency One-Page Sheet' }}
         </button>
         <button
-          @click="generateWalletCard"
           :disabled="isGeneratingWalletCard"
           class="px-4 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50"
+          @click="generateWalletCard"
         >
           {{ isGeneratingWalletCard ? 'Generating...' : 'Wallet Cards (printable)' }}
         </button>
         <button
-          @click="saveData"
           :disabled="isLoading"
           class="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+          @click="saveData"
         >
           {{ isLoading ? 'Saving...' : 'Save to Browser' }}
         </button>
         <button
-          @click="deleteAllData"
           class="px-4 py-3 bg-gray-200 dark:bg-gray-700 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 transition-colors"
+          @click="deleteAllData"
         >
           Delete All Data
         </button>
@@ -81,10 +83,15 @@
     </div>
 
     <!-- Getting Started Guide -->
-    <div v-if="showGettingStarted" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-5 mb-6">
+    <div
+      v-if="showGettingStarted"
+      class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-5 mb-6"
+    >
       <div class="flex items-start justify-between">
         <div>
-          <h3 class="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-2">How Life Relay Works</h3>
+          <h3 class="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-2">
+            How Life Relay Works
+          </h3>
           <ol class="text-sm text-blue-800 dark:text-blue-300 space-y-1.5 list-decimal list-inside">
             <li>Fill in the sections that matter to you using the sidebar — skip what doesn't apply.</li>
             <li>Your data saves automatically to this browser's local storage.</li>
@@ -97,12 +104,22 @@
           </p>
         </div>
         <button
-          @click="dismissGettingStarted"
           class="ml-4 text-blue-400 dark:text-blue-500 hover:text-blue-600 dark:hover:text-blue-300 flex-shrink-0"
           title="Dismiss"
+          @click="dismissGettingStarted"
         >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
@@ -114,9 +131,9 @@
       ref="fileInput"
       type="file"
       accept=".json"
-      @change="handleFileImport"
       class="hidden"
-    />
+      @change="handleFileImport"
+    >
 
     <!-- PDF Export Selection Modal -->
     <PdfExportModal

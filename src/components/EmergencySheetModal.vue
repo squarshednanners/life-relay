@@ -39,11 +39,11 @@
                   class="flex items-center gap-2 py-1"
                 >
                   <input
+                    v-model="sectionSelections[section.sectionKey]"
                     type="checkbox"
                     :value="getItemSelectionValue(section.sectionKey, item, idx)"
-                    v-model="sectionSelections[section.sectionKey]"
                     class="rounded text-primary-600"
-                  />
+                  >
                   <span class="text-sm text-gray-700 dark:text-gray-300">
                     {{ getItemDisplayLabel(section, item, idx) }}
                   </span>
@@ -55,10 +55,10 @@
             <template v-else>
               <div class="flex items-center gap-2 py-1">
                 <input
-                  type="checkbox"
                   v-model="booleanSelections[section.sectionKey]"
+                  type="checkbox"
                   class="rounded text-primary-600"
-                />
+                >
                 <span
                   class="text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
@@ -92,16 +92,16 @@
           <div class="flex gap-3">
             <button
               type="button"
-              @click="$emit('cancel')"
               class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              @click="$emit('cancel')"
             >
               Cancel
             </button>
             <button
               type="button"
-              @click="handleGenerate"
               :disabled="totalSelected === 0"
               class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50"
+              @click="handleGenerate"
             >
               Generate Sheet
             </button>

@@ -532,7 +532,11 @@ export async function generatePDFDocument(
     // Outline root dict
     const outlineRootRef = context.nextRef()
 
-    // Recursively register outline items, returning their refs
+    // Recursively register outline items, returning their refs.
+    // Block-scoped because it closes over `context`/`pdfDoc`/`PAGE_H` and
+    // is only used to build the outline tree — hoisting to module scope
+    // would require threading those dependencies through.
+    // eslint-disable-next-line no-inner-declarations
     function registerItem(item: OutlineItem, parentRef: PDFRef): { ref: PDFRef; lastChildRef?: PDFRef } {
       const itemRef = context.nextRef()
       const childRefs: PDFRef[] = []

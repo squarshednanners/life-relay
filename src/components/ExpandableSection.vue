@@ -1,9 +1,9 @@
 <template>
   <div class="border border-gray-200 dark:border-gray-700 rounded-lg">
     <button
-      @click="isExpanded = !isExpanded"
       class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors rounded-t-lg"
       :class="{ 'rounded-b-lg': !isExpanded }"
+      @click="isExpanded = !isExpanded"
     >
       <span class="font-medium text-gray-900 dark:text-gray-100">{{ label }}</span>
       <svg
@@ -13,7 +13,12 @@
         stroke="currentColor"
         viewBox="0 0 24 24"
       >
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M19 9l-7 7-7-7"
+        />
       </svg>
     </button>
     <div

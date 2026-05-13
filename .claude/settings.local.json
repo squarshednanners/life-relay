@@ -35,7 +35,9 @@
       "Bash(npm uninstall *)",
       "PowerShell(New-Item *)",
       "PowerShell(Get-Item *)",
-      "PowerShell(gh api *)"
+      "PowerShell(gh api *)",
+      "Bash(npx eslint *)",
+      "Bash(echo \"exit: $?\")"
     ]
   }
 }

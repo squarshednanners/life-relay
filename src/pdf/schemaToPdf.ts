@@ -369,7 +369,7 @@ export function addSchemaSectionToPDF(
       }
 
       // For non-array fields, value is already extracted above (including dot notation handling)
-      let actualValue = value
+      const actualValue = value
 
       // Check for manual entry flag
       const manualEntryFieldName = getManualEntryFieldName(field)

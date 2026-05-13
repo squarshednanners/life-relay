@@ -17,8 +17,8 @@
 
       <div class="mt-6 flex gap-4">
         <button
-          @click="save"
           class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+          @click="save"
         >
           Save
         </button>

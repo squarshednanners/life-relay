@@ -1,7 +1,10 @@
 <template>
   <div class="space-y-2">
     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Trust {{ role === 'owner' ? 'Owner' : 'Beneficiaries' }}</label>
-    <div v-if="assignments.length > 0" class="space-y-2 mb-2">
+    <div
+      v-if="assignments.length > 0"
+      class="space-y-2 mb-2"
+    >
       <div
         v-for="(assignment, index) in assignments"
         :key="index"
@@ -15,16 +18,22 @@
             {{ assignment.customName }}
           </span>
           <span v-else>Unnamed</span>
-          <span v-if="assignment.percentage" class="text-gray-600 dark:text-gray-400 ml-2">
+          <span
+            v-if="assignment.percentage"
+            class="text-gray-600 dark:text-gray-400 ml-2"
+          >
             ({{ assignment.percentage }}%)
           </span>
-          <span v-if="assignment.role" class="text-gray-600 dark:text-gray-400 ml-2 text-xs">
+          <span
+            v-if="assignment.role"
+            class="text-gray-600 dark:text-gray-400 ml-2 text-xs"
+          >
             [{{ assignment.role === 'owner' ? 'Owner' : 'Beneficiary' }}]
           </span>
         </span>
         <button
-          @click="removeAssignment(index)"
           class="text-red-600 hover:text-red-800 text-sm"
+          @click="removeAssignment(index)"
         >
           Remove
         </button>
@@ -35,7 +44,9 @@
         v-model="selectedTrustId"
         class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md text-sm"
       >
-        <option value="">Select trust</option>
+        <option value="">
+          Select trust
+        </option>
         <option
           v-for="trust in availableTrusts"
           :key="trust.id"
@@ -49,7 +60,7 @@
         type="text"
         placeholder="Or enter custom name"
         class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md text-sm"
-      />
+      >
       <input
         v-model.number="percentage"
         type="number"
@@ -57,11 +68,11 @@
         max="100"
         placeholder="%"
         class="w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md text-sm"
-      />
+      >
       <button
-        @click="addAssignment"
         :disabled="!selectedTrustId && !customTrustName"
         class="px-3 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+        @click="addAssignment"
       >
         Add
       </button>
