@@ -1,28 +1,42 @@
-# Tier 1 UI Primitives
+# UI Primitives (`src/components/ui/`)
 
-This directory contains the **Tier 1 UI primitive wrappers** for Life Relay. Every Dialog, Popover, Tabs, and Tooltip in the app is composed from these wrappers — not from `reka-ui` directly.
+This directory holds **wrappers for primitives that need a Grief-Mode Audit** and **primitives we built ourselves** because no library ships them at the quality we need.
 
-## The contract
+## What lives here
 
-1. **Wrappers are the only place `reka-ui` may be imported.** ESLint's `no-restricted-imports` rule blocks `reka-ui` everywhere else. The wrapper override in `.eslintrc.cjs` re-allows it inside `src/components/ui/**`.
+| File | Source | Why a wrapper |
+|---|---|---|
+| `UiDialog.vue` | wraps `reka-ui` Dialog | Carries Grief-Mode Audit; collapses compound API into one import |
+| `UiPopover.vue` | wraps `reka-ui` Popover | Same |
+| `UiTabs.vue` | wraps `reka-ui` Tabs | Same; adds an items-array prop for the common case |
+| `UiTooltip.vue` | wraps `reka-ui` Tooltip | Same |
+| `UiCommand.vue` | custom (vanilla Vue + `fuse.js`) | `reka-ui` has no command-palette primitive |
 
-2. **Wrappers carry copy via props/slots — never hardcoded strings.** ESLint's `vue/no-bare-strings-in-template` rule (scoped to this directory) fails the build if a wrapper template contains a bare English string. Consumers pass Companion Voice copy from their own context.
+## Convention (not enforced by lint as of Story 1.4)
 
-3. **Each wrapper carries a `// Grief-Mode Audit:` comment block at the top of `<script setup>`.** The block addresses four facets:
-   - Focus management under cognitive load
-   - Surprise-reduction
-   - Destructive-action timing
-   - Reduced-motion behavior
+The Story 1.3 ESLint ban on direct `reka-ui` imports outside this directory was **removed in Story 1.4** (see story file `1-4-build-non-radix-tier1-primitives.md` for rationale). The wrapper layer is now a **convention**, not a CI gate.
 
-   These comments are reviewed at PR time. They are the load-bearing documentation of the grief-mode behavior contract per the project's architecture (see `_bmad-output/planning-artifacts/architecture.md` § Per-Primitive Grief-Mode Audit Blocks).
+**When to add a wrapper here:**
+- You need a `// Grief-Mode Audit:` block co-located with the primitive (focus management, surprise-reduction, destructive-action timing, reduced-motion behavior)
+- You want to normalize the compound API into one import for consumers
+- You want to enforce token-bound styling at one place per primitive
 
-4. **All styling resolves from tokens.** Wrappers use Tailwind classes that read CSS variables defined by `src/tokens/index.ts` (via `tailwind.config.ts`). Zero hex literals, zero `rgb(...)` calls, zero magic numbers.
+**When to skip the wrapper and use `reka-ui` directly:**
+- The primitive is a one-off that doesn't need an audit (e.g., `Separator`, `VisuallyHidden`)
+- The compound API is the right consumer surface and a wrapper would just re-export it
+- You're prototyping; you can wrap later when the usage pattern stabilizes
 
-5. **Single-file per primitive.** One `.vue` SFC wraps the entire compound component family. Consumers get a single import like `import UiDialog from '@/components/ui/UiDialog.vue'`.
+## Discipline checklist for new primitive use
+
+Even without the import ban, every primitive use should still pass:
+
+1. **Token-bound styling** — colors, spacing, radii, shadows resolve from `src/tokens/index.ts` via Tailwind classes. No hex literals. No magic numbers in style bindings. (Enforced by the token-only AST scan from architecture.md § Token-Only CI Gate.)
+2. **Companion Voice copy** — user-facing strings carry the project's voice. Wrappers here enforce this via `vue/no-bare-strings-in-template`. Feature views are governed by the planned Companion Voice ESLint rule (PR-7g territory; not yet shipped).
+3. **Grief-Mode Audit** — if the primitive can trap focus, dismiss content, run destructive flows, or animate, document the audit in a comment block (here, in the consuming view, or in a co-located doc). See `docs/grief-mode-audit.md` for the checklist.
+4. **Reduced-motion respect** — `motion-safe:` Tailwind qualifiers on transition classes.
 
 ## When you need a new primitive
 
-If you find yourself reaching for `reka-ui` outside `src/components/ui/`, stop. Either:
-- The primitive you need already has a wrapper here — use it.
-- The primitive needs a wrapper — add one to this directory (with its Grief-Mode Audit block).
-- The primitive is in the "build directly" list (Combobox, Toast, ToggleGroup, DatePicker, Command — see UX spec § Design System Choice) — Story 1.4 owns those; talk to Brad before adding.
+- **`reka-ui` ships it** → Use it directly OR wrap it here. Both are fine.
+- **`reka-ui` doesn't ship it** → Build vanilla. Either here (if it'll be reused) or co-located with its consumer (if it's a one-off).
+- **You're not sure** → Search `reka-ui`'s exports (`node_modules/reka-ui/dist/index.d.ts`). As of Story 1.4 it includes Accordion, AlertDialog, AspectRatio, Autocomplete, Avatar, Calendar, Checkbox, Collapsible, Combobox, ContextMenu, DateField, DatePicker, DropdownMenu, Editable, HoverCard, Listbox, Menu, Menubar, MonthPicker, NavigationMenu, NumberField, Pagination, PinInput, Popover, Progress, RadioGroup, RangeCalendar, ScrollArea, Select, Separator, Slider, Splitter, Stepper, Switch, Tabs, TagsInput, TimeField, Toast, Toggle, ToggleGroup, Toolbar, Tooltip, Tree, YearPicker, and more.

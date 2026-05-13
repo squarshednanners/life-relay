@@ -31,6 +31,39 @@ describe('design tokens — categorical coverage', () => {
     expect(color.primary['700']).toBe('#0f766e');
   });
 
+  it('accent ramp covers the full 50→900 spec at the documented hue (25°)', () => {
+    // Story 1.1 review caught that only `700` was asserted; other steps could
+    // drift silently. Pin every step in the documented Deep Warm Umber ramp.
+    const expected: Record<string, string> = {
+      '50': 'hsl(25, 30%, 96%)',
+      '100': 'hsl(25, 35%, 92%)',
+      '500': 'hsl(25, 28%, 60%)',
+      '600': 'hsl(25, 32%, 50%)',
+      '700': 'hsl(25, 35%, 40%)',
+      '800': 'hsl(25, 36%, 30%)',
+      '900': 'hsl(25, 38%, 22%)',
+    };
+    for (const [step, value] of Object.entries(expected)) {
+      expect(color.accent[step as keyof typeof color.accent]).toBe(value);
+    }
+  });
+
+  it('accent ramp keys use 2-digit zero-padding consistent with `primary` palette', () => {
+    // Story 1.1 review caught that `accent['050']` (3-digit) would generate
+    // `accent-050` Tailwind class; consumers writing `bg-accent-50` would
+    // silently get no styling. Pin the convention: 2-digit (`50`, `100`, ...).
+    expect(color.accent).toHaveProperty('50');
+    expect(color.accent).not.toHaveProperty('050');
+  });
+
+  it('emo aliases are shared references (not duplicate literals)', () => {
+    // Refactoring `accent-700` or `surface-ivory` should propagate to
+    // `emo.matters` / `emo.rest`. The fix in Story 1.1 review uses shared
+    // constants so reference equality holds even with `as const`.
+    expect(color.emo.matters).toBe(color.accent['700']);
+    expect(color.emo.rest).toBe(color.surface.ivory);
+  });
+
   it('exports typography category', () => {
     expect(typography.family.heading).toContain('Source Serif 4');
     expect(typography.family.body).toContain('Inter');
@@ -137,13 +170,28 @@ describe('design tokens — PDF type scale (Story 1.2)', () => {
     }
   });
 
-  it('aligns numerically with the screen typography scale where the roles overlap', () => {
-    // The screen scale stores [size, lineHeight] tuples in px. PDF tokens are
-    // pt numbers. PDFs render text at the same numeric size as the screen.
-    const screenBodyMdPx = parseFloat(typography.scale['body-md'][0]);
-    expect(pdfTypeScale.bodyMd).toBe(screenBodyMdPx);
-    const screenHeadingMdPx = parseFloat(typography.scale['heading-md'][0]);
-    expect(pdfTypeScale.headingMd).toBe(screenHeadingMdPx);
+  it('aligns numerically with the screen typography scale across every overlapping role', () => {
+    // Story 1.1 review caught that only body-md and heading-md were asserted;
+    // every overlapping role can drift independently. Pin the full set so a
+    // mistyped screen px or PDF pt fails this test immediately.
+    const overlap: Array<[keyof typeof pdfTypeScale, keyof typeof typography.scale]> = [
+      ['displayXl', 'display-xl'],
+      ['displayLg', 'display-lg'],
+      ['headingXl', 'heading-xl'],
+      ['headingLg', 'heading-lg'],
+      ['headingMd', 'heading-md'],
+      ['bodyLg', 'body-lg'],
+      ['bodyMd', 'body-md'],
+      ['bodySm', 'body-sm'],
+      ['label', 'label'],
+      ['caption', 'caption'],
+      ['monoMd', 'mono-md'],
+      ['monoSm', 'mono-sm'],
+    ];
+    for (const [pdfKey, screenKey] of overlap) {
+      const screenPx = parseFloat(typography.scale[screenKey][0]);
+      expect(pdfTypeScale[pdfKey]).toBe(screenPx);
+    }
   });
 });
 
@@ -195,6 +243,27 @@ describe('design tokens — pdf-lib helpers', () => {
 
   it('hslStringToRgb throws on malformed input', () => {
     expect(() => hslStringToRgb('not-an-hsl-string')).toThrow();
+  });
+
+  it('hslStringToRgb clamps out-of-range saturation and lightness to [0, 1]', () => {
+    // Story 1.1 review: a token typo like `hsl(25, 150%, 40%)` would otherwise
+    // produce RGB outside [0, 1] and pdf-lib's `rgb()` throws at runtime.
+    // Clamping keeps token authoring forgiving.
+    const [r, g, b] = hslStringToRgb('hsl(25, 150%, 40%)');
+    expect(r).toBeGreaterThanOrEqual(0);
+    expect(r).toBeLessThanOrEqual(1);
+    expect(g).toBeGreaterThanOrEqual(0);
+    expect(g).toBeLessThanOrEqual(1);
+    expect(b).toBeGreaterThanOrEqual(0);
+    expect(b).toBeLessThanOrEqual(1);
+
+    const [r2, g2, b2] = hslStringToRgb('hsl(25, 50%, 200%)');
+    expect(r2).toBeGreaterThanOrEqual(0)
+    expect(r2).toBeLessThanOrEqual(1)
+    expect(g2).toBeGreaterThanOrEqual(0)
+    expect(g2).toBeLessThanOrEqual(1)
+    expect(b2).toBeGreaterThanOrEqual(0)
+    expect(b2).toBeLessThanOrEqual(1)
   });
 
   it('hexStringToRgb parses 6-digit hex', () => {

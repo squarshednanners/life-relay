@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest'
-import { evaluateVisibility, getVisibleFields } from '../FormSchema'
-import type { FormFieldSchema, VisibilityCondition } from '../FormSchema'
+import { describe, it, expect, vi } from 'vitest'
+import { evaluateVisibility, getVisibleFields, resolveFieldDisplayAs } from '../FormSchema'
+import type { FieldType, FormFieldSchema, VisibilityCondition } from '../FormSchema'
 
 describe('evaluateVisibility', () => {
   it('returns true when no condition is provided', () => {
@@ -124,5 +124,65 @@ describe('getVisibleFields', () => {
     const result = getVisibleFields(fields, {})
     expect(result).toHaveLength(1)
     expect(result[0].sectionDivider).toBeDefined()
+  })
+})
+
+describe('resolveFieldDisplayAs', () => {
+  it('schema override wins for prose', () => {
+    const field: FormFieldSchema = { name: 'x', type: 'password', displayAs: 'prose' }
+    expect(resolveFieldDisplayAs(field)).toBe('prose')
+  })
+
+  it('schema override wins for mono on a text field', () => {
+    const field: FormFieldSchema = { name: 'x', type: 'text', displayAs: 'mono' }
+    expect(resolveFieldDisplayAs(field)).toBe('mono')
+  })
+
+  it('defaults password to mono', () => {
+    expect(resolveFieldDisplayAs({ name: 'p', type: 'password' })).toBe('mono')
+  })
+
+  it('defaults tel to prose (phone numbers read fine in proportional font)', () => {
+    expect(resolveFieldDisplayAs({ name: 'p', type: 'tel' })).toBe('prose')
+  })
+
+  it('defaults prose-style types to prose', () => {
+    const proseTypes: FieldType[] = [
+      'text',
+      'textarea',
+      'number',
+      'email',
+      'tel',
+      'date',
+      'select',
+      'checkbox',
+      'radio',
+      'currency',
+      'array',
+      'custom',
+    ]
+    for (const type of proseTypes) {
+      expect(resolveFieldDisplayAs({ name: 'f', type })).toBe('prose')
+    }
+  })
+
+  it('defaults to prose when type is undefined (section dividers)', () => {
+    expect(resolveFieldDisplayAs({})).toBe('prose')
+  })
+
+  it('normalizes unexpected displayAs values to prose (with warning)', () => {
+    // TypeScript's union narrows `displayAs` to 'prose' | 'mono' at compile
+    // time, but raw JSON imports / dynamic schema authoring can slip a bad
+    // value through. The resolver normalizes + warns.
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    try {
+      const field = { name: 'x', type: 'text', displayAs: 'bogus' } as unknown as FormFieldSchema
+      expect(resolveFieldDisplayAs(field)).toBe('prose')
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('unexpected displayAs="bogus"'),
+      )
+    } finally {
+      warnSpy.mockRestore()
+    }
   })
 })

@@ -1,5 +1,5 @@
 <template>
-  <div class="mb-6">
+  <WitnessSection class="mb-6">
     <div class="flex items-center justify-between">
       <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
         <span
@@ -32,7 +32,7 @@
         :style="{ width: completeness.percentage + '%' }"
       />
     </div>
-  </div>
+  </WitnessSection>
 </template>
 
 <script setup lang="ts">
@@ -40,6 +40,7 @@ import { computed } from 'vue'
 import { getIcon } from '@/utils/icons'
 import type { FormSectionSchema } from '@/models/FormSchema'
 import { computeCompleteness } from '@/composables/useSectionCompleteness'
+import WitnessSection from '@/components/ui/WitnessSection.vue'
 
 const props = defineProps<{
   title: string

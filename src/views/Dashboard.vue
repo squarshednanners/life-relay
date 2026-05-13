@@ -47,23 +47,44 @@
         </button>
         <button
           :disabled="isGenerating"
-          class="px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+          :aria-busy="isGenerating || undefined"
+          class="px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
           @click="generatePDF"
         >
+          <span
+            v-if="isGenerating"
+            class="inline-block h-5 w-5 rounded-full animate-spin"
+            style="border: 3px solid white; border-top-color: transparent;"
+            aria-hidden="true"
+          />
           {{ isGenerating ? 'Generating...' : 'Download Full PDF' }}
         </button>
         <button
           :disabled="isGeneratingEmergency"
-          class="px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+          :aria-busy="isGeneratingEmergency || undefined"
+          class="px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
           @click="generateEmergencyPDF"
         >
+          <span
+            v-if="isGeneratingEmergency"
+            class="inline-block h-5 w-5 rounded-full animate-spin"
+            style="border: 3px solid white; border-top-color: transparent;"
+            aria-hidden="true"
+          />
           {{ isGeneratingEmergency ? 'Generating...' : 'Emergency One-Page Sheet' }}
         </button>
         <button
           :disabled="isGeneratingWalletCard"
-          class="px-4 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50"
+          :aria-busy="isGeneratingWalletCard || undefined"
+          class="px-4 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
           @click="generateWalletCard"
         >
+          <span
+            v-if="isGeneratingWalletCard"
+            class="inline-block h-5 w-5 rounded-full animate-spin"
+            style="border: 3px solid white; border-top-color: transparent;"
+            aria-hidden="true"
+          />
           {{ isGeneratingWalletCard ? 'Generating...' : 'Wallet Cards (printable)' }}
         </button>
         <button
@@ -176,7 +197,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 import { useLegacyStore } from '@/store'
 import { useToast } from '@/composables/useToast'
 import { generatePDFDocument } from '@/pdf/generator'
@@ -191,6 +212,24 @@ import ProgressTracker from '@/components/ProgressTracker.vue'
 import QuickStartModal from '@/components/QuickStartModal.vue'
 import { isEncrypted } from '@/utils/encryption'
 
+/**
+ * Wait for the browser to actually paint pending DOM updates before
+ * returning. The classic "double RAF + nextTick" pattern:
+ *   1. `nextTick` — flush Vue's reactivity queue (DOM nodes added/removed)
+ *   2. First RAF — browser commits the next frame using the new DOM
+ *   3. Second RAF — guarantees the commit became an actual paint
+ *
+ * Necessary because the synchronous PDF generation that follows blocks
+ * the main thread for seconds. Without an explicit paint yield, the
+ * browser defers paints until the work completes — the user sees the
+ * modal stay visible the entire time and never sees the spinner.
+ */
+async function waitForPaint(): Promise<void> {
+  await nextTick()
+  await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+  await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+}
+
 const store = useLegacyStore()
 const { showToast } = useToast()
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -201,6 +240,7 @@ const isGeneratingWalletCard = ref(false)
 async function generateWalletCard() {
   if (!store.data || isGeneratingWalletCard.value) return
   isGeneratingWalletCard.value = true
+  await waitForPaint() // let the spinner paint before blocking the main thread
   try {
     const bytes = await generateWalletCardPdf(store.data)
     const blob = new Blob([bytes as BlobPart], { type: 'application/pdf' })
@@ -417,7 +457,15 @@ async function handlePdfExportGenerate(sectionKeys: Set<string>) {
   showPdfExportModal.value = false
   if (!store.data) return
 
+  // Wait for the modal-unmount paint to complete BEFORE flipping the
+  // spinner state. Otherwise the modal can stay visible the entire time
+  // (browser defers paints when synchronous work is queued).
+  await waitForPaint()
+
   isGenerating.value = true
+  // Now wait for the spinner-state paint too, before blocking the main
+  // thread with PDF generation.
+  await waitForPaint()
   try {
     const pdfBytes = await generatePDFDocument(store.data, sectionKeys)
     const blob = new Blob([pdfBytes as BlobPart], { type: 'application/pdf' })
@@ -450,7 +498,9 @@ async function handleEmergencyGenerate(selections: EmergencySheetSelections) {
   showEmergencyModal.value = false
   if (!store.data) return
 
+  await waitForPaint() // let the modal-close paint finish
   isGeneratingEmergency.value = true
+  await waitForPaint() // let the spinner paint
   try {
     const pdfBytes = await generateEmergencySheet(store.data, selections)
     const blob = new Blob([pdfBytes as BlobPart], { type: 'application/pdf' })

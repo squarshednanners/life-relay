@@ -6,7 +6,7 @@
  */
 
 import type { FormSectionSchema, FormFieldSchema } from '@/models/FormSchema'
-import { getVisibleFields, evaluateVisibility } from '@/models/FormSchema'
+import { getVisibleFields, evaluateVisibility, resolveFieldDisplayAs } from '@/models/FormSchema'
 import type { DeathboxData } from '@/models/DeathboxData'
 
 /**
@@ -75,7 +75,13 @@ export function addSchemaSectionToPDF(
   fullData: DeathboxData, // Full data context for lookups (beneficiaries, people, etc.)
   addTitle: (text: string) => void,
   addSectionHeader: (text: string) => void,
-  addField: (label: string, value: string | undefined, indent?: number, isTextarea?: boolean) => void,
+  addField: (
+    label: string,
+    value: string | undefined,
+    indent?: number,
+    isTextarea?: boolean,
+    displayAs?: 'prose' | 'mono',
+  ) => void,
   ensureSpace: (height: number) => void
 ) {
   // Check if section should be visible
@@ -142,7 +148,13 @@ export function addSchemaSectionToPDF(
         if (value && Array.isArray(value) && value.length > 0) {
           const formatted = formatBeneficiaries(value, fullData)
           if (formatted) {
-            addField(field.pdfLabel || field.label || '', formatted)
+            addField(
+              field.pdfLabel || field.label || '',
+              formatted,
+              0,
+              false,
+              resolveFieldDisplayAs(field),
+            )
           }
         }
         return
@@ -151,7 +163,13 @@ export function addSchemaSectionToPDF(
       if (field.component === 'PersonSelector') {
         if (value) {
           const personName = formatPersonName(value, fullData)
-          addField(field.pdfLabel || field.label || '', personName)
+          addField(
+            field.pdfLabel || field.label || '',
+            personName,
+            0,
+            false,
+            resolveFieldDisplayAs(field),
+          )
         }
         return
       }
@@ -291,7 +309,13 @@ export function addSchemaSectionToPDF(
                       const deepNestedLabel = deepNestedField.pdfLabel || deepNestedField.label || ''
                       const deepNestedIsTextarea = deepNestedField.type === 'textarea'
                       // Use more indent for deeper nesting
-                      addField(deepNestedLabel, deepNestedDisplayValue, 40, deepNestedIsTextarea)
+                      addField(
+                        deepNestedLabel,
+                        deepNestedDisplayValue,
+                        40,
+                        deepNestedIsTextarea,
+                        resolveFieldDisplayAs(deepNestedField),
+                      )
                     })
 
                     ensureSpace(15)
@@ -359,7 +383,13 @@ export function addSchemaSectionToPDF(
               const nestedLabel = nestedField.pdfLabel || nestedField.label || ''
               const nestedIsTextarea = nestedField.type === 'textarea'
               // Use indent to show nesting visually
-              addField(nestedLabel, nestedDisplayValue, 20, nestedIsTextarea)
+              addField(
+                nestedLabel,
+                nestedDisplayValue,
+                20,
+                nestedIsTextarea,
+                resolveFieldDisplayAs(nestedField),
+              )
             })
 
             ensureSpace(15)
@@ -444,7 +474,7 @@ export function addSchemaSectionToPDF(
       const label = field.pdfLabel || field.label || ''
       // Pass isTextarea flag for textarea fields to preserve line breaks
       const isTextarea = field.type === 'textarea'
-      addField(label, displayValue, 0, isTextarea)
+      addField(label, displayValue, 0, isTextarea, resolveFieldDisplayAs(field))
     })
 
     // Add spacing after each item

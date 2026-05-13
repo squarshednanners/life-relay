@@ -1,7 +1,7 @@
 import type { Config } from 'tailwindcss';
 import { tokens } from './src/tokens';
 
-const { color, typography, radius, witnessLine, breakpoint, shadow } = tokens;
+const { color, typography, radius, witnessLine, breakpoint, shadow, spacing } = tokens;
 
 const config: Config = {
   darkMode: 'class',
@@ -58,6 +58,12 @@ const config: Config = {
         focus: shadow.focus,
         hover: shadow.hover,
         modal: shadow.modal,
+      },
+      spacing: {
+        // Witness Line content offset — canonical `space-6` (24px). Exposed
+        // here so utilities like `pl-witness-padding` resolve via the same
+        // token consumed by pdf-lib (`pdfSpacing.witnessLinePaddingLeftPt`).
+        'witness-padding': spacing.witnessLinePaddingLeft,
       },
     },
   },

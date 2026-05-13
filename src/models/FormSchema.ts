@@ -119,6 +119,25 @@ export interface FormFieldSchema {
   // Conditional visibility
   visible?: VisibilityCondition | VisibilityCondition[] // Show/hide based on other fields
   
+  // Typographic Inversion (Story 1.6)
+  //
+  // 'prose' — value renders in Inter at body-md (16px / 16pt) regular weight.
+  //           This hint affects PDF rendering only — the screen FieldRenderer
+  //           uses uniform prose typography on every input (consistent editing
+  //           surface).
+  // 'mono'  — value renders in JetBrains Mono at mono-md (16px / 16pt) regular
+  //           in the PDF.
+  //
+  // Default resolution (see `resolveFieldDisplayAs`):
+  //   - 'mono' for `password` type only (structured scan target).
+  //   - 'prose' for every other type, including `tel` (phone numbers read
+  //     fine in proportional font).
+  // Schema authors should override `text` fields that hold structured data
+  // (crypto addresses, BIP-39 phrases, fingerprints, IBAN/SWIFT, IPFS hashes,
+  // tax IDs, API keys, recovery codes) to 'mono' so the eye can compare
+  // character by character on the printed runbook.
+  displayAs?: 'prose' | 'mono'
+
   // PDF generation (full vault PDF via schemaToPdf.ts)
   pdfLabel?: string // Optional different label for PDF
   pdfFormat?: (value: any) => string // Custom formatter for PDF
@@ -284,5 +303,41 @@ export function getVisibleFields(
   data: any
 ): FormFieldSchema[] {
   return fields.filter(field => evaluateVisibility(field.visible, data))
+}
+
+/**
+ * Resolve the effective display mode for a field's value (Story 1.6 —
+ * Typographic Inversion).
+ *
+ *   prose — Inter body-md, regular weight. Free-form text, descriptions,
+ *           addresses, option labels, names, phone numbers, emails.
+ *   mono  — JetBrains Mono mono-md, regular weight. Structured data the
+ *           eye needs to compare character-by-character (wallet addresses,
+ *           account numbers, recovery codes, BIP-39 phrases, fingerprints).
+ *
+ * Schema's `displayAs` wins; otherwise type-based defaults: `password`
+ * defaults to mono (passwords are character-by-character scan targets);
+ * everything else defaults to prose. Schema authors opt-in to mono for
+ * structured `text` fields (crypto addresses, account numbers, etc.).
+ *
+ * If a schema author typos `displayAs` to anything other than 'prose' or
+ * 'mono', the resolver normalizes to prose and (in dev mode) emits a
+ * console warning so the typo surfaces during schema review rather than
+ * silently falling through.
+ */
+export function resolveFieldDisplayAs(field: FormFieldSchema): 'prose' | 'mono' {
+  const raw = field.displayAs
+  if (raw === 'prose' || raw === 'mono') return raw
+  if (raw !== undefined) {
+    // Typo guard. TypeScript's union narrows this case to never at compile
+    // time, but raw JSON imports / dynamic schema authoring would slip a
+    // bad value through. Warn loudly so it gets fixed.
+    // eslint-disable-next-line no-console
+    console.warn(
+      `resolveFieldDisplayAs: unexpected displayAs="${String(raw)}" on field "${field.name ?? 'unnamed'}" — falling back to 'prose'. Valid values: 'prose' | 'mono'.`,
+    )
+  }
+  if (field.type === 'password') return 'mono'
+  return 'prose'
 }
 

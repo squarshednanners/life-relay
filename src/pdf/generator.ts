@@ -1,4 +1,4 @@
-import { PDFDocument, PDFRef, PDFArray, PDFDict, PDFName, PDFNumber, PDFString, rgb } from 'pdf-lib'
+import { PDFDocument, PDFRef, PDFArray, PDFDict, PDFName, PDFNumber, PDFString, StandardFonts, rgb } from 'pdf-lib'
 import type { PDFPage, PDFFont } from 'pdf-lib'
 import type { DeathboxData } from '@/models/DeathboxData'
 import { getSchemasByGroup } from '@/schemas/index'
@@ -37,14 +37,59 @@ function sanitize(text: string): string {
   return text
     .replace(/[\u2018\u2019\u2032]/g, "'")
     .replace(/[\u201C\u201D]/g, '"')
-    .replace(/\u2014/g, '--')
+    // Convert non-ASCII dashes / arrows to single-char ASCII so the
+    // output never contains the multi-char sequences that trigger
+    // JetBrains Mono's programming ligatures (`--`, `->`, `<-`). Those
+    // ligature glyphs have malformed CFF data in the WOFF subset and
+    // crash fontkit. The Helvetica fallback in `addField` handles JBM
+    // crashes at draw-time, but avoiding the trigger is faster + quieter.
+    .replace(/\u2014/g, '-') // em dash \u2192 single hyphen (was '--')
     .replace(/\u2013/g, '-')
     .replace(/\u2026/g, '...')
-    .replace(/\u2192/g, '->')   // →
-    .replace(/\u2190/g, '<-')   // ←
+    .replace(/\u2192/g, '>')   // →
+    .replace(/\u2190/g, '<')   // ←
     .replace(/\u2191/g, '^')    // ↑
     .replace(/\u2193/g, 'v')    // ↓
+    // Collapse user-typed multi-hyphens to a single hyphen — JBM's `--`
+    // ligature glyph has malformed CFF data in the WOFF subset and
+    // crashes fontkit. Loses some typographic richness but preserves
+    // separator semantics. The Helvetica fallback in addField still
+    // catches anything that slips through.
+    .replace(/--+/g, '-')
     .replace(/[^\x20-\x7E\n\r\t]/g, '?')
+}
+
+/**
+ * Defensive text-width measurement.
+ *
+ * `font.widthOfTextAtSize` calls fontkit's full OpenType layout/shaping
+ * engine, which can throw "Trying to access beyond buffer length" on
+ * certain subsetted fonts with malformed CFF charstrings (e.g.,
+ * JetBrains Mono in some @fontsource releases). One bad glyph would
+ * otherwise kill the entire PDF generation.
+ *
+ * Fallback heuristic: estimate width per character. ~0.55 em is a
+ * reasonable average for proportional Inter; ~0.6 em for monospace.
+ * The fallback is imperfect — wrapped lines may be slightly too short
+ * or too long — but the PDF still generates with all content present.
+ */
+const FONT_MEASURE_FALLBACK_WARNED = new WeakSet<PDFFont>()
+function safeMeasure(text: string, fontSize: number, font: PDFFont): number {
+  try {
+    return font.widthOfTextAtSize(text, fontSize)
+  } catch (err) {
+    if (!FONT_MEASURE_FALLBACK_WARNED.has(font)) {
+      FONT_MEASURE_FALLBACK_WARNED.add(font)
+      console.error(
+        'PDF text layout: font.widthOfTextAtSize threw — falling back to char-width estimate. PDF wrapping will be approximate for this font.',
+        err,
+      )
+    }
+    // ~0.55 em per character for proportional fonts; close enough for
+    // wrap-line bucketing. Monospace fonts measure slightly wider but
+    // the fallback is intentionally conservative (wraps a touch early).
+    return text.length * fontSize * 0.55
+  }
 }
 
 function wrapText(text: string, maxWidth: number, fontSize: number, font: PDFFont): string[] {
@@ -56,7 +101,7 @@ function wrapText(text: string, maxWidth: number, fontSize: number, font: PDFFon
   for (const w of words) {
     if (!w) continue
     const test = cur ? `${cur} ${w}` : w
-    if (font.widthOfTextAtSize(test, fontSize) > maxWidth && cur) {
+    if (safeMeasure(test, fontSize, font) > maxWidth && cur) {
       lines.push(cur)
       cur = w
     } else {
@@ -78,7 +123,7 @@ function wrapTextarea(text: string, maxWidth: number, fontSize: number, font: PD
     for (const w of words) {
       if (!w) continue
       const test = cur ? `${cur} ${w}` : w
-      if (font.widthOfTextAtSize(test, fontSize) > maxWidth && cur) {
+      if (safeMeasure(test, fontSize, font) > maxWidth && cur) {
         lines.push(cur)
         cur = w
       } else {
@@ -112,6 +157,12 @@ export async function generatePDFDocument(
   const font: PDFFont = fonts.bodyRegular
   const bold: PDFFont = fonts.bodyMedium
   const heading: PDFFont = fonts.headingMedium
+  const mono: PDFFont = fonts.monoRegular
+  // Helvetica fallback — pdf-lib's built-in StandardFont. Does NOT go
+  // through fontkit, so layout cannot fail with the "buffer length"
+  // RangeError that some subsetted WOFF glyphs trigger. Used as a
+  // data-preserving fallback in `addField` when the primary font throws.
+  const helveticaFallback: PDFFont = await pdfDoc.embedFont(StandardFonts.Helvetica)
 
   let page: PDFPage = null as any
   let y = PAGE_H - MARGIN
@@ -203,77 +254,125 @@ export async function generatePDFDocument(
     y -= 20
   }
 
-  // Label: value field pair
+  // Label: value field pair.
+  //
+  // Typographic Inversion (Story 1.6) — print-appropriate density.
+  //   Label  — bodyMedium @ 8.5pt (`PDF_LABEL_SIZE`), GRAY.
+  //   Value  — prose: bodyRegular @ 10pt (`PDF_VALUE_PROSE_SIZE`), DARK.
+  //          — mono:  monoRegular @ 10pt (`PDF_VALUE_MONO_SIZE`), DARK.
+  //
+  // These sizes are deliberately smaller than the screen `body-md`/`body-sm`
+  // tokens because printed documents are read at near-100% scale and the
+  // density of a runbook benefits from compact typography. The inversion
+  // (label smaller + lighter than value) is preserved by weight + color
+  // delta + the stacked layout — not by dramatic size difference.
+  //
+  // This applies to the SCHEMA-DRIVEN full vault PDF. The bespoke PDFs
+  // (emergencySheet, walletCard, attorneyPrep, runbook) have hand-tuned
+  // page budgets and use their own typography.
+  const PDF_LABEL_SIZE = 8.5
+  const PDF_VALUE_PROSE_SIZE = 10
+  const PDF_VALUE_MONO_SIZE = 10
   const addField = (
     label: string,
     value: string | undefined,
     indent: number = 0,
     isTextarea: boolean = false,
+    displayAs: 'prose' | 'mono' = 'prose',
   ) => {
     if (!value || value.trim() === '' || value === 'N/A') return
-    ensureSpace(18)
+
+    const labelSize = PDF_LABEL_SIZE
+    const valueSize = displayAs === 'mono' ? PDF_VALUE_MONO_SIZE : PDF_VALUE_PROSE_SIZE
+    const valueFont = displayAs === 'mono' ? mono : font
+    // Line height proportional to size — use ~1.3 for tight-but-readable PDF
+    // rhythm. (Token-side line-height ratios are wider for screen comfort;
+    // PDF density is tighter by convention.)
+    const valueLineHeight = Math.round(valueSize * 1.3)
+    const labelLineHeight = Math.round(labelSize * 1.3)
+    const postFieldGap = 6
 
     const fieldX = MARGIN + 12 + indent
     const cleanLabel = label
       ? sanitize(label.endsWith(':') ? label : `${label}:`)
       : ''
-    const labelW = cleanLabel ? bold.widthOfTextAtSize(cleanLabel, 8.5) + 6 : 0
-    const valueX = fieldX + labelW
-    const maxValW = MARGIN + CONTENT_W - valueX
 
-    // Guard: if label is so wide there's no room for value, fall back to stacked layout
-    if (maxValW < 80) {
-      // Stacked: label on its own line, value below full-width
-      if (cleanLabel) {
-        page.drawText(cleanLabel, {
-          x: fieldX,
-          y,
-          size: 8.5,
-          font: bold,
-          color: GRAY,
-        })
-        y -= 12
-      }
-      const stackedMaxW = MARGIN + CONTENT_W - fieldX
-      const lines = isTextarea
-        ? wrapTextarea(value, stackedMaxW, 10, font)
-        : wrapText(value, stackedMaxW, 10, font)
-      for (const line of lines) {
-        if (y < MARGIN + 14) newPage()
-        page.drawText(line, { x: fieldX, y, size: 10, font, color: DARK })
-        y -= 13
-      }
-      y -= 3
-      return
-    }
+    // Wrap the value FIRST so we know how tall this field will be. Then
+    // reserve enough space for label + every wrapped line up front. Without
+    // this, ensureSpace() only covered ONE value line — a multi-line value
+    // could split: label on page N, value continues on page N+1. (Story 1.6
+    // code review caught the orphan-label hazard.)
+    const stackedMaxW = MARGIN + CONTENT_W - fieldX
+    const lines = isTextarea
+      ? wrapTextarea(value, stackedMaxW, valueSize, valueFont)
+      : wrapText(value, stackedMaxW, valueSize, valueFont)
+    const labelHeight = cleanLabel ? labelLineHeight : 0
+    ensureSpace(labelHeight + lines.length * valueLineHeight + postFieldGap)
 
-    // Inline layout: label then value on same line
+    // With the larger value type, stacked layout (label above value) is the
+    // only legible choice — inline label+value at body-sm / body-lg would
+    // produce a noticeable baseline mismatch. Always stack.
     if (cleanLabel) {
       page.drawText(cleanLabel, {
         x: fieldX,
         y,
-        size: 8.5,
+        size: labelSize,
         font: bold,
         color: GRAY,
       })
+      y -= labelLineHeight
     }
 
-    const lines = isTextarea
-      ? wrapTextarea(value, maxValW, 10, font)
-      : wrapText(value, maxValW, 10, font)
-
+    // Wrap drawText in a try/catch per line. fontkit can throw during
+    // text layout on certain subsetted-font glyphs (a "Trying to access
+    // beyond buffer length" RangeError originating in `_getCBox` /
+    // `_getMetrics`). When that happens, retry the same line with the
+    // Helvetica StandardFont — pdf-lib's built-in font, which does NOT
+    // go through fontkit's layout engine and is reliable for ASCII.
+    //
+    // The user gets the actual data (just in a different, less-pretty
+    // font for the affected line) rather than a useless placeholder.
     for (const line of lines) {
-      if (y < MARGIN + 14) newPage()
-      page.drawText(line, {
-        x: valueX,
-        y,
-        size: 10,
-        font,
-        color: DARK,
-      })
-      y -= 13
+      if (y < MARGIN + valueLineHeight) newPage()
+      try {
+        page.drawText(line, { x: fieldX, y, size: valueSize, font: valueFont, color: DARK })
+      } catch (err) {
+        console.error(
+          `PDF text draw failed for line "${line}" in field "${label}" — retrying with Helvetica fallback to preserve the data.`,
+          err,
+        )
+        try {
+          page.drawText(line, {
+            x: fieldX,
+            y,
+            size: valueSize,
+            font: helveticaFallback,
+            color: DARK,
+          })
+        } catch (err2) {
+          // Even Helvetica fails (should be unreachable for ASCII —
+          // sanitize() strips non-ASCII upstream). Last-ditch: note the
+          // unrenderable line so the survivor knows data is missing.
+          console.error(
+            `PDF text draw failed even with Helvetica fallback for line "${line}" — line dropped.`,
+            err2,
+          )
+          try {
+            page.drawText('[content unrenderable — see schema data]', {
+              x: fieldX,
+              y,
+              size: valueSize,
+              font: helveticaFallback,
+              color: GRAY,
+            })
+          } catch {
+            // Truly give up. The field is dropped.
+          }
+        }
+      }
+      y -= valueLineHeight
     }
-    y -= 3
+    y -= postFieldGap
   }
 
   /* ── Title page ──────────────────────────────────────── */

@@ -18,23 +18,29 @@
 // Each color is an HSL string. Tailwind consumes these directly; pdf-lib code
 // converts via the `pdfRgb()` helper at the bottom of this file.
 
+// Shared palette anchors — referenced both inside `color.accent`/`surface` and
+// inside `color.emo`, so a future tweak to the canonical value propagates
+// (Story 1.1 review found these were aliased by literal string duplication).
+const ACCENT_700 = 'hsl(25, 35%, 40%)' as const;
+const SURFACE_IVORY = 'hsl(40, 25%, 98%)' as const;
+
 export const color = {
   // Brand accent — Deep Warm Umber (UX Step 8). Color of old legal paper,
   // notary stamps, archival folders. Provisional pending five-conversation
   // user research validation.
   accent: {
-    '050': 'hsl(25, 30%, 96%)',
+    '50': 'hsl(25, 30%, 96%)',
     '100': 'hsl(25, 35%, 92%)',
     '500': 'hsl(25, 28%, 60%)',
     '600': 'hsl(25, 32%, 50%)',
-    '700': 'hsl(25, 35%, 40%)', // primary brand accent (default)
+    '700': ACCENT_700, // primary brand accent (default)
     '800': 'hsl(25, 36%, 30%)',
     '900': 'hsl(25, 38%, 22%)',
   },
 
   // Neutral surface — warm grays with slight umber undertone.
   surface: {
-    ivory: 'hsl(40, 25%, 98%)',
+    ivory: SURFACE_IVORY,
     bone: 'hsl(35, 18%, 95%)',
     stone: 'hsl(30, 12%, 88%)',
   },
@@ -66,9 +72,12 @@ export const color = {
   // Emotional semantic layer — distinct from functional status. Carries
   // relational meaning ("this matters" / "you're at rest" / "decision pending")
   // rather than system state.
+  //
+  // Aliased by shared-constant reference so future tweaks to the underlying
+  // value propagate (see ACCENT_700 / SURFACE_IVORY at the top of this file).
   emo: {
-    matters: 'hsl(25, 35%, 40%)', // same as accent-700
-    rest: 'hsl(40, 25%, 98%)', // same as surface-ivory
+    matters: ACCENT_700,
+    rest: SURFACE_IVORY,
     pending: 'hsl(35, 30%, 85%)',
   },
 
@@ -153,13 +162,16 @@ export const radius = {
 // WITNESS LINE
 // ============================================================================
 //
-// The structural visual signature. 3px accent-700 left border on every
-// section that contains user-recorded data. Renders identically in Tailwind
-// and pdf-lib.
+// The structural visual signature. A 3-unit-thick accent-700 left border on
+// every section that contains user-recorded data. The screen renders 3 CSS
+// pixels; the PDF renders 3 pdf-lib points (≈ 4 CSS px at 72dpi). Both are
+// the canonical "3 units" in their own coordinate space — pixel-perfect
+// thickness parity is NOT a goal, the cross-surface contract is the
+// structural signal "user-recorded data lives here".
 
 export const witnessLine = {
   width: '3px',
-  widthPt: 3, // pdf-lib points
+  widthPt: 3, // pdf-lib points (1pt = 1/72 in; ~33% thicker than 3px on screen)
   color: color.accent['700'],
 } as const;
 
@@ -435,8 +447,12 @@ export function hslStringToRgb(hsl: string): RgbTuple {
     throw new Error(`tokens: cannot parse HSL string "${hsl}"`);
   }
   const h = parseFloat(match[1]);
-  const s = parseFloat(match[2]) / 100;
-  const l = parseFloat(match[3]) / 100;
+  // Clamp saturation and lightness to [0, 1] — out-of-range token values would
+  // otherwise produce RGB outside [0, 1] and pdf-lib's `rgb()` would throw at
+  // runtime. Clamping at the parser boundary keeps token authoring forgiving
+  // (and the test suite catches the documented-range cases).
+  const s = Math.min(1, Math.max(0, parseFloat(match[2]) / 100));
+  const l = Math.min(1, Math.max(0, parseFloat(match[3]) / 100));
 
   const c = (1 - Math.abs(2 * l - 1)) * s;
   const hh = ((h % 360) + 360) % 360 / 60;

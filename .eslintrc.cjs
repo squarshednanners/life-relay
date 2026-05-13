@@ -38,38 +38,14 @@ module.exports = {
     // are noise.
     'no-undef': 'off',
     'no-unused-vars': 'off',
-    // Grief-mode contract: only Tier 1 wrappers in `src/components/ui/`
-    // may import directly from `reka-ui`. The wrapper override re-allows
-    // it for that directory only. Adding more wrappers? Put them under
-    // `src/components/ui/`. See `src/components/ui/README.md`.
-    'no-restricted-imports': [
-      'error',
-      {
-        patterns: [
-          {
-            // Match the bare specifier AND any subpath (`reka-ui/dist/...`,
-            // `reka-ui/namespaced/...`). Without the wildcard, deep imports
-            // would slip through the grief-mode contract.
-            group: ['reka-ui', 'reka-ui/*', 'reka-ui/**'],
-            message:
-              'Direct reka-ui imports are not allowed outside src/components/ui/. Use the Tier 1 wrappers (UiDialog, UiPopover, UiTabs, UiTooltip) instead.',
-          },
-        ],
-      },
-    ],
   },
   overrides: [
-    // Inside the Tier 1 wrapper directory, reka-ui imports are allowed.
-    {
-      files: ['src/components/ui/**/*.{vue,ts}'],
-      rules: {
-        'no-restricted-imports': 'off',
-      },
-    },
-    // Wrappers MUST NOT carry hardcoded user-facing strings — all copy
-    // flows through props/slots from the consumer (Companion Voice
-    // discipline). The rule is scoped to the wrapper directory only;
-    // the rest of the codebase is unaffected by this story.
+    // Wrappers in `src/components/ui/` MUST NOT carry hardcoded user-facing
+    // strings — all copy flows through props/slots from the consumer
+    // (Companion Voice discipline). The rule is scoped to the wrapper
+    // directory only; broader copy-discipline enforcement on feature views
+    // is the responsibility of the planned Companion Voice ESLint rule
+    // (architecture.md § Companion Voice Enforcement).
     {
       files: ['src/components/ui/**/*.vue'],
       rules: {

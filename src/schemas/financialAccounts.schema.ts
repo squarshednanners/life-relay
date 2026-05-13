@@ -63,6 +63,7 @@ export const financialAccountsSchema: FormSectionSchema = {
       name: 'accountNumber',
       label: 'Account Number',
       type: 'text',
+      displayAs: 'mono',
       placeholder: 'Account #',
       colSpan: 1,
       pdfViews: {
