@@ -12,7 +12,7 @@
  * file run.
  */
 import 'fake-indexeddb/auto'
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { IDBFactory } from 'fake-indexeddb'
 import { LocalDataStore } from '../LocalDataStore'
 import { isEncrypted } from '@/utils/encryption'
@@ -139,5 +139,48 @@ describe('LocalDataStore — encrypted export/import round-trip (Story 1.9 + 1.1
     const store = new LocalDataStore()
     const exported = await store.exportToJSON()
     expect(exported).toBe('null')
+  })
+})
+
+describe('LocalDataStore — quota-exceeded handling (Story 1.8)', () => {
+  it('rethrows quota errors as StorageQuotaExceededError + flips the quota composable state', async () => {
+    const { StorageQuotaExceededError } = await import('../errors')
+    const { useStorageQuota, _resetStorageQuotaForTests } = await import(
+      '@/composables/useStorageQuota'
+    )
+    _resetStorageQuotaForTests()
+    expect(useStorageQuota().state.value).toBe('unknown')
+
+    // Patch the global IDBObjectStore.put to throw a quota error on the
+    // next call. Cleaner than mocking Dexie internals because the failure
+    // bubbles through the same path real browsers use.
+    const realPut = IDBObjectStore.prototype.put
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    let restored = false
+    IDBObjectStore.prototype.put = function (this: IDBObjectStore) {
+      // Restore immediately so subsequent tests see the real method.
+      if (!restored) {
+        IDBObjectStore.prototype.put = realPut
+        restored = true
+      }
+      const err = new DOMException(
+        'simulated quota exceeded',
+        'QuotaExceededError',
+      )
+      // IndexedDB throws synchronously when initiating the request.
+      throw err
+    }
+
+    try {
+      const store = new LocalDataStore()
+      await expect(store.save(makeFixture())).rejects.toBeInstanceOf(
+        StorageQuotaExceededError,
+      )
+      expect(useStorageQuota().state.value).toBe('full')
+    } finally {
+      IDBObjectStore.prototype.put = realPut
+      consoleSpy.mockRestore()
+      _resetStorageQuotaForTests()
+    }
   })
 })

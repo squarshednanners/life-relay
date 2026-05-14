@@ -23,6 +23,7 @@ import {
   collectFieldsByPdfView,
   type CollectedItem,
 } from './schemaPdfViews'
+import { MANUAL_ENTRY_BLANK_PLACEHOLDER } from './manualEntry'
 import { pdfColor, pdfPage } from '@/tokens'
 
 const TEAL = rgb(...pdfColor.brandTeal)
@@ -71,9 +72,18 @@ export interface WalletCardData {
 /**
  * Find a single field value in a collected item by field name.
  * Returns empty string if missing or empty.
+ *
+ * Honors `manualEntryBlank` per Story 1.11 — substitutes a blank-line
+ * placeholder when the user has flagged the field for handwritten
+ * entry. (Defensive: no walletCard-tagged schema field has
+ * `manualEntry: true` today, but the contract says every PDF code path
+ * respects it.)
  */
 function fieldValue(item: CollectedItem, fieldName: string): string {
-  return item.fields.find((f) => f.fieldName === fieldName)?.value ?? ''
+  const field = item.fields.find((f) => f.fieldName === fieldName)
+  if (!field) return ''
+  if (field.manualEntryBlank) return MANUAL_ENTRY_BLANK_PLACEHOLDER
+  return field.value ?? ''
 }
 
 /**

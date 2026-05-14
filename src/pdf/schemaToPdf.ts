@@ -7,6 +7,7 @@
 
 import type { FormSectionSchema, FormFieldSchema } from '@/models/FormSchema'
 import { getVisibleFields, evaluateVisibility, resolveFieldDisplayAs } from '@/models/FormSchema'
+import { MANUAL_ENTRY_BLANK_PLACEHOLDER } from './manualEntry'
 import type { DeathboxData } from '@/models/DeathboxData'
 
 /**
@@ -275,7 +276,7 @@ export function addSchemaSectionToPDF(
                       
                       // If manual entry checkbox is checked, always show blank line (even if field has a value)
                       if (deepNestedIsManualEntry) {
-                        deepNestedDisplayValue = '___________________________ (write manually)'
+                        deepNestedDisplayValue = MANUAL_ENTRY_BLANK_PLACEHOLDER
                       } else if (deepNestedField.pdfFormat) {
                         deepNestedDisplayValue = deepNestedField.pdfFormat(deepNestedValue)
                       } else if (deepNestedIsEmpty) {
@@ -349,7 +350,7 @@ export function addSchemaSectionToPDF(
               
               // If manual entry checkbox is checked, always show blank line (even if field has a value)
               if (nestedIsManualEntry) {
-                nestedDisplayValue = '___________________________ (write manually)'
+                nestedDisplayValue = MANUAL_ENTRY_BLANK_PLACEHOLDER
               } else if (nestedField.pdfFormat) {
                 nestedDisplayValue = nestedField.pdfFormat(nestedValue)
               } else if (nestedIsEmpty) {
@@ -432,7 +433,7 @@ export function addSchemaSectionToPDF(
       // IMPORTANT: If manual entry checkbox is checked, always show blank line (even if field has a value)
       // This must be checked FIRST, before any other formatting
       if (isManualEntry) {
-        displayValue = '___________________________ (write manually)'
+        displayValue = MANUAL_ENTRY_BLANK_PLACEHOLDER
       } else if (field.pdfFormat) {
         displayValue = field.pdfFormat(actualValue)
       } else if (isEmpty) {

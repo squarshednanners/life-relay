@@ -20,6 +20,7 @@ import { PDFDocument, rgb } from 'pdf-lib'
 import type { PDFFont } from 'pdf-lib'
 import type { DeathboxData } from '@/models/DeathboxData'
 import { estatePrepCategories, attorneyMeetingChecklist } from '@/data/willPrepCategories'
+import { MANUAL_ENTRY_BLANK_PLACEHOLDER } from './manualEntry'
 import { ESTATE_PREP_DISCLAIMER, ESTATE_PREP_PDF_FOOTER } from '@/data/willPrepDisclaimers'
 import { hasSectionData } from '@/composables/useSectionProgress'
 import { drawLifeRelayMark, drawGeneratedBy } from './pdfBranding'
@@ -219,7 +220,8 @@ export async function generateAttorneyPrepPdf(
       }
       for (const field of item.fields) {
         if (field.manualEntryBlank) {
-          drawField(field.label, '____________________', 8)
+          // Placeholder centralized in src/pdf/manualEntry.ts (Story 1.11).
+          drawField(field.label, MANUAL_ENTRY_BLANK_PLACEHOLDER, 8)
         } else {
           drawField(field.label, field.value, 8)
         }

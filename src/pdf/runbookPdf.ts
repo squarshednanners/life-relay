@@ -5,6 +5,7 @@ import { runbookPhases, runbookDonts } from '@/data/runbookSteps'
 import { drawGeneratedBy } from '@/pdf/pdfBranding'
 import { embedPdfFonts } from '@/pdf/fonts'
 import { collectFieldsByPdfView } from '@/pdf/schemaPdfViews'
+import { MANUAL_ENTRY_BLANK_PLACEHOLDER } from '@/pdf/manualEntry'
 import { schemaRegistry } from '@/schemas'
 import { pdfColor, pdfPage } from '@/tokens'
 
@@ -163,20 +164,31 @@ export async function generateRunbookPdfDocument(data: DeathboxData): Promise<Ui
       const roleField = item.fields.find((f) => f.fieldName === 'role')
       const phoneField = item.fields.find((f) => f.fieldName === 'phone')
 
-      const name = nameField?.value ?? 'Unnamed'
-      page!.drawText(sanitize(name), {
+      // manualEntryBlank guard (Story 1.11) — defensive: no current
+      // importantContacts field has `manualEntry: true`, but the
+      // per-AC contract says every PDF code path honors the flag.
+      const nameValue = nameField?.manualEntryBlank
+        ? MANUAL_ENTRY_BLANK_PLACEHOLDER
+        : (nameField?.value ?? 'Unnamed')
+      page!.drawText(sanitize(nameValue), {
         x: MARGIN, y, size: 10, font: bold, color: DARK,
       })
-      const nameW = bold.widthOfTextAtSize(sanitize(name), 10)
-      if (roleField?.value) {
-        page!.drawText(`  -  ${sanitize(roleField.value)}`, {
+      const nameW = bold.widthOfTextAtSize(sanitize(nameValue), 10)
+      if (roleField?.value || roleField?.manualEntryBlank) {
+        const roleValue = roleField.manualEntryBlank
+          ? MANUAL_ENTRY_BLANK_PLACEHOLDER
+          : (roleField.value ?? '')
+        page!.drawText(`  -  ${sanitize(roleValue)}`, {
           x: MARGIN + nameW, y, size: 9, font, color: GRAY,
         })
       }
       y -= 12
-      if (phoneField?.value) {
+      if (phoneField?.value || phoneField?.manualEntryBlank) {
         // Phone is vault-data → JetBrains Mono per UX Step 8 typography guide.
-        page!.drawText(sanitize(phoneField.value), {
+        const phoneValue = phoneField.manualEntryBlank
+          ? MANUAL_ENTRY_BLANK_PLACEHOLDER
+          : (phoneField.value ?? '')
+        page!.drawText(sanitize(phoneValue), {
           x: MARGIN + 12, y, size: 10, font: mono, color: DARK,
         })
         y -= 12

@@ -18,6 +18,7 @@ import type { PDFFont } from 'pdf-lib'
 import type { DeathboxData } from '@/models/DeathboxData'
 import { drawLifeRelayMark, drawGeneratedBy } from './pdfBranding'
 import { embedPdfFonts } from './fonts'
+import { MANUAL_ENTRY_BLANK_PLACEHOLDER } from './manualEntry'
 import { drawWitnessLine, WITNESS_LINE_DEFAULT_HEIGHT } from './witnessLine'
 import {
   collectFieldsByPdfView,
@@ -357,8 +358,9 @@ export async function generateEmergencySheet(
       for (const field of item.fields) {
         if (y < MARGIN + 30) break
         if (field.manualEntryBlank) {
-          // Render blank line for handwritten entry per FR8
-          drawField(field.label, '____________________', indent, fieldMaxW)
+          // Render blank line for handwritten entry per FR8.
+          // Placeholder centralized in src/pdf/manualEntry.ts (Story 1.11).
+          drawField(field.label, MANUAL_ENTRY_BLANK_PLACEHOLDER, indent, fieldMaxW)
         } else {
           drawField(field.label, field.value, indent, fieldMaxW)
         }

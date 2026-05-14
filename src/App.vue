@@ -161,6 +161,41 @@
     </div>
 
     <Toast />
+
+    <!-- Story 1.8 — singleton storage-quota surfaces. Banner renders only
+         when state === 'warning' (≥80% usage); modal renders when state
+         === 'full' (≥99% or a failed save with QuotaExceededError). Both
+         consume the singleton state from `useStorageQuota()`. -->
+    <div class="fixed bottom-4 right-4 z-40 max-w-md">
+      <StorageQuotaBanner
+        warning-message="Your vault is using more than 80% of this browser's storage. Consider exporting a backup so you can free up space."
+        dismiss-label="Dismiss storage warning"
+      />
+    </div>
+    <StorageFullModal
+      title="Storage limit reached"
+      body="Your vault has reached this browser's storage limit. To save new changes, please export a backup of your vault, then remove attachments or older entries to free space."
+      confirm-label="I understand"
+      close-label="Close storage limit notice"
+    />
+
+    <!-- Story 1.13 — migration-failure surfaces. The modal handles the
+         soft-failure case (rollback succeeded, data is safe). The
+         full-screen NeedsManualImport overlays everything when the
+         rollback itself was missing/broken — the user must restore
+         from a backup before the app can be used. -->
+    <MigrationFailedModal
+      title="A vault upgrade was rolled back"
+      body="We've restored your data to its previous state so nothing is lost. The upgrade will try again next time you open the app — if it keeps failing, please reach out via the project issues page."
+      confirm-label="I understand"
+      close-label="Close migration notice"
+    />
+    <NeedsManualImport
+      title="Your vault couldn't be loaded"
+      body="To recover, please import your last JSON backup (encrypted or unencrypted). The current data on this device can't be safely opened."
+      cta-label="Open Import Vault"
+      cta-href="/dashboard"
+    />
   </div>
 </template>
 
@@ -171,6 +206,10 @@ import { getIcon } from '@/utils/icons'
 import { hasSectionData as checkSectionData } from '@/composables/useSectionProgress'
 import Toast from '@/components/Toast.vue'
 import LifeRelayLogo from '@/components/LifeRelayLogo.vue'
+import StorageQuotaBanner from '@/components/StorageQuotaBanner.vue'
+import StorageFullModal from '@/components/StorageFullModal.vue'
+import MigrationFailedModal from '@/components/MigrationFailedModal.vue'
+import NeedsManualImport from '@/components/NeedsManualImport.vue'
 
 const store = useLegacyStore()
 const isMobileMenuOpen = ref(false)

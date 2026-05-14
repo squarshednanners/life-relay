@@ -211,6 +211,36 @@ import PasswordPromptModal from '@/components/PasswordPromptModal.vue'
 import ProgressTracker from '@/components/ProgressTracker.vue'
 import QuickStartModal from '@/components/QuickStartModal.vue'
 import { isEncrypted } from '@/utils/encryption'
+import { useMigrationStatus } from '@/composables/useMigrationStatus'
+import {
+  MigrationFailedError,
+  LoadRequiresManualImportError,
+} from '@/services/errors'
+
+const migrationStatus = useMigrationStatus()
+
+/**
+ * Funnel a caught error from an import path into the right surface:
+ *   - `LoadRequiresManualImportError` → full-screen NeedsManualImport
+ *     (the JSON's migration failed AND no rollback exists, so it's
+ *     equivalent to a load that left the user stranded)
+ *   - `MigrationFailedError` → soft-failure modal
+ *   - anything else → toast (current behavior)
+ *
+ * Returns true if the error was a migration error (and the toast should
+ * be suppressed), false otherwise.
+ */
+function routeMigrationError(error: unknown): boolean {
+  if (error instanceof LoadRequiresManualImportError) {
+    migrationStatus.markRequiresManualImport(error.message)
+    return true
+  }
+  if (error instanceof MigrationFailedError) {
+    migrationStatus.markRolledBack(error.message)
+    return true
+  }
+  return false
+}
 
 /**
  * Wait for the browser to actually paint pending DOM updates before
@@ -379,7 +409,12 @@ async function handleFileImport(event: Event) {
       showToast('Data imported successfully!', 'success')
     }
   } catch (error) {
-    showToast('Error reading file. Please check the file format.', 'error')
+    if (routeMigrationError(error)) {
+      // The migration-status singleton now drives the right surface;
+      // suppress the generic toast to avoid double-signalling.
+    } else {
+      showToast('Error reading file. Please check the file format.', 'error')
+    }
   }
   target.value = ''
 }
@@ -406,8 +441,10 @@ async function handlePasswordConfirm(password: string) {
       pendingFileContent.value = null
     }
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Operation failed'
-    showToast(errorMessage, 'error')
+    if (!routeMigrationError(error)) {
+      const errorMessage = error instanceof Error ? error.message : 'Operation failed'
+      showToast(errorMessage, 'error')
+    }
   } finally {
     pendingAction.value = null
   }
