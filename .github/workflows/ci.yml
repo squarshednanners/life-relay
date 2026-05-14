@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel in-progress runs of the same workflow on the same ref when a new push comes in.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Lint · Type-check · Test · Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          # README pins Node 18+. Use 20.x — current LTS — for headroom.
+          node-version: '20.x'
+          cache: npm
+
+      - name: Install dependencies
+        # `npm ci` uses package-lock.json verbatim — no lockfile drift, no resolution surprises.
+        run: npm ci
+
+      - name: Lint (no auto-fix in CI)
+        run: npm run lint:check
+
+      - name: Type-check + build
+        # `vue-tsc && vite build` — the build script already gates on type errors.
+        run: npm run build
+
+      - name: Run tests
+        run: npm run test:ci
