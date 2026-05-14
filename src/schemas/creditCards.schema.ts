@@ -7,6 +7,15 @@ export const creditCardsSchema: FormSectionSchema = {
   isArray: true,
   arrayItemLabel: (index, item) => item.cardName || `Credit Card ${index + 1}`,
   pdfGroup: 'Finances',
+  pdfViews: {
+    attorneyPrep: {
+      sectionLabel: 'Credit Cards',
+      itemLabel: (item) =>
+        String(item.cardName ?? '') ||
+        String(item.issuer ?? '') ||
+        'Credit Card',
+    },
+  },
   fields: [
     {
       name: 'cardName',
@@ -21,6 +30,9 @@ export const creditCardsSchema: FormSectionSchema = {
       type: 'text',
       placeholder: 'Bank or credit card company',
       colSpan: 1,
+      pdfViews: {
+        attorneyPrep: { include: true, priority: 20, label: 'Issuer' },
+      },
     },
     {
       name: 'cardNumber',
@@ -28,6 +40,9 @@ export const creditCardsSchema: FormSectionSchema = {
       type: 'text',
       placeholder: 'Last 4 digits',
       colSpan: 1,
+      pdfViews: {
+        attorneyPrep: { include: true, priority: 10, label: 'Card #' },
+      },
     },
     {
       name: 'expirationDate',

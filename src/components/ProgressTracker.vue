@@ -3,8 +3,13 @@
     <!-- Overall Progress -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
       <div class="flex items-center justify-between mb-3">
-        <h3 class="text-lg font-semibold">Overall Progress</h3>
-        <span class="text-2xl font-bold" :class="overallColorClass">
+        <h3 class="text-lg font-semibold">
+          Overall Progress
+        </h3>
+        <span
+          class="text-2xl font-bold"
+          :class="overallColorClass"
+        >
           {{ overallProgress.percentage }}%
         </span>
       </div>
@@ -13,14 +18,17 @@
           class="h-3 rounded-full transition-all duration-500"
           :class="overallBarClass"
           :style="{ width: overallProgress.percentage + '%' }"
-        ></div>
+        />
       </div>
       <p class="text-sm text-gray-500 mt-2">
         {{ overallProgress.completed }} of {{ overallProgress.total }} sections completed
       </p>
 
       <!-- Suggested Next Section -->
-      <div v-if="suggestedNextSection" class="mt-4 p-3 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg">
+      <div
+        v-if="suggestedNextSection"
+        class="mt-4 p-3 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg"
+      >
         <p class="text-sm text-primary-700 dark:text-primary-300">
           <span class="font-medium">Suggested next:</span>
           <router-link
@@ -35,12 +43,22 @@
 
     <!-- Group Progress -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-      <h3 class="text-lg font-semibold mb-4">Progress by Section</h3>
+      <h3 class="text-lg font-semibold mb-4">
+        Progress by Section
+      </h3>
       <div class="space-y-5">
-        <div v-for="group in groupProgress" :key="group.name">
+        <div
+          v-for="group in groupProgress"
+          :key="group.name"
+        >
           <div class="flex items-center justify-between mb-1">
-            <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ group.name }}</h4>
-            <span class="text-xs font-medium" :class="groupColorClass(group.percentage)">
+            <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              {{ group.name }}
+            </h4>
+            <span
+              class="text-xs font-medium"
+              :class="groupColorClass(group.percentage)"
+            >
               {{ group.completed }}/{{ group.total }}
             </span>
           </div>
@@ -49,7 +67,7 @@
               class="h-2 rounded-full transition-all duration-500"
               :class="groupBarClass(group.percentage)"
               :style="{ width: group.percentage + '%' }"
-            ></div>
+            />
           </div>
           <!-- Individual sections -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-1 ml-1">
@@ -88,19 +106,25 @@
                       transform="rotate(-90 10 10)"
                     />
                   </svg>
-                  <span v-else class="w-4 h-4 inline-block rounded-full border-2 border-gray-300 dark:border-gray-500"></span>
+                  <span
+                    v-else
+                    class="w-4 h-4 inline-block rounded-full border-2 border-gray-300 dark:border-gray-500"
+                  />
                 </span>
-                <span class="truncate" :class="{ 'line-through text-gray-400 dark:text-gray-500': isSectionSkipped(item.path) }">
+                <span
+                  class="truncate"
+                  :class="{ 'line-through text-gray-400 dark:text-gray-500': isSectionSkipped(item.path) }"
+                >
                   {{ item.name }}
                 </span>
               </router-link>
               <button
-                @click.prevent="toggleSkipSection(item.path)"
                 class="text-xs px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 ml-2"
                 :class="isSectionSkipped(item.path)
                   ? 'text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-200 hover:bg-primary-50 dark:hover:bg-primary-900/30'
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'"
                 :title="isSectionSkipped(item.path) ? 'Unskip this section' : 'Skip — not applicable'"
+                @click.prevent="toggleSkipSection(item.path)"
               >
                 {{ isSectionSkipped(item.path) ? 'Unskip' : 'Skip' }}
               </button>

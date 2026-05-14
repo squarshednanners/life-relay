@@ -41,6 +41,7 @@ import PetCareSchema from '@/views/PetCareSchema.vue'
 import PhotosAndMediaSchema from '@/views/PhotosAndMediaSchema.vue'
 import EstatePlanningGuide from '@/views/WillPreparation.vue'
 import Runbook from '@/views/Runbook.vue'
+import Import from '@/views/Import.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -306,6 +307,12 @@ const router = createRouter({
       name: 'settings',
       component: Settings,
       meta: { title: 'Settings | Life Relay' },
+    },
+    {
+      path: '/import',
+      name: 'import',
+      component: Import,
+      meta: { title: 'Import Data | Life Relay' },
     },
   ],
 })

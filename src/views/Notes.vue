@@ -9,9 +9,9 @@
       <form @submit.prevent="save">
         <FormField
           id="notes"
+          v-model="notes"
           label="Notes"
           type="textarea"
-          v-model="notes"
           :rows="15"
           placeholder="Any additional notes, thoughts, or information you'd like to include..."
         />

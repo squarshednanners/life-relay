@@ -18,6 +18,22 @@ export const beneficiariesSchema: FormSectionSchema = {
     notes: '',
   }),
   pdfGroup: 'People & Contacts',
+  pdfViews: {
+    walletCard: {
+      // Used by the renderer as a fallback source when fewer than 4 important
+      // contacts are tagged. Each beneficiary appears as a row labelled
+      // 'Beneficiary' with name + phone.
+      itemLabel: () => 'Beneficiary',
+    },
+    attorneyPrep: {
+      sectionLabel: 'Beneficiaries',
+      itemLabel: (item) => {
+        const name = String(item.name ?? '')
+        const type = String(item.type ?? '')
+        return [name, type ? `(${type})` : ''].filter(Boolean).join(' ')
+      },
+    },
+  },
   fields: [
     {
       name: 'name',
@@ -25,6 +41,7 @@ export const beneficiariesSchema: FormSectionSchema = {
       type: 'text',
       placeholder: 'Beneficiary Name',
       colSpan: 1,
+      pdfViews: { walletCard: { include: true, priority: 10 } },
     },
     {
       name: 'relationship',
@@ -32,6 +49,9 @@ export const beneficiariesSchema: FormSectionSchema = {
       type: 'text',
       placeholder: 'Spouse, Child, etc.',
       colSpan: 1,
+      pdfViews: {
+        attorneyPrep: { include: true, priority: 10, label: 'Relationship' },
+      },
     },
     {
       name: 'type',
@@ -53,6 +73,15 @@ export const beneficiariesSchema: FormSectionSchema = {
         min: 0,
         max: 100,
       },
+      pdfSkipIfEmpty: true,
+      pdfViews: {
+        attorneyPrep: {
+          include: true,
+          priority: 30,
+          label: 'Percentage',
+          format: (value) => (value ? `${value}%` : ''),
+        },
+      },
     },
     {
       name: 'phone',
@@ -60,6 +89,7 @@ export const beneficiariesSchema: FormSectionSchema = {
       type: 'tel',
       placeholder: '(555) 123-4567',
       colSpan: 1,
+      pdfViews: { walletCard: { include: true, priority: 20 } },
     },
     {
       name: 'email',
@@ -76,6 +106,17 @@ export const beneficiariesSchema: FormSectionSchema = {
       colSpan: 2,
       fullWidth: true,
       rows: 2,
+      pdfViews: {
+        attorneyPrep: { include: true, priority: 20, label: 'Address' },
+      },
+    },
+    {
+      name: 'documentFiles',
+      label: 'Beneficiary documents (designation forms, signed acknowledgments)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
     },
     {
       name: 'notes',
@@ -85,6 +126,10 @@ export const beneficiariesSchema: FormSectionSchema = {
       colSpan: 2,
       fullWidth: true,
       rows: 2,
+      pdfSkipIfEmpty: true,
+      pdfViews: {
+        attorneyPrep: { include: true, priority: 40, label: 'Notes' },
+      },
     },
   ],
 }

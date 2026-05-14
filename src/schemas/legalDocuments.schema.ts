@@ -6,6 +6,10 @@ export const legalDocumentsSchema: FormSectionSchema = {
   description: 'Wills, power of attorney, advance directives, and other legal documents with their locations',
   isArray: false,
   pdfGroup: 'Documents & Storage',
+  pdfViews: {
+    emergencySheet: { sectionLabel: 'LEGAL DOCUMENTS' },
+    attorneyPrep: { sectionLabel: 'Existing Legal Documents' },
+  },
   fields: [
     {
       sectionDivider: {
@@ -18,12 +22,20 @@ export const legalDocumentsSchema: FormSectionSchema = {
       type: 'text',
       placeholder: 'Where the will is stored',
       colSpan: 1,
+      pdfViews: {
+        emergencySheet: { include: true, priority: 10, label: 'Will Location' },
+        attorneyPrep: { include: true, priority: 10, label: 'Will Location' },
+      },
     },
     {
       name: 'willDate',
       label: 'Date Executed',
       type: 'date',
       colSpan: 1,
+      pdfViews: {
+        emergencySheet: { include: true, priority: 20, label: 'Will Date' },
+        attorneyPrep: { include: true, priority: 20, label: 'Will Date' },
+      },
     },
     {
       sectionDivider: {
@@ -36,6 +48,14 @@ export const legalDocumentsSchema: FormSectionSchema = {
       type: 'text',
       placeholder: 'Where the power of attorney document is stored',
       colSpan: 1,
+      pdfViews: {
+        emergencySheet: { include: true, priority: 40, label: 'POA Location' },
+        attorneyPrep: {
+          include: true,
+          priority: 40,
+          label: 'POA Document Location',
+        },
+      },
     },
     {
       name: 'poaAgent',
@@ -43,6 +63,10 @@ export const legalDocumentsSchema: FormSectionSchema = {
       type: 'text',
       placeholder: 'Person designated as power of attorney',
       colSpan: 1,
+      pdfViews: {
+        emergencySheet: { include: true, priority: 30, label: 'POA Agent' },
+        attorneyPrep: { include: true, priority: 30, label: 'POA Agent' },
+      },
     },
     {
       sectionDivider: {
@@ -56,6 +80,14 @@ export const legalDocumentsSchema: FormSectionSchema = {
       placeholder: 'Where the advance directive is stored',
       colSpan: 2,
       fullWidth: true,
+      pdfViews: {
+        emergencySheet: { include: true, priority: 50, label: 'Living Will' },
+        attorneyPrep: {
+          include: true,
+          priority: 50,
+          label: 'Living Will / Advance Directive',
+        },
+      },
     },
     {
       sectionDivider: {
@@ -70,6 +102,22 @@ export const legalDocumentsSchema: FormSectionSchema = {
       colSpan: 2,
       fullWidth: true,
       rows: 3,
+      pdfSkipIfEmpty: true,
+      pdfViews: {
+        attorneyPrep: {
+          include: true,
+          priority: 60,
+          label: 'Other Documents',
+        },
+      },
+    },
+    {
+      name: 'documentFiles',
+      label: 'Document files (will, POA, trust paperwork)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
     },
     {
       name: 'notes',

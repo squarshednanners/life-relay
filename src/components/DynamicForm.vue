@@ -2,10 +2,16 @@
   <div class="space-y-4">
     <!-- Array items -->
     <template v-if="schema.isArray">
-      <div v-if="modelValue.length === 0" class="text-gray-500 dark:text-gray-400 mb-4">
+      <div
+        v-if="modelValue.length === 0"
+        class="text-gray-500 dark:text-gray-400 mb-4"
+      >
         No items added yet.
       </div>
-      <div v-else class="space-y-4 mb-6">
+      <div
+        v-else
+        class="space-y-4 mb-6"
+      >
         <div
           v-for="(item, index) in modelValue"
           :key="index"
@@ -17,8 +23,8 @@
             </h3>
             <button
               v-if="schema.isArray && props.allowRemove"
-              @click="$emit('remove', index)"
               class="text-red-600 hover:text-red-800 text-sm"
+              @click="$emit('remove', index)"
             >
               Remove
             </button>
@@ -33,8 +39,8 @@
       </div>
       <button
         v-if="schema.isArray && props.allowAdd"
-        @click="addItem"
         class="mb-4 px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+        @click="addItem"
       >
         + Add {{ singularTitle }}
       </button>

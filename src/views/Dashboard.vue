@@ -19,8 +19,8 @@
         </p>
       </div>
       <button
-        @click="markReviewed"
         class="ml-4 px-3 py-1.5 text-sm bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex-shrink-0"
+        @click="markReviewed"
       >
         Mark Reviewed
       </button>
@@ -28,52 +28,81 @@
 
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
       <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Quick Actions</h3>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          Quick Actions
+        </h3>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <button
-          @click="exportData"
           class="px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+          @click="exportData"
         >
           Export Vault
         </button>
         <button
-          @click="importData"
           class="px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+          @click="importData"
         >
           Import Vault
         </button>
         <button
-          @click="generatePDF"
-          :disabled="isGenerating"
-          class="px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+          class="px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+          @click="importStructured"
         >
+          Import Structured Data
+        </button>
+        <button
+          :disabled="isGenerating"
+          :aria-busy="isGenerating || undefined"
+          class="px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
+          @click="generatePDF"
+        >
+          <span
+            v-if="isGenerating"
+            class="inline-block h-5 w-5 rounded-full animate-spin"
+            style="border: 3px solid white; border-top-color: transparent;"
+            aria-hidden="true"
+          />
           {{ isGenerating ? 'Generating...' : 'Download Full PDF' }}
         </button>
         <button
-          @click="generateEmergencyPDF"
           :disabled="isGeneratingEmergency"
-          class="px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+          :aria-busy="isGeneratingEmergency || undefined"
+          class="px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
+          @click="generateEmergencyPDF"
         >
+          <span
+            v-if="isGeneratingEmergency"
+            class="inline-block h-5 w-5 rounded-full animate-spin"
+            style="border: 3px solid white; border-top-color: transparent;"
+            aria-hidden="true"
+          />
           {{ isGeneratingEmergency ? 'Generating...' : 'Emergency One-Page Sheet' }}
         </button>
         <button
-          @click="generateWalletCard"
           :disabled="isGeneratingWalletCard"
-          class="px-4 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50"
+          :aria-busy="isGeneratingWalletCard || undefined"
+          class="px-4 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
+          @click="generateWalletCard"
         >
+          <span
+            v-if="isGeneratingWalletCard"
+            class="inline-block h-5 w-5 rounded-full animate-spin"
+            style="border: 3px solid white; border-top-color: transparent;"
+            aria-hidden="true"
+          />
           {{ isGeneratingWalletCard ? 'Generating...' : 'Wallet Cards (printable)' }}
         </button>
         <button
-          @click="saveData"
           :disabled="isLoading"
           class="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+          @click="saveData"
         >
           {{ isLoading ? 'Saving...' : 'Save to Browser' }}
         </button>
         <button
-          @click="deleteAllData"
           class="px-4 py-3 bg-gray-200 dark:bg-gray-700 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 transition-colors"
+          @click="deleteAllData"
         >
           Delete All Data
         </button>
@@ -81,10 +110,15 @@
     </div>
 
     <!-- Getting Started Guide -->
-    <div v-if="showGettingStarted" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-5 mb-6">
+    <div
+      v-if="showGettingStarted"
+      class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-5 mb-6"
+    >
       <div class="flex items-start justify-between">
         <div>
-          <h3 class="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-2">How Life Relay Works</h3>
+          <h3 class="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-2">
+            How Life Relay Works
+          </h3>
           <ol class="text-sm text-blue-800 dark:text-blue-300 space-y-1.5 list-decimal list-inside">
             <li>Fill in the sections that matter to you using the sidebar — skip what doesn't apply.</li>
             <li>Your data saves automatically to this browser's local storage.</li>
@@ -97,12 +131,22 @@
           </p>
         </div>
         <button
-          @click="dismissGettingStarted"
           class="ml-4 text-blue-400 dark:text-blue-500 hover:text-blue-600 dark:hover:text-blue-300 flex-shrink-0"
           title="Dismiss"
+          @click="dismissGettingStarted"
         >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
@@ -114,9 +158,9 @@
       ref="fileInput"
       type="file"
       accept=".json"
-      @change="handleFileImport"
       class="hidden"
-    />
+      @change="handleFileImport"
+    >
 
     <!-- PDF Export Selection Modal -->
     <PdfExportModal
@@ -159,7 +203,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import { useLegacyStore } from '@/store'
 import { useToast } from '@/composables/useToast'
 import { generatePDFDocument } from '@/pdf/generator'
@@ -173,6 +218,54 @@ import PasswordPromptModal from '@/components/PasswordPromptModal.vue'
 import ProgressTracker from '@/components/ProgressTracker.vue'
 import QuickStartModal from '@/components/QuickStartModal.vue'
 import { isEncrypted } from '@/utils/encryption'
+import { useMigrationStatus } from '@/composables/useMigrationStatus'
+import {
+  MigrationFailedError,
+  LoadRequiresManualImportError,
+} from '@/services/errors'
+
+const migrationStatus = useMigrationStatus()
+
+/**
+ * Funnel a caught error from an import path into the right surface:
+ *   - `LoadRequiresManualImportError` → full-screen NeedsManualImport
+ *     (the JSON's migration failed AND no rollback exists, so it's
+ *     equivalent to a load that left the user stranded)
+ *   - `MigrationFailedError` → soft-failure modal
+ *   - anything else → toast (current behavior)
+ *
+ * Returns true if the error was a migration error (and the toast should
+ * be suppressed), false otherwise.
+ */
+function routeMigrationError(error: unknown): boolean {
+  if (error instanceof LoadRequiresManualImportError) {
+    migrationStatus.markRequiresManualImport(error.message)
+    return true
+  }
+  if (error instanceof MigrationFailedError) {
+    migrationStatus.markRolledBack(error.message)
+    return true
+  }
+  return false
+}
+
+/**
+ * Wait for the browser to actually paint pending DOM updates before
+ * returning. The classic "double RAF + nextTick" pattern:
+ *   1. `nextTick` — flush Vue's reactivity queue (DOM nodes added/removed)
+ *   2. First RAF — browser commits the next frame using the new DOM
+ *   3. Second RAF — guarantees the commit became an actual paint
+ *
+ * Necessary because the synchronous PDF generation that follows blocks
+ * the main thread for seconds. Without an explicit paint yield, the
+ * browser defers paints until the work completes — the user sees the
+ * modal stay visible the entire time and never sees the spinner.
+ */
+async function waitForPaint(): Promise<void> {
+  await nextTick()
+  await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+  await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+}
 
 const store = useLegacyStore()
 const { showToast } = useToast()
@@ -184,6 +277,7 @@ const isGeneratingWalletCard = ref(false)
 async function generateWalletCard() {
   if (!store.data || isGeneratingWalletCard.value) return
   isGeneratingWalletCard.value = true
+  await waitForPaint() // let the spinner paint before blocking the main thread
   try {
     const bytes = await generateWalletCardPdf(store.data)
     const blob = new Blob([bytes as BlobPart], { type: 'application/pdf' })
@@ -296,6 +390,12 @@ function importData() {
   fileInput.value?.click()
 }
 
+const router = useRouter()
+
+function importStructured() {
+  router.push({ name: 'import' })
+}
+
 async function handleFileImport(event: Event) {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
@@ -322,7 +422,12 @@ async function handleFileImport(event: Event) {
       showToast('Data imported successfully!', 'success')
     }
   } catch (error) {
-    showToast('Error reading file. Please check the file format.', 'error')
+    if (routeMigrationError(error)) {
+      // The migration-status singleton now drives the right surface;
+      // suppress the generic toast to avoid double-signalling.
+    } else {
+      showToast('Error reading file. Please check the file format.', 'error')
+    }
   }
   target.value = ''
 }
@@ -349,8 +454,10 @@ async function handlePasswordConfirm(password: string) {
       pendingFileContent.value = null
     }
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Operation failed'
-    showToast(errorMessage, 'error')
+    if (!routeMigrationError(error)) {
+      const errorMessage = error instanceof Error ? error.message : 'Operation failed'
+      showToast(errorMessage, 'error')
+    }
   } finally {
     pendingAction.value = null
   }
@@ -400,7 +507,15 @@ async function handlePdfExportGenerate(sectionKeys: Set<string>) {
   showPdfExportModal.value = false
   if (!store.data) return
 
+  // Wait for the modal-unmount paint to complete BEFORE flipping the
+  // spinner state. Otherwise the modal can stay visible the entire time
+  // (browser defers paints when synchronous work is queued).
+  await waitForPaint()
+
   isGenerating.value = true
+  // Now wait for the spinner-state paint too, before blocking the main
+  // thread with PDF generation.
+  await waitForPaint()
   try {
     const pdfBytes = await generatePDFDocument(store.data, sectionKeys)
     const blob = new Blob([pdfBytes as BlobPart], { type: 'application/pdf' })
@@ -433,7 +548,9 @@ async function handleEmergencyGenerate(selections: EmergencySheetSelections) {
   showEmergencyModal.value = false
   if (!store.data) return
 
+  await waitForPaint() // let the modal-close paint finish
   isGeneratingEmergency.value = true
+  await waitForPaint() // let the spinner paint
   try {
     const pdfBytes = await generateEmergencySheet(store.data, selections)
     const blob = new Blob([pdfBytes as BlobPart], { type: 'application/pdf' })

@@ -7,6 +7,9 @@ export const healthInsuranceSchema: FormSectionSchema = {
   isArray: true,
   arrayItemLabel: (index, item) => item?.provider || `Policy ${index + 1}`,
   pdfGroup: 'Insurance, Medical & Benefits',
+  pdfViews: {
+    emergencySheet: { sectionLabel: 'HEALTH INSURANCE' },
+  },
   fields: [
     {
       name: 'provider',
@@ -14,12 +17,14 @@ export const healthInsuranceSchema: FormSectionSchema = {
       type: 'text',
       placeholder: 'Insurance Provider',
       colSpan: 1,
+      pdfViews: { emergencySheet: { include: true, priority: 10 } },
     },
     {
       name: 'planType',
       label: 'Plan Type',
       type: 'select',
       colSpan: 1,
+      pdfViews: { emergencySheet: { include: true, priority: 15 } },
       options: [
         { label: '', value: '' },
         { label: 'PPO', value: 'PPO' },
@@ -40,6 +45,9 @@ export const healthInsuranceSchema: FormSectionSchema = {
       type: 'text',
       placeholder: 'Policy #',
       colSpan: 1,
+      pdfViews: {
+        emergencySheet: { include: true, priority: 20, label: 'Policy #' },
+      },
     },
     {
       name: 'groupNumber',
@@ -47,6 +55,9 @@ export const healthInsuranceSchema: FormSectionSchema = {
       type: 'text',
       placeholder: 'Group #',
       colSpan: 1,
+      pdfViews: {
+        emergencySheet: { include: true, priority: 30, label: 'Group #' },
+      },
     },
     {
       name: 'contactPhone',
@@ -54,6 +65,9 @@ export const healthInsuranceSchema: FormSectionSchema = {
       type: 'tel',
       placeholder: '(555) 123-4567',
       colSpan: 1,
+      pdfViews: {
+        emergencySheet: { include: true, priority: 40, label: 'Phone' },
+      },
     },
     {
       name: 'coveredMembers',
@@ -62,6 +76,18 @@ export const healthInsuranceSchema: FormSectionSchema = {
       placeholder: 'e.g. John, Jane, Alex, Sam',
       colSpan: 1,
       helpText: 'Names of people covered under this policy',
+      pdfSkipIfEmpty: true,
+      pdfViews: {
+        emergencySheet: { include: true, priority: 50, label: 'Covered' },
+      },
+    },
+    {
+      name: 'documentFiles',
+      label: 'Insurance documents (policy, insurance card, claim correspondence)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
     },
     {
       name: 'notes',

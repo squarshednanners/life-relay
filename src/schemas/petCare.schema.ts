@@ -165,6 +165,14 @@ export const petCareSchema: FormSectionSchema = {
     },
 
     {
+      name: 'documentFiles',
+      label: 'Pet documents (vet records, pet insurance, microchip registration)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
+    },
+    {
       name: 'notes',
       label: 'Notes',
       type: 'textarea',

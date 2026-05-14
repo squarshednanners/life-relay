@@ -98,6 +98,14 @@ export const otherInsuranceSchema: FormSectionSchema = {
       colSpan: 1,
     },
     {
+      name: 'documentFiles',
+      label: 'Insurance documents (policy, declarations page)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
+    },
+    {
       name: 'notes',
       label: 'Notes',
       type: 'textarea',

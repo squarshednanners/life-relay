@@ -20,6 +20,12 @@ export const lifeInsurancePolicySchema: FormSectionSchema = {
   isArray: true,
   arrayItemLabel: (index, item) => item?.company || `Policy ${index + 1}`,
   pdfGroup: 'Insurance, Medical & Benefits',
+  pdfViews: {
+    attorneyPrep: {
+      sectionLabel: 'Life Insurance Policies',
+      itemLabel: (item) => String(item.company ?? '') || 'Policy',
+    },
+  },
   fields: [
     {
       name: 'company',
@@ -50,6 +56,9 @@ export const lifeInsurancePolicySchema: FormSectionSchema = {
       type: 'text',
       placeholder: 'Policy #',
       colSpan: 1,
+      pdfViews: {
+        attorneyPrep: { include: true, priority: 10, label: 'Policy #' },
+      },
     },
     {
       name: 'amount',
@@ -57,6 +66,9 @@ export const lifeInsurancePolicySchema: FormSectionSchema = {
       type: 'currency',
       placeholder: '$0.00',
       colSpan: 1,
+      pdfViews: {
+        attorneyPrep: { include: true, priority: 20, label: 'Amount' },
+      },
     },
     {
       name: 'beneficiaries',
@@ -68,6 +80,20 @@ export const lifeInsurancePolicySchema: FormSectionSchema = {
       },
       colSpan: 2,
       fullWidth: true,
+      pdfSkipIfEmpty: true,
+      pdfViews: {
+        attorneyPrep: {
+          include: true,
+          priority: 30,
+          label: 'Beneficiaries',
+          format: (value) => {
+            if (!Array.isArray(value)) return ''
+            return value
+              .map((b) => String((b as Record<string, unknown>).customName ?? '') || 'Designated')
+              .join(', ')
+          },
+        },
+      },
     },
 
     // ===== Filing a Claim =====
@@ -136,6 +162,14 @@ export const lifeInsurancePolicySchema: FormSectionSchema = {
       helpText: 'When does the policy lapse if it\'s a term policy?',
     },
 
+    {
+      name: 'documentFiles',
+      label: 'Policy documents (policy, beneficiary form, riders)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
+    },
     {
       name: 'notes',
       label: 'Notes',

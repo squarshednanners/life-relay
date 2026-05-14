@@ -7,6 +7,16 @@ export const financialAccountsSchema: FormSectionSchema = {
   isArray: true,
   arrayItemLabel: (index, item) => item.accountName || item.institution || `Account ${index + 1}`,
   pdfGroup: 'Finances',
+  pdfViews: {
+    attorneyPrep: {
+      sectionLabel: 'Financial Accounts',
+      itemLabel: (item) => {
+        const inst = String(item.institution ?? '')
+        const acctType = String(item.accountType ?? '')
+        return [inst, acctType].filter(Boolean).join(' — ')
+      },
+    },
+  },
   fields: [
     {
       name: 'institution',
@@ -34,6 +44,9 @@ export const financialAccountsSchema: FormSectionSchema = {
         { label: 'Joint', value: 'joint' },
         { label: 'Trust', value: 'trust' },
       ],
+      pdfViews: {
+        attorneyPrep: { include: true, priority: 30, label: 'Owner' },
+      },
     },
     {
       name: 'accountName',
@@ -50,8 +63,12 @@ export const financialAccountsSchema: FormSectionSchema = {
       name: 'accountNumber',
       label: 'Account Number',
       type: 'text',
+      displayAs: 'mono',
       placeholder: 'Account #',
       colSpan: 1,
+      pdfViews: {
+        attorneyPrep: { include: true, priority: 10, label: 'Account #' },
+      },
     },
     {
       name: 'routingNumber',

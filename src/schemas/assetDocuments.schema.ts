@@ -30,6 +30,14 @@ export const assetDocumentsSchema: FormSectionSchema = {
       colSpan: 1,
     },
     {
+      name: 'documentFiles',
+      label: 'Asset documents (receipts, appraisals, purchase agreements)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
+    },
+    {
       name: 'notes',
       label: 'Notes',
       type: 'textarea',

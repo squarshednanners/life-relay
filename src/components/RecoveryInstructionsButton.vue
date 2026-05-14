@@ -2,12 +2,17 @@
   <div class="col-span-1 md:col-span-2">
     <button
       type="button"
-      @click="populateInstructions"
       class="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors text-sm"
+      @click="populateInstructions"
     >
       {{ label || 'Generate Recommended Recovery Instructions' }}
     </button>
-    <p v-if="helpText" class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ helpText }}</p>
+    <p
+      v-if="helpText"
+      class="mt-1 text-sm text-gray-500 dark:text-gray-400"
+    >
+      {{ helpText }}
+    </p>
   </div>
 </template>
 

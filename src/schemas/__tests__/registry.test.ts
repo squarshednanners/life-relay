@@ -104,7 +104,17 @@ describe('Schema Registry', () => {
       it(`${schema.sectionKey} fields exist in test data`, () => {
         const firstItem = dataKey[0]
         const fieldNames = schema.fields
-          .filter(f => !f.sectionDivider && f.name && !f.name.includes('.') && !f.visible)
+          .filter(
+            f =>
+              !f.sectionDivider &&
+              f.name &&
+              !f.name.includes('.') &&
+              !f.visible &&
+              // Attachment fields hold ids that point at the separate
+              // `attachments` IndexedDB table (Story 1.7); they aren't
+              // required to appear in the sample vault fixture.
+              f.type !== 'attachment',
+          )
           .map(f => f.name!)
 
         for (const fieldName of fieldNames) {
@@ -115,5 +125,25 @@ describe('Schema Registry', () => {
         }
       })
     }
+  })
+
+  /**
+   * Product-positioning guardrail (Story 1.7b): Life Relay is a vault,
+   * not a photo-storage platform. Allowing attachments on
+   * `photosAndMedia` would invite "store all your family photos here"
+   * which is not what this product is for. A future PR that adds an
+   * attachment field to this schema must justify the decision
+   * explicitly — this test forces the conversation.
+   */
+  describe('photosAndMedia anti-pattern guard', () => {
+    it('does NOT include any attachment-typed field', () => {
+      const schema = getSchema('photosAndMedia')
+      expect(schema).toBeTruthy()
+      const offending = schema!.fields.filter(f => f.type === 'attachment')
+      expect(
+        offending,
+        'photosAndMedia must not have attachment fields — see Story 1.7b scope decision',
+      ).toEqual([])
+    })
   })
 })

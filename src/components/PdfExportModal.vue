@@ -7,18 +7,25 @@
     >
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[85vh] flex flex-col">
         <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Export PDF</h2>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Select which sections to include in the PDF.</p>
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            Export PDF
+          </h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Select which sections to include in the PDF.
+          </p>
         </div>
 
         <div class="overflow-y-auto flex-1 p-6 space-y-5">
-          <div v-for="group in groups" :key="group.name">
+          <div
+            v-for="group in groups"
+            :key="group.name"
+          >
             <div class="flex items-center justify-between mb-1">
               <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ group.name }}</span>
               <button
                 type="button"
-                @click="toggleGroup(group)"
                 class="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-200"
+                @click="toggleGroup(group)"
               >
                 {{ isGroupFullySelected(group) ? 'Deselect all' : 'Select all' }}
               </button>
@@ -30,16 +37,22 @@
                 class="flex items-center gap-2 py-1"
               >
                 <input
+                  v-model="selected"
                   type="checkbox"
                   :value="section.sectionKey"
-                  v-model="selected"
                   :disabled="!section.hasData"
                   class="rounded text-primary-600 disabled:opacity-30"
-                />
-                <span class="text-sm" :class="section.hasData ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400 dark:text-gray-500'">
+                >
+                <span
+                  class="text-sm"
+                  :class="section.hasData ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400 dark:text-gray-500'"
+                >
                   {{ section.title }}
                 </span>
-                <span v-if="!section.hasData" class="text-xs text-gray-400 dark:text-gray-500">(empty)</span>
+                <span
+                  v-if="!section.hasData"
+                  class="text-xs text-gray-400 dark:text-gray-500"
+                >(empty)</span>
               </div>
             </div>
           </div>
@@ -52,8 +65,8 @@
             </span>
             <button
               type="button"
-              @click="selectAllWithData"
               class="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-200"
+              @click="selectAllWithData"
             >
               Select all with data
             </button>
@@ -61,16 +74,16 @@
           <div class="flex gap-3">
             <button
               type="button"
-              @click="$emit('cancel')"
               class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              @click="$emit('cancel')"
             >
               Cancel
             </button>
             <button
               type="button"
-              @click="handleGenerate"
               :disabled="selected.length === 0"
               class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50"
+              @click="handleGenerate"
             >
               Generate PDF
             </button>

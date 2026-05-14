@@ -6,18 +6,35 @@
     />
 
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-6">
+      <!-- Cover photo (Story 1.7c) -->
+      <div>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          Cover photo
+        </h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          Optional. Adds a photo to the front of the vault PDF — a portrait, a family photo, anything you'd like the family to see first.
+        </p>
+        <AttachmentField
+          :model-value="coverPhotoId"
+          :field="coverPhotoField"
+          @update:model-value="onCoverPhotoChange"
+        />
+      </div>
+
       <!-- Appearance -->
       <div>
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Appearance</h3>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          Appearance
+        </h3>
         <div class="flex gap-2">
           <button
             v-for="option in themeOptions"
             :key="option.value"
-            @click="setTheme(option.value)"
             class="px-4 py-2 text-sm font-medium rounded-lg border transition-colors"
             :class="theme === option.value
               ? 'bg-primary-100 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-300'
               : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'"
+            @click="setTheme(option.value)"
           >
             {{ option.label }}
           </button>
@@ -26,23 +43,25 @@
 
       <!-- Data Management -->
       <div>
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Data Management</h3>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          Data Management
+        </h3>
         <div class="space-y-3">
           <button
-            @click="exportData"
             class="w-full px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-left"
+            @click="exportData"
           >
             Export Vault
           </button>
           <button
-            @click="importData"
             class="w-full px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-left"
+            @click="importData"
           >
             Import Vault
           </button>
           <button
-            @click="deleteAllData"
             class="w-full px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-left"
+            @click="deleteAllData"
           >
             Delete All Data
           </button>
@@ -54,13 +73,19 @@
 
       <!-- About -->
       <div>
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">About</h3>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          About
+        </h3>
         <div class="space-y-4">
           <div class="flex items-center gap-3">
             <LifeRelayLogo size="lg" />
             <div>
-              <p class="font-semibold text-gray-900 dark:text-gray-100">Life Relay</p>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Version 2.0.0</p>
+              <p class="font-semibold text-gray-900 dark:text-gray-100">
+                Life Relay
+              </p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Version 2.0.0
+              </p>
             </div>
           </div>
           <p class="text-sm text-gray-600 dark:text-gray-400">
@@ -68,7 +93,9 @@
             browser using IndexedDB. No servers, no cloud, no tracking. Your information never leaves your device.
           </p>
           <div>
-            <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Key Features</h4>
+            <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              Key Features
+            </h4>
             <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1.5">
               <li class="flex items-start gap-2">
                 <span class="text-green-500 mt-0.5 flex-shrink-0">&check;</span>
@@ -116,9 +143,9 @@
         ref="fileInput"
         type="file"
         accept=".json"
-        @change="handleFileImport"
         class="hidden"
-      />
+        @change="handleFileImport"
+      >
     </div>
 
     <!-- Password Prompt Modal -->
@@ -148,8 +175,33 @@ import SectionHeader from '@/components/SectionHeader.vue'
 import LifeRelayLogo from '@/components/LifeRelayLogo.vue'
 import PasswordPromptModal from '@/components/PasswordPromptModal.vue'
 import { isEncrypted } from '@/utils/encryption'
+import AttachmentField from '@/components/AttachmentField.vue'
+import { computed } from 'vue'
+import type { FormFieldSchema } from '@/models/FormSchema'
 
 const store = useLegacyStore()
+
+const coverPhotoField: FormFieldSchema = {
+  name: 'coverPhoto',
+  label: '',
+  type: 'attachment',
+  multiple: false,
+  maxAttachments: 1,
+  acceptMimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/avif'],
+  maxSizeBytes: 5 * 1024 * 1024, // 5 MB cap for display imagery (Story 1.7c).
+  fullWidth: true,
+}
+
+const coverPhotoId = computed<string | undefined>(
+  () => store.data?.coverPhotoAttachmentId,
+)
+
+function onCoverPhotoChange(value: string | string[] | undefined): void {
+  // AttachmentField in single-mode emits string | undefined; coerce
+  // defensively in case `multiple` wiring drifts.
+  const id = Array.isArray(value) ? value[0] : value
+  void store.updateData({ coverPhotoAttachmentId: id ?? undefined })
+}
 const { showToast } = useToast()
 const { theme, setTheme } = useTheme()
 const fileInput = ref<HTMLInputElement | null>(null)

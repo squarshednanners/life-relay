@@ -10,6 +10,17 @@ export const vehiclesSchema: FormSectionSchema = {
     return parts.length > 0 ? parts.join(' ') : 'Vehicle'
   },
   pdfGroup: 'Property & Household',
+  pdfViews: {
+    attorneyPrep: {
+      sectionLabel: 'Vehicles',
+      itemLabel: (item) => {
+        const parts = [item.year, item.make, item.model]
+          .map((v) => String(v ?? ''))
+          .filter(Boolean)
+        return parts.length > 0 ? parts.join(' ') : 'Vehicle'
+      },
+    },
+  },
   fields: [
     {
       name: 'make',
@@ -38,6 +49,9 @@ export const vehiclesSchema: FormSectionSchema = {
       type: 'text',
       placeholder: 'Vehicle Identification Number',
       colSpan: 1,
+      pdfViews: {
+        attorneyPrep: { include: true, priority: 10, label: 'VIN' },
+      },
     },
     {
       name: 'licensePlate',
@@ -76,6 +90,9 @@ export const vehiclesSchema: FormSectionSchema = {
       type: 'text',
       placeholder: 'Where the title is stored',
       colSpan: 1,
+      pdfViews: {
+        attorneyPrep: { include: true, priority: 20, label: 'Title Location' },
+      },
     },
     {
       name: 'titleNumber',
@@ -113,6 +130,10 @@ export const vehiclesSchema: FormSectionSchema = {
       type: 'text',
       placeholder: 'Lender holding the loan (if any)',
       colSpan: 1,
+      pdfSkipIfEmpty: true,
+      pdfViews: {
+        attorneyPrep: { include: true, priority: 30, label: 'Lienholder' },
+      },
     },
     {
       name: 'lienholderPhone',
@@ -131,6 +152,14 @@ export const vehiclesSchema: FormSectionSchema = {
       fullWidth: true,
     },
 
+    {
+      name: 'documentFiles',
+      label: 'Vehicle documents (title, registration, insurance card)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
+    },
     {
       name: 'notes',
       label: 'Notes',

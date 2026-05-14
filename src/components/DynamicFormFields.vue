@@ -1,6 +1,9 @@
 <template>
   <div class="space-y-4">
-    <template v-for="(group, groupIndex) in fieldGroups" :key="groupIndex">
+    <template
+      v-for="(group, groupIndex) in fieldGroups"
+      :key="groupIndex"
+    >
       <!-- Expandable Section (from expandableSectionId) -->
       <ExpandableSection
         v-if="group.isExpandable && group.label"
@@ -8,7 +11,10 @@
         :default-expanded="group.defaultExpanded"
       >
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <template v-for="(field, fieldIndex) in group.fields" :key="field.name || `divider-${fieldIndex}`">
+          <template
+            v-for="(field, fieldIndex) in group.fields"
+            :key="field.name || `divider-${fieldIndex}`"
+          >
             <FieldRenderer
               :field="field"
               :model-value="modelValue"
@@ -26,8 +32,8 @@
       >
         <button
           type="button"
-          @click="toggleSection(group.collapseKey!, group.defaultExpanded === false)"
           class="w-full flex items-center justify-between text-left mb-3 group hover:opacity-80 transition-opacity"
+          @click="toggleSection(group.collapseKey!, group.defaultExpanded === false)"
         >
           <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-200">
             {{ group.label }}
@@ -35,16 +41,26 @@
           <svg
             class="w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform"
             :class="{ 'rotate-180': !isCollapsed(group.collapseKey!, group.defaultExpanded === false) }"
-            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
           >
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 15l7-7 7 7"
+            />
           </svg>
         </button>
         <div
           v-show="!isCollapsed(group.collapseKey!, group.defaultExpanded === false)"
           class="grid grid-cols-1 md:grid-cols-2 gap-4"
         >
-          <template v-for="(field, fieldIndex) in group.fields" :key="field.name || `field-${fieldIndex}`">
+          <template
+            v-for="(field, fieldIndex) in group.fields"
+            :key="field.name || `field-${fieldIndex}`"
+          >
             <FieldRenderer
               :field="field"
               :model-value="modelValue"
@@ -56,14 +72,23 @@
       </div>
 
       <!-- Regular Fields Group -->
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <template v-for="(field, fieldIndex) in group.fields" :key="field.name || `divider-${fieldIndex}`">
+      <div
+        v-else
+        class="grid grid-cols-1 md:grid-cols-2 gap-4"
+      >
+        <template
+          v-for="(field, fieldIndex) in group.fields"
+          :key="field.name || `divider-${fieldIndex}`"
+        >
           <!-- Section Divider (non-collapsible) -->
           <template v-if="field.sectionDivider && (!field.name || field.name.startsWith('_'))">
             <div
               :class="field.sectionDivider.showBorder !== false ? 'col-span-1 md:col-span-2 border-t border-gray-200 dark:border-gray-600 pt-4 mt-2' : 'col-span-1 md:col-span-2 pt-2'"
             >
-              <h4 v-if="field.sectionDivider.label" class="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+              <h4
+                v-if="field.sectionDivider.label"
+                class="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2"
+              >
                 {{ field.sectionDivider.label }}
               </h4>
             </div>

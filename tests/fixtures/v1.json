@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-05-13T12:00:00.000Z",
+  "people": [
+    {
+      "id": "p1",
+      "firstName": "Anna",
+      "lastName": "Voss",
+      "email": "anna@example.com",
+      "phone": "+1-512-555-0100"
+    }
+  ],
+  "financialAccounts": [
+    {
+      "id": "fa1",
+      "institutionName": "First Federal",
+      "accountNumber": "0001-2345-6789",
+      "accountType": "checking"
+    }
+  ],
+  "passwordVaults": [
+    {
+      "id": "pv1",
+      "vaultName": "1Password",
+      "username": "anna@example.com",
+      "masterPassword": "fixture-only-not-real",
+      "masterPasswordManualEntry": false
+    }
+  ],
+  "notes": "Baseline v1 vault fixture for the migration framework's 3-guard test harness (Story 1.12). Update this file ONLY when adding a v2 migration; the v1 shape is frozen by this fixture."
+}

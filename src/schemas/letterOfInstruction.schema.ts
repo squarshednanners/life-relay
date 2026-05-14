@@ -25,6 +25,14 @@ export const letterOfInstructionSchema: FormSectionSchema = {
       fullWidth: true,
     },
     {
+      name: 'documentFiles',
+      label: 'Letter of instruction document (handwritten version, signed)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
+    },
+    {
       name: 'notes',
       label: 'Notes',
       type: 'textarea',

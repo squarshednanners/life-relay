@@ -2,9 +2,12 @@
   <!-- Section Divider -->
   <div
     v-if="field.sectionDivider && (!field.name || field.name.startsWith('_'))"
-    :class="field.sectionDivider.showBorder !== false ? 'col-span-1 md:col-span-2 border-t border-gray-200 dark:border-gray-600 pt-4 mt-2' : 'col-span-1 md:col-span-2 pt-2'"
+    :class="field.sectionDivider.showBorder !== false ? 'col-span-1 md:col-span-2 border-t border-border-subtle dark:border-gray-600 pt-4 mt-2' : 'col-span-1 md:col-span-2 pt-2'"
   >
-    <h4 v-if="field.sectionDivider.label" class="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+    <h4
+      v-if="field.sectionDivider.label"
+      class="text-body-sm font-medium text-text-secondary dark:text-gray-200 mb-2"
+    >
       {{ field.sectionDivider.label }}
     </h4>
   </div>
@@ -14,9 +17,12 @@
     v-else-if="field.type === 'array' && field.arraySchema && field.name"
     :class="field.fullWidth ? 'col-span-1 md:col-span-2' : `col-span-1 md:col-span-${field.colSpan || 1}`"
   >
-    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+    <label class="block text-body-sm font-medium text-text-secondary dark:text-gray-300 mb-2">
       {{ field.label }}
-      <span v-if="field.required" class="text-red-500">*</span>
+      <span
+        v-if="field.required"
+        class="text-status-error"
+      >*</span>
     </label>
     <DynamicForm
       :schema="field.arraySchema"
@@ -28,6 +34,14 @@
     />
   </div>
 
+  <!-- Attachment Field (Story 1.7) -->
+  <AttachmentField
+    v-else-if="field.type === 'attachment' && field.name"
+    :model-value="fieldValue(field.name!)"
+    :field="field"
+    @update:model-value="updateField(field.name!, $event)"
+  />
+
   <!-- Custom components -->
   <div
     v-else-if="field.component && field.name"
@@ -37,12 +51,12 @@
       :is="getComponent(field.component)"
       :id="`${field.name}-${index ?? ''}`"
       :model-value="fieldValue(field.name)"
-      @update:model-value="updateField(field.name, $event)"
       :label="field.label"
       :required="field.required"
       :parent-data="modelValue"
       :on-update="(fieldName: string, value: any) => updateField(fieldName, value)"
       v-bind="field.componentProps || {}"
+      @update:model-value="updateField(field.name, $event)"
     />
   </div>
 
@@ -51,53 +65,99 @@
     v-else-if="field.type === 'password' && field.name"
     :class="field.fullWidth ? 'col-span-1 md:col-span-2' : `col-span-1 md:col-span-${field.colSpan || 1}`"
   >
-    <label :for="`${field.name}-${index ?? ''}`" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+    <label
+      :for="`${field.name}-${index ?? ''}`"
+      class="block text-body-sm font-medium text-text-secondary dark:text-gray-300 mb-1"
+    >
       {{ field.label }}
-      <span v-if="field.required" class="text-red-500">*</span>
+      <span
+        v-if="field.required"
+        class="text-status-error"
+      >*</span>
     </label>
     <div class="relative">
       <input
         :id="`${field.name}-${index ?? ''}`"
         :type="passwordVisible[field.name!] ? 'text' : 'password'"
         :value="fieldValue(field.name)"
-        @input="updateField(field.name, ($event.target as HTMLInputElement).value)"
-        @blur="onBlur(field)"
         :placeholder="field.placeholder"
         :required="field.required"
         :aria-required="field.required || undefined"
         :aria-invalid="!!(field.name && touched[field.name] && errors[field.name]) || undefined"
         :aria-describedby="describedBy(field)"
-        :class="['w-full px-3 py-2 pr-10 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100', inputBorderClass(field)]"
-      />
+        :class="['w-full px-3 py-2 pr-10 border rounded-md shadow-sm focus:outline-none focus-visible:shadow-focus dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100', inputBorderClass(field), VALUE_INPUT_CLASSES]"
+        @input="updateField(field.name, ($event.target as HTMLInputElement).value)"
+        @blur="onBlur(field)"
+      >
       <button
         type="button"
-        @click="passwordVisible[field.name!] = !passwordVisible[field.name!]"
-        class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+        class="absolute inset-y-0 right-0 flex items-center pr-3 text-text-tertiary hover:text-text-primary dark:text-gray-500 dark:hover:text-gray-300 focus-visible:outline-none focus-visible:shadow-focus rounded-sm"
         :aria-label="passwordVisible[field.name!] ? 'Hide' : 'Show'"
+        @click="passwordVisible[field.name!] = !passwordVisible[field.name!]"
       >
-        <svg v-if="passwordVisible[field.name!]" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+        <svg
+          v-if="passwordVisible[field.name!]"
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+          />
         </svg>
-        <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        <svg
+          v-else
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+          />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+          />
         </svg>
       </button>
     </div>
     <label
       v-if="field.manualEntry"
-      class="flex items-center mt-1 text-sm text-gray-600 dark:text-gray-400"
+      class="flex items-center mt-1 text-body-sm text-text-tertiary dark:text-gray-400"
     >
       <input
         type="checkbox"
         :checked="fieldValue(getManualEntryFieldName(field))"
-        @change="updateField(getManualEntryFieldName(field), ($event.target as HTMLInputElement).checked)"
         class="mr-2"
-      />
+        @change="updateField(getManualEntryFieldName(field), ($event.target as HTMLInputElement).checked)"
+      >
       <span>Leave space in PDF for manual entry</span>
     </label>
-    <p v-if="field.helpText" :id="helpId(field.name!)" class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ field.helpText }}</p>
-    <p v-if="field.name && touched[field.name] && errors[field.name]" :id="errorId(field.name)" class="mt-1 text-sm text-red-600" role="alert">{{ errors[field.name] }}</p>
+    <p
+      v-if="field.helpText"
+      :id="helpId(field.name!)"
+      class="mt-1 text-body-sm text-text-tertiary dark:text-gray-400"
+    >
+      {{ field.helpText }}
+    </p>
+    <p
+      v-if="field.name && touched[field.name] && errors[field.name]"
+      :id="errorId(field.name)"
+      class="mt-1 text-body-sm text-status-error"
+      role="alert"
+    >
+      {{ errors[field.name] }}
+    </p>
   </div>
 
   <!-- Standard text input -->
@@ -105,37 +165,56 @@
     v-else-if="(field.type === 'text' || field.type === 'email' || field.type === 'tel' || field.type === 'number') && field.name"
     :class="field.fullWidth ? 'col-span-1 md:col-span-2' : `col-span-1 md:col-span-${field.colSpan || 1}`"
   >
-    <label :for="`${field.name}-${index ?? ''}`" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+    <label
+      :for="`${field.name}-${index ?? ''}`"
+      class="block text-body-sm font-medium text-text-secondary dark:text-gray-300 mb-1"
+    >
       {{ field.label }}
-      <span v-if="field.required" class="text-red-500">*</span>
+      <span
+        v-if="field.required"
+        class="text-status-error"
+      >*</span>
     </label>
     <input
       :id="`${field.name}-${index ?? ''}`"
       :type="field.type === 'number' ? 'number' : field.type === 'email' ? 'email' : field.type === 'tel' ? 'tel' : 'text'"
       :value="fieldValue(field.name!)"
-      @input="updateField(field.name!, ($event.target as HTMLInputElement).value)"
-      @blur="onBlur(field)"
       :placeholder="field.placeholder"
       :required="field.required"
       :aria-required="field.required || undefined"
       :aria-invalid="!!(field.name && touched[field.name!] && errors[field.name!]) || undefined"
       :aria-describedby="describedBy(field)"
-      :class="['w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100', inputBorderClass(field)]"
-    />
+      :class="['w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus-visible:shadow-focus dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100', inputBorderClass(field), VALUE_INPUT_CLASSES]"
+      @input="updateField(field.name!, ($event.target as HTMLInputElement).value)"
+      @blur="onBlur(field)"
+    >
     <label
       v-if="field.manualEntry"
-      class="flex items-center mt-1 text-sm text-gray-600 dark:text-gray-400"
+      class="flex items-center mt-1 text-body-sm text-text-tertiary dark:text-gray-400"
     >
       <input
         type="checkbox"
         :checked="fieldValue(getManualEntryFieldName(field))"
-        @change="updateField(getManualEntryFieldName(field), ($event.target as HTMLInputElement).checked)"
         class="mr-2"
-      />
+        @change="updateField(getManualEntryFieldName(field), ($event.target as HTMLInputElement).checked)"
+      >
       <span>Leave space in PDF for manual entry</span>
     </label>
-    <p v-if="field.helpText" :id="helpId(field.name!)" class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ field.helpText }}</p>
-    <p v-if="field.name && touched[field.name] && errors[field.name]" :id="errorId(field.name)" class="mt-1 text-sm text-red-600" role="alert">{{ errors[field.name] }}</p>
+    <p
+      v-if="field.helpText"
+      :id="helpId(field.name!)"
+      class="mt-1 text-body-sm text-text-tertiary dark:text-gray-400"
+    >
+      {{ field.helpText }}
+    </p>
+    <p
+      v-if="field.name && touched[field.name] && errors[field.name]"
+      :id="errorId(field.name)"
+      class="mt-1 text-body-sm text-status-error"
+      role="alert"
+    >
+      {{ errors[field.name] }}
+    </p>
   </div>
 
   <!-- Textarea -->
@@ -143,15 +222,19 @@
     v-else-if="field.type === 'textarea' && field.name"
     :class="field.fullWidth ? 'col-span-1 md:col-span-2' : `col-span-1 md:col-span-${field.colSpan || 1}`"
   >
-    <label :for="`${field.name}-${index ?? ''}`" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+    <label
+      :for="`${field.name}-${index ?? ''}`"
+      class="block text-body-sm font-medium text-text-secondary dark:text-gray-300 mb-1"
+    >
       {{ field.label }}
-      <span v-if="field.required" class="text-red-500">*</span>
+      <span
+        v-if="field.required"
+        class="text-status-error"
+      >*</span>
     </label>
     <textarea
       :id="`${field.name}-${index ?? ''}`"
       :value="fieldValue(field.name)"
-      @input="updateField(field.name, ($event.target as HTMLTextAreaElement).value)"
-      @blur="onBlur(field)"
       :placeholder="field.placeholder"
       :required="field.required"
       :aria-required="field.required || undefined"
@@ -159,25 +242,40 @@
       :aria-describedby="describedBy(field)"
       :rows="field.rows || 3"
       :class="[
-        'w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100',
+        'w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus-visible:shadow-focus dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100',
         inputBorderClass(field),
-        field.manualEntry ? 'font-mono text-sm' : ''
+        VALUE_INPUT_CLASSES,
       ]"
+      @input="updateField(field.name, ($event.target as HTMLTextAreaElement).value)"
+      @blur="onBlur(field)"
     />
     <label
       v-if="field.manualEntry"
-      class="flex items-center mt-1 text-sm text-gray-600 dark:text-gray-400"
+      class="flex items-center mt-1 text-body-sm text-text-tertiary dark:text-gray-400"
     >
       <input
         type="checkbox"
         :checked="fieldValue(getManualEntryFieldName(field))"
-        @change="updateField(getManualEntryFieldName(field), ($event.target as HTMLInputElement).checked)"
         class="mr-2"
-      />
+        @change="updateField(getManualEntryFieldName(field), ($event.target as HTMLInputElement).checked)"
+      >
       <span>Leave space in PDF for manual entry</span>
     </label>
-    <p v-if="field.helpText" :id="helpId(field.name!)" class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ field.helpText }}</p>
-    <p v-if="field.name && touched[field.name] && errors[field.name]" :id="errorId(field.name)" class="mt-1 text-sm text-red-600" role="alert">{{ errors[field.name] }}</p>
+    <p
+      v-if="field.helpText"
+      :id="helpId(field.name!)"
+      class="mt-1 text-body-sm text-text-tertiary dark:text-gray-400"
+    >
+      {{ field.helpText }}
+    </p>
+    <p
+      v-if="field.name && touched[field.name] && errors[field.name]"
+      :id="errorId(field.name)"
+      class="mt-1 text-body-sm text-status-error"
+      role="alert"
+    >
+      {{ errors[field.name] }}
+    </p>
   </div>
 
   <!-- Select -->
@@ -185,20 +283,26 @@
     v-else-if="field.type === 'select' && field.name"
     :class="field.fullWidth ? 'col-span-1 md:col-span-2' : `col-span-1 md:col-span-${field.colSpan || 1}`"
   >
-    <label :for="`${field.name}-${index ?? ''}`" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+    <label
+      :for="`${field.name}-${index ?? ''}`"
+      class="block text-body-sm font-medium text-text-secondary dark:text-gray-300 mb-1"
+    >
       {{ field.label }}
-      <span v-if="field.required" class="text-red-500">*</span>
+      <span
+        v-if="field.required"
+        class="text-status-error"
+      >*</span>
     </label>
     <select
       :id="`${field.name}-${index ?? ''}`"
       :value="fieldValue(field.name)"
-      @change="updateField(field.name, ($event.target as HTMLSelectElement).value)"
-      @blur="onBlur(field)"
       :required="field.required"
       :aria-required="field.required || undefined"
       :aria-invalid="!!(field.name && touched[field.name!] && errors[field.name!]) || undefined"
       :aria-describedby="describedBy(field)"
-      :class="['w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100', inputBorderClass(field)]"
+      :class="['w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus-visible:shadow-focus dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100', inputBorderClass(field), VALUE_INPUT_CLASSES]"
+      @change="updateField(field.name, ($event.target as HTMLSelectElement).value)"
+      @blur="onBlur(field)"
     >
       <option
         v-for="option in resolvedOptions"
@@ -208,8 +312,21 @@
         {{ option.label }}
       </option>
     </select>
-    <p v-if="field.helpText" :id="helpId(field.name!)" class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ field.helpText }}</p>
-    <p v-if="field.name && touched[field.name] && errors[field.name]" :id="errorId(field.name)" class="mt-1 text-sm text-red-600" role="alert">{{ errors[field.name] }}</p>
+    <p
+      v-if="field.helpText"
+      :id="helpId(field.name!)"
+      class="mt-1 text-body-sm text-text-tertiary dark:text-gray-400"
+    >
+      {{ field.helpText }}
+    </p>
+    <p
+      v-if="field.name && touched[field.name] && errors[field.name]"
+      :id="errorId(field.name)"
+      class="mt-1 text-body-sm text-status-error"
+      role="alert"
+    >
+      {{ errors[field.name] }}
+    </p>
   </div>
 
   <!-- Currency -->
@@ -217,37 +334,56 @@
     v-else-if="field.type === 'currency' && field.name"
     :class="field.fullWidth ? 'col-span-1 md:col-span-2' : `col-span-1 md:col-span-${field.colSpan || 1}`"
   >
-    <label :for="`${field.name}-${index ?? ''}`" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+    <label
+      :for="`${field.name}-${index ?? ''}`"
+      class="block text-body-sm font-medium text-text-secondary dark:text-gray-300 mb-1"
+    >
       {{ field.label }}
-      <span v-if="field.required" class="text-red-500">*</span>
+      <span
+        v-if="field.required"
+        class="text-status-error"
+      >*</span>
     </label>
     <input
       :id="`${field.name}-${index ?? ''}`"
       type="text"
       :value="fieldValue(field.name)"
-      @input="updateField(field.name, ($event.target as HTMLInputElement).value)"
-      @blur="onBlur(field)"
       :placeholder="field.placeholder || '$0.00'"
       :required="field.required"
       :aria-required="field.required || undefined"
       :aria-invalid="!!(field.name && touched[field.name!] && errors[field.name!]) || undefined"
       :aria-describedby="describedBy(field)"
-      :class="['w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100', inputBorderClass(field)]"
-    />
+      :class="['w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus-visible:shadow-focus dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100', inputBorderClass(field), VALUE_INPUT_CLASSES]"
+      @input="updateField(field.name, ($event.target as HTMLInputElement).value)"
+      @blur="onBlur(field)"
+    >
     <label
       v-if="field.manualEntry"
-      class="flex items-center mt-1 text-sm text-gray-600 dark:text-gray-400"
+      class="flex items-center mt-1 text-body-sm text-text-tertiary dark:text-gray-400"
     >
       <input
         type="checkbox"
         :checked="fieldValue(getManualEntryFieldName(field))"
-        @change="updateField(getManualEntryFieldName(field), ($event.target as HTMLInputElement).checked)"
         class="mr-2"
-      />
+        @change="updateField(getManualEntryFieldName(field), ($event.target as HTMLInputElement).checked)"
+      >
       <span>Leave space in PDF for manual entry</span>
     </label>
-    <p v-if="field.helpText" :id="helpId(field.name!)" class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ field.helpText }}</p>
-    <p v-if="field.name && touched[field.name] && errors[field.name]" :id="errorId(field.name)" class="mt-1 text-sm text-red-600" role="alert">{{ errors[field.name] }}</p>
+    <p
+      v-if="field.helpText"
+      :id="helpId(field.name!)"
+      class="mt-1 text-body-sm text-text-tertiary dark:text-gray-400"
+    >
+      {{ field.helpText }}
+    </p>
+    <p
+      v-if="field.name && touched[field.name] && errors[field.name]"
+      :id="errorId(field.name)"
+      class="mt-1 text-body-sm text-status-error"
+      role="alert"
+    >
+      {{ errors[field.name] }}
+    </p>
   </div>
 
   <!-- Date -->
@@ -255,24 +391,43 @@
     v-else-if="field.type === 'date' && field.name"
     :class="field.fullWidth ? 'col-span-1 md:col-span-2' : `col-span-1 md:col-span-${field.colSpan || 1}`"
   >
-    <label :for="`${field.name}-${index ?? ''}`" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+    <label
+      :for="`${field.name}-${index ?? ''}`"
+      class="block text-body-sm font-medium text-text-secondary dark:text-gray-300 mb-1"
+    >
       {{ field.label }}
-      <span v-if="field.required" class="text-red-500">*</span>
+      <span
+        v-if="field.required"
+        class="text-status-error"
+      >*</span>
     </label>
     <input
       :id="`${field.name}-${index ?? ''}`"
       type="date"
       :value="fieldValue(field.name)"
-      @input="updateField(field.name, ($event.target as HTMLInputElement).value)"
-      @blur="onBlur(field)"
       :required="field.required"
       :aria-required="field.required || undefined"
       :aria-invalid="!!(field.name && touched[field.name!] && errors[field.name!]) || undefined"
       :aria-describedby="describedBy(field)"
-      :class="['w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100', inputBorderClass(field)]"
-    />
-    <p v-if="field.helpText" :id="helpId(field.name!)" class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ field.helpText }}</p>
-    <p v-if="field.name && touched[field.name] && errors[field.name]" :id="errorId(field.name)" class="mt-1 text-sm text-red-600" role="alert">{{ errors[field.name] }}</p>
+      :class="['w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus-visible:shadow-focus dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100', inputBorderClass(field), VALUE_INPUT_CLASSES]"
+      @input="updateField(field.name, ($event.target as HTMLInputElement).value)"
+      @blur="onBlur(field)"
+    >
+    <p
+      v-if="field.helpText"
+      :id="helpId(field.name!)"
+      class="mt-1 text-body-sm text-text-tertiary dark:text-gray-400"
+    >
+      {{ field.helpText }}
+    </p>
+    <p
+      v-if="field.name && touched[field.name] && errors[field.name]"
+      :id="errorId(field.name)"
+      class="mt-1 text-body-sm text-status-error"
+      role="alert"
+    >
+      {{ errors[field.name] }}
+    </p>
   </div>
 
   <!-- Checkbox -->
@@ -285,17 +440,26 @@
         :id="`${field.name}-${index ?? ''}`"
         type="checkbox"
         :checked="fieldValue(field.name)"
-        @change="updateField(field.name, ($event.target as HTMLInputElement).checked)"
         :aria-required="field.required || undefined"
         :aria-describedby="describedBy(field)"
         class="mr-2"
-      />
-      <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+        @change="updateField(field.name, ($event.target as HTMLInputElement).checked)"
+      >
+      <span class="text-body-md text-text-primary dark:text-gray-300">
         {{ field.label }}
-        <span v-if="field.required" class="text-red-500">*</span>
+        <span
+          v-if="field.required"
+          class="text-status-error"
+        >*</span>
       </span>
     </label>
-    <p v-if="field.helpText" :id="helpId(field.name!)" class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ field.helpText }}</p>
+    <p
+      v-if="field.helpText"
+      :id="helpId(field.name!)"
+      class="mt-1 text-body-sm text-text-tertiary dark:text-gray-400"
+    >
+      {{ field.helpText }}
+    </p>
   </div>
 
   <!-- Radio -->
@@ -305,9 +469,15 @@
     role="radiogroup"
     :aria-labelledby="`${field.name}-${index ?? ''}-label`"
   >
-    <label :id="`${field.name}-${index ?? ''}-label`" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+    <label
+      :id="`${field.name}-${index ?? ''}-label`"
+      class="block text-body-sm font-medium text-text-secondary dark:text-gray-300 mb-2"
+    >
       {{ field.label }}
-      <span v-if="field.required" class="text-red-500">*</span>
+      <span
+        v-if="field.required"
+        class="text-status-error"
+      >*</span>
     </label>
     <div class="flex gap-4">
       <label
@@ -320,14 +490,20 @@
           :name="`${field.name}-${index ?? ''}`"
           :value="option.value"
           :checked="fieldValue(field.name) === option.value"
-          @change="updateField(field.name, option.value)"
           :aria-required="field.required || undefined"
           class="mr-2"
-        />
-        <span>{{ option.label }}</span>
+          @change="updateField(field.name, option.value)"
+        >
+        <span class="text-body-md text-text-primary">{{ option.label }}</span>
       </label>
     </div>
-    <p v-if="field.helpText" :id="helpId(field.name!)" class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ field.helpText }}</p>
+    <p
+      v-if="field.helpText"
+      :id="helpId(field.name!)"
+      class="mt-1 text-body-sm text-text-tertiary dark:text-gray-400"
+    >
+      {{ field.helpText }}
+    </p>
   </div>
 </template>
 
@@ -340,6 +516,7 @@ import TrustSelector from './TrustSelector.vue'
 import PersonSelector from './PersonSelector.vue'
 import RecoveryInstructionsButton from './RecoveryInstructionsButton.vue'
 import DynamicForm from './DynamicForm.vue'
+import AttachmentField from './AttachmentField.vue'
 
 const props = defineProps<{
   field: FormFieldSchema
@@ -456,10 +633,34 @@ function onBlur(field: FormFieldSchema): void {
 
 function inputBorderClass(field: FormFieldSchema): string {
   if (field.name && touched[field.name] && errors[field.name]) {
-    return 'border-red-500'
+    return 'border-status-error'
   }
-  return 'border-gray-300'
+  return 'border-border'
 }
+
+/**
+ * Typographic Inversion (Story 1.6) — value-text classes for every input.
+ *
+ * On the EDITING surface, every input renders uniformly at body-md (16px)
+ * Inter regular. Visual consistency across adjacent fields beats the
+ * "structured-data scan target" cue when the user is actively typing —
+ * mono-vs-prose differences during editing read as noise, not signal.
+ *
+ * Mono / prose distinction is preserved for the PDF output (read-only
+ * artifact, where character-by-character scanning of a printed wallet
+ * address actually helps the survivor). See `schemaToPdf.ts` —
+ * `resolveFieldDisplayAs(field)` is consulted at PDF-render time only.
+ *
+ * The label class is inlined at each label element (text-body-sm 14px
+ * font-medium text-text-secondary). The inversion (label smaller +
+ * lighter than value) is preserved by size + color delta — not by
+ * font-family difference.
+ *
+ * This is a constant — no per-field branching, intentionally. Story 1.6
+ * code review caught the prior `valueClasses(field)` signature lying
+ * about per-field behavior; this constant export avoids that trap.
+ */
+const VALUE_INPUT_CLASSES = 'text-body-md font-normal text-text-primary'
 
 const emit = defineEmits<{
   'update:field': [fieldName: string, value: any]

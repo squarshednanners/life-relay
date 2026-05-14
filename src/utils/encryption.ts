@@ -22,14 +22,14 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
     ['deriveBits', 'deriveKey']
   )
 
-  // Derive key using PBKDF2
-  // Create a new ArrayBuffer from the salt to ensure proper type
-  const saltBuffer = new Uint8Array(salt).buffer
-  
+  // Pass the Uint8Array directly. Wrapping it through `.buffer` trips
+  // Node's strict `instanceof ArrayBuffer` check across vitest worker
+  // realms. The BufferSource cast satisfies TS5.4's widened
+  // `Uint8Array<ArrayBufferLike>` type.
   return crypto.subtle.deriveKey(
     {
       name: 'PBKDF2',
-      salt: saltBuffer as ArrayBuffer,
+      salt: salt as BufferSource,
       iterations: PBKDF2_ITERATIONS,
       hash: 'SHA-256',
     },

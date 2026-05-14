@@ -2,6 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Structural-token CSS variables (Story 1.5 + architecture.md § Tailwind
+ * arbitrary-value policy).
+ *
+ * These mirror entries in `src/tokens/index.ts` and are the only legal way
+ * for components to consume structural lengths/colors in arbitrary-value
+ * Tailwind classes. If you change a value here, update the matching token
+ * in `src/tokens/index.ts` and run `npx vitest run main-css.test.ts` to
+ * confirm the bridge stays in sync.
+ */
+:root {
+  --witness-line-width: 3px;
+  --color-accent-700: hsl(25, 35%, 40%);
+  --witness-line-padding-left: 1.5rem;
+}
+
+/*
+ * Forced-colors override. Under Windows High Contrast Mode (or any
+ * forced-colors UA), the user's palette overrides ours. Map the Witness
+ * Line color variable to the system `Highlight` color so the structural
+ * signal — "user-recorded data lives here" — survives the override.
+ *
+ * Verified manually in Edge with Windows High Contrast Mode enabled
+ * (yellow Highlight on dark backgrounds). Automated browser-mode
+ * verification is deferred.
+ */
+@media (forced-colors: active) {
+  :root {
+    --color-accent-700: Highlight;
+  }
+}
+
 body {
   @apply bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100;
 }

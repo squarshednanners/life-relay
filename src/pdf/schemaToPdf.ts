@@ -6,7 +6,8 @@
  */
 
 import type { FormSectionSchema, FormFieldSchema } from '@/models/FormSchema'
-import { getVisibleFields, evaluateVisibility } from '@/models/FormSchema'
+import { getVisibleFields, evaluateVisibility, resolveFieldDisplayAs } from '@/models/FormSchema'
+import { MANUAL_ENTRY_BLANK_PLACEHOLDER } from './manualEntry'
 import type { DeathboxData } from '@/models/DeathboxData'
 
 /**
@@ -69,14 +70,33 @@ function formatPersonName(personId: string, data: DeathboxData): string {
 /**
  * Add a section to PDF based on schema
  */
+export interface AttachmentSummaryEntry {
+  filename: string
+  mimeType: string
+  sizeBytes: number
+  uploadedAt: string
+}
+
 export function addSchemaSectionToPDF(
   schema: FormSectionSchema,
   data: any | any[],
   fullData: DeathboxData, // Full data context for lookups (beneficiaries, people, etc.)
   addTitle: (text: string) => void,
   addSectionHeader: (text: string) => void,
-  addField: (label: string, value: string | undefined, indent?: number, isTextarea?: boolean) => void,
-  ensureSpace: (height: number) => void
+  addField: (
+    label: string,
+    value: string | undefined,
+    indent?: number,
+    isTextarea?: boolean,
+    displayAs?: 'prose' | 'mono',
+  ) => void,
+  ensureSpace: (height: number) => void,
+  // Optional attachment-metadata lookup (Story 1.7). When provided,
+  // attachment-typed fields render as a per-file list (filename, type,
+  // size, uploaded date). Without it, the field renders as a simple
+  // count line — keeps the PDF generator usable from contexts that
+  // don't want to async-preload metadata.
+  attachmentMeta?: Map<string, AttachmentSummaryEntry>,
 ) {
   // Check if section should be visible
   if (!evaluateVisibility(schema.visible, data)) {
@@ -94,7 +114,7 @@ export function addSchemaSectionToPDF(
 
   items.forEach((item, index) => {
     if (schema.isArray && index > 0) {
-      ensureSpace(20) // Space between array items
+      ensureSpace(10) // Space between array items — tightened in Story 1.7c PDF cleanup.
     }
 
     // Add section header for array items using arrayItemLabel
@@ -142,7 +162,13 @@ export function addSchemaSectionToPDF(
         if (value && Array.isArray(value) && value.length > 0) {
           const formatted = formatBeneficiaries(value, fullData)
           if (formatted) {
-            addField(field.pdfLabel || field.label || '', formatted)
+            addField(
+              field.pdfLabel || field.label || '',
+              formatted,
+              0,
+              false,
+              resolveFieldDisplayAs(field),
+            )
           }
         }
         return
@@ -151,7 +177,13 @@ export function addSchemaSectionToPDF(
       if (field.component === 'PersonSelector') {
         if (value) {
           const personName = formatPersonName(value, fullData)
-          addField(field.pdfLabel || field.label || '', personName)
+          addField(
+            field.pdfLabel || field.label || '',
+            personName,
+            0,
+            false,
+            resolveFieldDisplayAs(field),
+          )
         }
         return
       }
@@ -257,7 +289,7 @@ export function addSchemaSectionToPDF(
                       
                       // If manual entry checkbox is checked, always show blank line (even if field has a value)
                       if (deepNestedIsManualEntry) {
-                        deepNestedDisplayValue = '___________________________ (write manually)'
+                        deepNestedDisplayValue = MANUAL_ENTRY_BLANK_PLACEHOLDER
                       } else if (deepNestedField.pdfFormat) {
                         deepNestedDisplayValue = deepNestedField.pdfFormat(deepNestedValue)
                       } else if (deepNestedIsEmpty) {
@@ -290,8 +322,14 @@ export function addSchemaSectionToPDF(
 
                       const deepNestedLabel = deepNestedField.pdfLabel || deepNestedField.label || ''
                       const deepNestedIsTextarea = deepNestedField.type === 'textarea'
-                      // Use more indent for deeper nesting
-                      addField(deepNestedLabel, deepNestedDisplayValue, 40, deepNestedIsTextarea)
+                      // No indent — every label starts at the same x.
+                      addField(
+                        deepNestedLabel,
+                        deepNestedDisplayValue,
+                        0,
+                        deepNestedIsTextarea,
+                        resolveFieldDisplayAs(deepNestedField),
+                      )
                     })
 
                     ensureSpace(15)
@@ -325,7 +363,7 @@ export function addSchemaSectionToPDF(
               
               // If manual entry checkbox is checked, always show blank line (even if field has a value)
               if (nestedIsManualEntry) {
-                nestedDisplayValue = '___________________________ (write manually)'
+                nestedDisplayValue = MANUAL_ENTRY_BLANK_PLACEHOLDER
               } else if (nestedField.pdfFormat) {
                 nestedDisplayValue = nestedField.pdfFormat(nestedValue)
               } else if (nestedIsEmpty) {
@@ -358,8 +396,15 @@ export function addSchemaSectionToPDF(
 
               const nestedLabel = nestedField.pdfLabel || nestedField.label || ''
               const nestedIsTextarea = nestedField.type === 'textarea'
-              // Use indent to show nesting visually
-              addField(nestedLabel, nestedDisplayValue, 20, nestedIsTextarea)
+              // No indent — all labels share the same starting x across
+              // every section, regardless of nesting depth.
+              addField(
+                nestedLabel,
+                nestedDisplayValue,
+                0,
+                nestedIsTextarea,
+                resolveFieldDisplayAs(nestedField),
+              )
             })
 
             ensureSpace(15)
@@ -369,7 +414,7 @@ export function addSchemaSectionToPDF(
       }
 
       // For non-array fields, value is already extracted above (including dot notation handling)
-      let actualValue = value
+      const actualValue = value
 
       // Check for manual entry flag
       const manualEntryFieldName = getManualEntryFieldName(field)
@@ -402,7 +447,7 @@ export function addSchemaSectionToPDF(
       // IMPORTANT: If manual entry checkbox is checked, always show blank line (even if field has a value)
       // This must be checked FIRST, before any other formatting
       if (isManualEntry) {
-        displayValue = '___________________________ (write manually)'
+        displayValue = MANUAL_ENTRY_BLANK_PLACEHOLDER
       } else if (field.pdfFormat) {
         displayValue = field.pdfFormat(actualValue)
       } else if (isEmpty) {
@@ -432,6 +477,30 @@ export function addSchemaSectionToPDF(
         // For select fields, show the label if available
         const option = field.options?.find(opt => opt.value === actualValue)
         displayValue = option ? option.label : String(actualValue)
+      } else if (field.type === 'attachment') {
+        // Render attachment fields as a per-file list when metadata is
+        // available, else as a count line.
+        const ids: string[] = Array.isArray(actualValue)
+          ? actualValue.filter((v): v is string => typeof v === 'string')
+          : typeof actualValue === 'string' && actualValue.length > 0
+            ? [actualValue]
+            : []
+        if (ids.length === 0) {
+          return // Empty attachment field — skip entirely.
+        }
+        if (attachmentMeta && attachmentMeta.size > 0) {
+          const lines = ids.map(id => {
+            const meta = attachmentMeta.get(id)
+            // Render a friendly "file unavailable" without exposing the
+            // raw attachment UUID — it's an internal id, not useful to
+            // the survivor reading the PDF (Story 1.7c review).
+            if (!meta) return '(a file was attached but its content is unavailable)'
+            return `${meta.filename} — ${humanAttachmentType(meta.mimeType)} — ${humanAttachmentSize(meta.sizeBytes)} — uploaded ${formatAttachmentDate(meta.uploadedAt)}`
+          })
+          displayValue = lines.join('\n')
+        } else {
+          displayValue = `${ids.length} file${ids.length === 1 ? '' : 's'} attached`
+        }
       } else {
         displayValue = String(actualValue)
       }
@@ -443,8 +512,9 @@ export function addSchemaSectionToPDF(
 
       const label = field.pdfLabel || field.label || ''
       // Pass isTextarea flag for textarea fields to preserve line breaks
-      const isTextarea = field.type === 'textarea'
-      addField(label, displayValue, 0, isTextarea)
+      // Attachment fields use the same multi-line rendering path.
+      const isTextarea = field.type === 'textarea' || field.type === 'attachment'
+      addField(label, displayValue, 0, isTextarea, resolveFieldDisplayAs(field))
     })
 
     // Add spacing after each item
@@ -452,6 +522,29 @@ export function addSchemaSectionToPDF(
       ensureSpace(15)
     }
   })
+}
+
+function humanAttachmentType(mimeType: string): string {
+  if (mimeType === 'application/pdf') return 'PDF'
+  if (mimeType.startsWith('image/')) {
+    const sub = mimeType.slice('image/'.length).toUpperCase()
+    return `${sub} image`
+  }
+  return mimeType
+}
+
+function humanAttachmentSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} bytes`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function formatAttachmentDate(iso: string): string {
+  try {
+    return new Date(iso).toLocaleDateString()
+  } catch {
+    return iso
+  }
 }
 
 /**

@@ -1,0 +1,468 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`attorneyPrepPdf — schema-driven data plan > matches the snapshot for the canonical fixture 1`] = `
+[
+  {
+    "items": [
+      {
+        "fields": [
+          {
+            "fieldName": "dateOfBirth",
+            "label": "Date of Birth",
+            "value": "1958-04-12",
+          },
+          {
+            "fieldName": "socialSecurityNumber",
+            "label": "SSN",
+            "value": undefined,
+          },
+          {
+            "fieldName": "phone",
+            "label": "Phone",
+            "value": "(555) 010-2030",
+          },
+          {
+            "fieldName": "email",
+            "label": "Email",
+            "value": "eleanor@example.com",
+          },
+          {
+            "fieldName": "address",
+            "label": "Address",
+            "value": "142 Maple Lane, Springfield, IL 62701",
+          },
+        ],
+        "itemId": "person-1",
+        "itemLabel": "Eleanor Vance",
+      },
+      {
+        "fields": [
+          {
+            "fieldName": "dateOfBirth",
+            "label": "Date of Birth",
+            "value": "1960-09-03",
+          },
+          {
+            "fieldName": "socialSecurityNumber",
+            "label": "SSN",
+            "value": undefined,
+          },
+          {
+            "fieldName": "phone",
+            "label": "Phone",
+            "value": "(555) 020-4050",
+          },
+          {
+            "fieldName": "email",
+            "label": "Email",
+            "value": "thomas@example.com",
+          },
+          {
+            "fieldName": "address",
+            "label": "Address",
+            "value": "142 Maple Lane, Springfield, IL 62701",
+          },
+        ],
+        "itemId": "person-2",
+        "itemLabel": "Thomas Vance",
+      },
+    ],
+    "sectionKey": "people",
+    "sectionLabel": "Personal Information",
+  },
+  {
+    "items": [
+      {
+        "fields": [
+          {
+            "fieldName": "relationship",
+            "label": "Relationship",
+            "value": "Spouse",
+          },
+          {
+            "fieldName": "address",
+            "label": "Address",
+            "value": "142 Maple Lane, Springfield, IL 62701",
+          },
+          {
+            "fieldName": "percentage",
+            "label": "Percentage",
+            "value": "100%",
+          },
+        ],
+        "itemId": "beneficiary-1",
+        "itemLabel": "Thomas Vance (primary)",
+      },
+      {
+        "fields": [
+          {
+            "fieldName": "relationship",
+            "label": "Relationship",
+            "value": "Daughter",
+          },
+          {
+            "fieldName": "address",
+            "label": "Address",
+            "value": undefined,
+          },
+          {
+            "fieldName": "percentage",
+            "label": "Percentage",
+            "value": "50%",
+          },
+        ],
+        "itemId": "beneficiary-2",
+        "itemLabel": "Hannah Vance (secondary)",
+      },
+    ],
+    "sectionKey": "beneficiaries",
+    "sectionLabel": "Beneficiaries",
+  },
+  {
+    "items": [
+      {
+        "fields": [
+          {
+            "fieldName": "phone",
+            "label": "Phone",
+            "value": "(555) 110-2200",
+          },
+          {
+            "fieldName": "email",
+            "label": "Email",
+            "value": "margaret@hillassoc.com",
+          },
+          {
+            "fieldName": "organization",
+            "label": "Organization",
+            "value": "Hill & Associates",
+          },
+        ],
+        "itemLabel": "Margaret Hill — Executor",
+      },
+      {
+        "fields": [
+          {
+            "fieldName": "phone",
+            "label": "Phone",
+            "value": "(555) 220-3300",
+          },
+          {
+            "fieldName": "email",
+            "label": "Email",
+            "value": "david@chenlegal.com",
+          },
+          {
+            "fieldName": "organization",
+            "label": "Organization",
+            "value": "Chen Legal",
+          },
+          {
+            "fieldName": "notes",
+            "label": "Notes",
+            "value": "Estate attorney for 12 years.",
+          },
+        ],
+        "itemLabel": "David Chen — Attorney",
+      },
+      {
+        "fields": [
+          {
+            "fieldName": "phone",
+            "label": "Phone",
+            "value": "(555) 440-5500",
+          },
+          {
+            "fieldName": "email",
+            "label": "Email",
+            "value": "susan@kimcpa.com",
+          },
+          {
+            "fieldName": "organization",
+            "label": "Organization",
+            "value": "Kim CPA",
+          },
+        ],
+        "itemLabel": "Susan Kim — Accountant / CPA",
+      },
+      {
+        "fields": [
+          {
+            "fieldName": "phone",
+            "label": "Phone",
+            "value": "(555) 330-4400",
+          },
+          {
+            "fieldName": "email",
+            "label": "Email",
+            "value": "apatel@springfieldfp.com",
+          },
+          {
+            "fieldName": "organization",
+            "label": "Organization",
+            "value": "Springfield Family Practice",
+          },
+        ],
+        "itemLabel": "Dr. Anil Patel — Doctor",
+      },
+    ],
+    "sectionKey": "importantContacts",
+    "sectionLabel": "Executor & Key Contacts",
+  },
+  {
+    "items": [
+      {
+        "fields": [
+          {
+            "fieldName": "accountNumber",
+            "label": "Account #",
+            "value": undefined,
+          },
+          {
+            "fieldName": "accountCategory",
+            "label": "Owner",
+            "value": undefined,
+          },
+        ],
+        "itemLabel": "First National Bank — Checking",
+      },
+    ],
+    "sectionKey": "financialAccounts",
+    "sectionLabel": "Financial Accounts",
+  },
+  {
+    "items": [
+      {
+        "fields": [
+          {
+            "fieldName": "cardNumber",
+            "label": "Card #",
+            "value": undefined,
+          },
+          {
+            "fieldName": "issuer",
+            "label": "Issuer",
+            "value": "Chase",
+          },
+        ],
+        "itemLabel": "Chase",
+      },
+    ],
+    "sectionKey": "creditCards",
+    "sectionLabel": "Credit Cards",
+  },
+  {
+    "items": [
+      {
+        "fields": [
+          {
+            "fieldName": "accountNumber",
+            "label": "Account #",
+            "value": undefined,
+          },
+          {
+            "fieldName": "balance",
+            "label": "Balance",
+            "value": "$180,000",
+          },
+          {
+            "fieldName": "monthlyPayment",
+            "label": "Monthly Payment",
+            "value": "$1,420",
+          },
+        ],
+        "itemLabel": "Wells Fargo Mortgage — Mortgage",
+      },
+    ],
+    "sectionKey": "debts",
+    "sectionLabel": "Debts & Obligations",
+  },
+  {
+    "items": [
+      {
+        "fields": [
+          {
+            "fieldName": "accountNumber",
+            "label": "Account #",
+            "value": undefined,
+          },
+          {
+            "fieldName": "balance",
+            "label": "Balance",
+            "value": "$420,000",
+          },
+          {
+            "fieldName": "beneficiaries",
+            "label": "Beneficiaries",
+            "value": "Designated",
+          },
+        ],
+        "itemLabel": "Fidelity",
+      },
+    ],
+    "sectionKey": "retirementAccounts",
+    "sectionLabel": "Retirement & Investment Accounts",
+  },
+  {
+    "items": [
+      {
+        "fields": [
+          {
+            "fieldName": "storageType",
+            "label": "Storage",
+            "value": "Single-Sig Wallet",
+          },
+          {
+            "fieldName": "approximateHoldings",
+            "label": "Holdings",
+            "value": undefined,
+          },
+          {
+            "fieldName": "walletApp",
+            "label": "Wallet App",
+            "value": undefined,
+          },
+        ],
+        "itemLabel": "Crypto Asset",
+      },
+    ],
+    "sectionKey": "cryptoAssets",
+    "sectionLabel": "Cryptocurrency Assets",
+  },
+  {
+    "items": [
+      {
+        "fields": [
+          {
+            "fieldName": "type",
+            "label": "Type",
+            "value": undefined,
+          },
+          {
+            "fieldName": "ownership",
+            "label": "Ownership",
+            "value": undefined,
+          },
+          {
+            "fieldName": "estimatedValue",
+            "label": "Estimated Value",
+            "value": "$385,000",
+          },
+        ],
+        "itemLabel": "142 Maple Lane, Springfield, IL 62701",
+      },
+    ],
+    "sectionKey": "property",
+    "sectionLabel": "Property & Real Estate",
+  },
+  {
+    "items": [
+      {
+        "fields": [
+          {
+            "fieldName": "vin",
+            "label": "VIN",
+            "value": undefined,
+          },
+          {
+            "fieldName": "titleLocation",
+            "label": "Title Location",
+            "value": undefined,
+          },
+        ],
+        "itemLabel": "2021 Toyota Camry",
+      },
+    ],
+    "sectionKey": "vehicles",
+    "sectionLabel": "Vehicles",
+  },
+  {
+    "items": [
+      {
+        "fields": [
+          {
+            "fieldName": "entityType",
+            "label": "Type",
+            "value": "LLC",
+          },
+          {
+            "fieldName": "ownershipPercentage",
+            "label": "Ownership %",
+            "value": "100%%",
+          },
+        ],
+        "itemLabel": "Vance Consulting LLC",
+      },
+    ],
+    "sectionKey": "businessOwnership",
+    "sectionLabel": "Business Ownership",
+  },
+  {
+    "items": [
+      {
+        "fields": [
+          {
+            "fieldName": "willLocation",
+            "label": "Will Location",
+            "value": "Home Safe (see Physical Storage)",
+          },
+          {
+            "fieldName": "willDate",
+            "label": "Will Date",
+            "value": "2024-03-15",
+          },
+          {
+            "fieldName": "poaAgent",
+            "label": "POA Agent",
+            "value": "Thomas Vance",
+          },
+          {
+            "fieldName": "powerOfAttorney",
+            "label": "POA Document Location",
+            "value": undefined,
+          },
+          {
+            "fieldName": "livingWill",
+            "label": "Living Will / Advance Directive",
+            "value": undefined,
+          },
+        ],
+      },
+    ],
+    "sectionKey": "legalDocuments",
+    "sectionLabel": "Existing Legal Documents",
+  },
+  {
+    "items": [
+      {
+        "fields": [
+          {
+            "fieldName": "trustType",
+            "label": "Type",
+            "value": "Revocable",
+          },
+          {
+            "fieldName": "dateCreated",
+            "label": "Date Created",
+            "value": "2024-03-15",
+          },
+          {
+            "fieldName": "trustee",
+            "label": "Trustee",
+            "value": "Eleanor Vance",
+          },
+          {
+            "fieldName": "successorTrustee",
+            "label": "Successor Trustee",
+            "value": "Thomas Vance",
+          },
+        ],
+        "itemId": "trust-1",
+        "itemLabel": "Vance Family Living Trust",
+      },
+    ],
+    "sectionKey": "trusts",
+    "sectionLabel": "Trusts",
+  },
+]
+`;

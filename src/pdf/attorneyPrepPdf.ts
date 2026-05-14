@@ -1,24 +1,73 @@
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
+/**
+ * Attorney Prep Packet PDF — thin renderer driven by schema-tagged
+ * `pdfViews.attorneyPrep` metadata.
+ *
+ * Schema-as-truth: each section (Personal Information, Beneficiaries,
+ * Executor & Key Contacts, Financial Accounts, Property, Vehicles,
+ * Retirement & Investment Accounts, Cryptocurrency Assets, Debts,
+ * Credit Cards, Life Insurance Policies, Existing Legal Documents, Trusts,
+ * Business Ownership) flows from `pdfViews.attorneyPrep` schema tags.
+ *
+ * Renderer-side concerns kept here:
+ *   - Title page + disclaimer box
+ *   - Readiness summary (uses hasSectionData helper across estatePrepCategories)
+ *   - Trust Planning Considerations — bespoke aggregation logic counting items
+ *     across sections + computing minor beneficiaries from age
+ *   - Attorney Meeting Checklist (curated content from willPrepCategories)
+ *   - Section ordering on the page (config below)
+ */
+import { PDFDocument, rgb } from 'pdf-lib'
+import type { PDFFont } from 'pdf-lib'
 import type { DeathboxData } from '@/models/DeathboxData'
 import { estatePrepCategories, attorneyMeetingChecklist } from '@/data/willPrepCategories'
+import { MANUAL_ENTRY_BLANK_PLACEHOLDER } from './manualEntry'
 import { ESTATE_PREP_DISCLAIMER, ESTATE_PREP_PDF_FOOTER } from '@/data/willPrepDisclaimers'
 import { hasSectionData } from '@/composables/useSectionProgress'
 import { drawLifeRelayMark, drawGeneratedBy } from './pdfBranding'
+import { embedPdfFonts } from './fonts'
+import { drawWitnessLine, WITNESS_LINE_DEFAULT_HEIGHT } from './witnessLine'
+import {
+  collectFieldsByPdfView,
+  type CollectedSection,
+} from './schemaPdfViews'
+import { pdfColor, pdfPage, pdfSpacing } from '@/tokens'
 
-const PAGE_WIDTH = 612
-const PAGE_HEIGHT = 792
-const MARGIN = 50
+const PAGE_WIDTH = pdfPage.widthPt
+const PAGE_HEIGHT = pdfPage.heightPt
+const MARGIN = pdfPage.marginAttorneyPrep
 const CONTENT_WIDTH = PAGE_WIDTH - 2 * MARGIN
+
+/**
+ * Section order in the rendered packet. Sections not listed do not appear
+ * even if schema-tagged. Order matches the original generator.
+ */
+const SECTION_ORDER: string[] = [
+  'people',
+  'beneficiaries',
+  'importantContacts',
+  'financialAccounts',
+  'property',
+  'vehicles',
+  'retirementAccounts',
+  'cryptoAssets',
+  'debts',
+  'creditCards',
+  'lifeInsurance.policies',
+  'legalDocuments',
+  'trusts',
+  // Trust Planning Considerations (bespoke; rendered separately after trusts)
+  'businessOwnership',
+]
 
 function sanitize(text: string): string {
   return text
-    .replace(/[\u2018\u2019\u2032]/g, "'")
-    .replace(/[\u201C\u201D]/g, '"')
-    .replace(/\u2014/g, '--')
-    .replace(/\u2013/g, '-')
-    .replace(/\u2026/g, '...')
-    .replace(/\u2192/g, '->')
-    .replace(/\u2190/g, '<-')
+    .replace(/[‘’′]/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/—/g, '--')
+    .replace(/–/g, '-')
+    .replace(/…/g, '...')
+    .replace(/→/g, '->')
+    .replace(/←/g, '<-')
     .replace(/[^\x20-\x7E\n\r\t]/g, '?')
 }
 
@@ -27,11 +76,15 @@ function truncate(text: string, maxLen: number): string {
   return text.slice(0, maxLen - 3) + '...'
 }
 
-export async function generateAttorneyPrepPdf(data: DeathboxData): Promise<Uint8Array> {
+export async function generateAttorneyPrepPdf(
+  data: DeathboxData,
+): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create()
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
-  const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
-  const italic = await pdfDoc.embedFont(StandardFonts.HelveticaOblique)
+  const fonts = await embedPdfFonts(pdfDoc)
+  const font: PDFFont = fonts.bodyRegular
+  const bold: PDFFont = fonts.bodyMedium
+  const italic: PDFFont = fonts.headingItalic
+  const heading: PDFFont = fonts.headingMedium
 
   let page = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT])
   let y = PAGE_HEIGHT - MARGIN
@@ -42,23 +95,21 @@ export async function generateAttorneyPrepPdf(data: DeathboxData): Promise<Uint8
 
   function addFooter() {
     const pageCount = pdfDoc.getPageCount()
-    // Footer text
     const footerW = font.widthOfTextAtSize(ESTATE_PREP_PDF_FOOTER, 7)
     page.drawText(ESTATE_PREP_PDF_FOOTER, {
       x: (PAGE_WIDTH - footerW) / 2,
       y: 25,
       size: 7,
       font: italic,
-      color: rgb(0.5, 0.5, 0.5),
+      color: rgb(...pdfColor.textMuted),
     })
-    // Page number
     const pNum = `Page ${pageCount}`
     page.drawText(pNum, {
       x: PAGE_WIDTH - MARGIN - font.widthOfTextAtSize(pNum, 7),
       y: 25,
       size: 7,
       font,
-      color: rgb(0.5, 0.5, 0.5),
+      color: rgb(...pdfColor.textMuted),
     })
   }
 
@@ -74,7 +125,11 @@ export async function generateAttorneyPrepPdf(data: DeathboxData): Promise<Uint8
     }
   }
 
-  function drawField(label: string, value: string | undefined | null, indent = 0): boolean {
+  function drawField(
+    label: string,
+    value: string | undefined | null,
+    indent = 0,
+  ): boolean {
     if (!value || value.trim() === '') return false
     ensureSpace(lineHeight + 4)
     const clean = sanitize(truncate(value.trim().replace(/\n/g, ', '), 120))
@@ -85,9 +140,8 @@ export async function generateAttorneyPrepPdf(data: DeathboxData): Promise<Uint8
       y,
       size: labelSize,
       font: bold,
-      color: rgb(0.4, 0.4, 0.4),
+      color: rgb(...pdfColor.textLabel),
     })
-    // Word-wrap the value
     const maxW = CONTENT_WIDTH - indent - labelW
     const words = clean.split(' ')
     let line = ''
@@ -99,7 +153,7 @@ export async function generateAttorneyPrepPdf(data: DeathboxData): Promise<Uint8
           y,
           size: fontSize,
           font,
-          color: rgb(0, 0, 0),
+          color: rgb(...pdfColor.black),
         })
         y -= lineHeight
         ensureSpace(lineHeight)
@@ -114,7 +168,7 @@ export async function generateAttorneyPrepPdf(data: DeathboxData): Promise<Uint8
         y,
         size: fontSize,
         font,
-        color: rgb(0, 0, 0),
+        color: rgb(...pdfColor.black),
       })
     }
     y -= lineHeight
@@ -123,19 +177,19 @@ export async function generateAttorneyPrepPdf(data: DeathboxData): Promise<Uint8
 
   function drawSectionHeader(text: string) {
     ensureSpace(30)
-    page.drawRectangle({
+    // Witness Line + section-header text — replaces the prior grey banner.
+    // Cross-surface contract: same primitive as <WitnessSection> on screen.
+    drawWitnessLine(page, {
       x: MARGIN,
-      y: y - 3,
-      width: CONTENT_WIDTH,
-      height: 18,
-      color: rgb(0.93, 0.93, 0.95),
+      yTop: y + WITNESS_LINE_DEFAULT_HEIGHT - 3,
+      yBottom: y - 3,
     })
     page.drawText(sanitize(text.toUpperCase()), {
-      x: MARGIN + 6,
+      x: MARGIN + pdfSpacing.witnessLinePaddingLeftPt,
       y: y + 1,
       size: 10,
-      font: bold,
-      color: rgb(0.2, 0.2, 0.3),
+      font: heading,
+      color: rgb(...pdfColor.sectionHeaderText),
     })
     y -= 24
   }
@@ -147,9 +201,34 @@ export async function generateAttorneyPrepPdf(data: DeathboxData): Promise<Uint8
       y,
       size: fontSize + 1,
       font: bold,
-      color: rgb(0.1, 0.1, 0.1),
+      color: rgb(...pdfColor.textHeavy),
     })
     y -= lineHeight + 2
+  }
+
+  /**
+   * Draw all collected items + their fields for a section.
+   * The section header is drawn here; items have their itemLabel as bold
+   * heading and fields as label/value rows indented 8.
+   */
+  function drawCollectedSection(section: CollectedSection) {
+    if (section.items.length === 0) return
+    drawSectionHeader(section.sectionLabel)
+    for (const item of section.items) {
+      if (item.itemLabel && item.itemLabel.trim() !== '') {
+        drawItemName(item.itemLabel)
+      }
+      for (const field of item.fields) {
+        if (field.manualEntryBlank) {
+          // Placeholder centralized in src/pdf/manualEntry.ts (Story 1.11).
+          drawField(field.label, MANUAL_ENTRY_BLANK_PLACEHOLDER, 8)
+        } else {
+          drawField(field.label, field.value, 8)
+        }
+      }
+      y -= 4
+    }
+    y -= 8
   }
 
   // ========================================
@@ -158,7 +237,6 @@ export async function generateAttorneyPrepPdf(data: DeathboxData): Promise<Uint8
   y -= 60
   const title = 'Estate Planning — Attorney Preparation Summary'
   const titleW = bold.widthOfTextAtSize(title, 18)
-  // Logo mark next to title
   const logoSize = 22
   const titleBlockWidth = logoSize + 8 + titleW
   const titleBlockX = (PAGE_WIDTH - titleBlockWidth) / 2
@@ -167,8 +245,8 @@ export async function generateAttorneyPrepPdf(data: DeathboxData): Promise<Uint8
     x: titleBlockX + logoSize + 8,
     y,
     size: 18,
-    font: bold,
-    color: rgb(0.06, 0.46, 0.43),
+    font: heading,
+    color: rgb(...pdfColor.brandTeal),
   })
   y -= 24
 
@@ -179,7 +257,7 @@ export async function generateAttorneyPrepPdf(data: DeathboxData): Promise<Uint8
     y,
     size: 12,
     font,
-    color: rgb(0.4, 0.4, 0.4),
+    color: rgb(...pdfColor.textLabel),
   })
   y -= 16
 
@@ -191,21 +269,20 @@ export async function generateAttorneyPrepPdf(data: DeathboxData): Promise<Uint8
     y,
     size: 10,
     font,
-    color: rgb(0.5, 0.5, 0.5),
+    color: rgb(...pdfColor.textMuted),
   })
   y -= 30
 
-  // Disclaimer box on title page
+  // Disclaimer box
   page.drawRectangle({
     x: MARGIN,
     y: y - 50,
     width: CONTENT_WIDTH,
     height: 55,
-    color: rgb(1, 0.97, 0.9),
-    borderColor: rgb(0.85, 0.7, 0.3),
+    color: rgb(...pdfColor.bgDisclaimerCream),
+    borderColor: rgb(...pdfColor.amberBorder),
     borderWidth: 1,
   })
-  // Wrap disclaimer text
   const disclaimerWords = ESTATE_PREP_DISCLAIMER.split(' ')
   let dLine = ''
   let dY = y - 10
@@ -217,7 +294,7 @@ export async function generateAttorneyPrepPdf(data: DeathboxData): Promise<Uint8
         y: dY,
         size: 8,
         font: italic,
-        color: rgb(0.5, 0.4, 0.1),
+        color: rgb(...pdfColor.amberText),
       })
       dY -= 11
       dLine = word
@@ -231,255 +308,56 @@ export async function generateAttorneyPrepPdf(data: DeathboxData): Promise<Uint8
       y: dY,
       size: 8,
       font: italic,
-      color: rgb(0.5, 0.4, 0.1),
+      color: rgb(...pdfColor.amberText),
     })
   }
   y -= 70
 
   // Readiness summary
   const completedSections = estatePrepCategories
-    .flatMap(c => c.sections)
-    .filter(s => hasSectionData(data, s.path))
-  const totalSections = estatePrepCategories.flatMap(c => c.sections).length
-  drawField('Sections Completed', `${completedSections.length} of ${totalSections}`)
+    .flatMap((c) => c.sections)
+    .filter((s) => hasSectionData(data, s.path))
+  const totalSections = estatePrepCategories.flatMap((c) => c.sections).length
+  drawField(
+    'Sections Completed',
+    `${completedSections.length} of ${totalSections}`,
+  )
   y -= 8
 
   // Category readiness
   for (const cat of estatePrepCategories) {
-    const done = cat.sections.filter(s => hasSectionData(data, s.path)).length
+    const done = cat.sections.filter((s) => hasSectionData(data, s.path)).length
     const status = done === cat.sections.length ? 'Complete' : `${done}/${cat.sections.length}`
     drawField(cat.title, `${status} (${cat.priority})`, 8)
   }
 
   // ========================================
-  // CONTENT PAGES
+  // CONTENT PAGES — schema-driven via collectFieldsByPdfView
   // ========================================
   newPage()
 
-  // --- Identity & Family ---
-  const people = data.people ?? []
-  if (people.length > 0) {
-    drawSectionHeader('Personal Information')
-    for (const person of people) {
-      if (person.name) drawItemName(person.name)
-      drawField('Date of Birth', person.dateOfBirth, 8)
-      drawField('SSN', person.socialSecurityNumber, 8)
-      drawField('Phone', person.phone, 8)
-      drawField('Email', person.email, 8)
-      drawField('Address', person.address, 8)
-      y -= 4
-    }
-    y -= 8
+  const allCollected = collectFieldsByPdfView('attorneyPrep', data)
+  const sectionByKey = new Map(allCollected.map((s) => [s.sectionKey, s]))
+
+  for (const sectionKey of SECTION_ORDER) {
+    const section = sectionByKey.get(sectionKey)
+    if (!section) continue
+    drawCollectedSection(section)
   }
 
-  // --- Beneficiaries ---
-  const beneficiaries = data.beneficiaries ?? []
-  if (beneficiaries.length > 0) {
-    drawSectionHeader('Beneficiaries')
-    for (const b of beneficiaries) {
-      const label = [b.name, b.type ? `(${b.type})` : ''].filter(Boolean).join(' ')
-      if (label) drawItemName(label)
-      drawField('Relationship', b.relationship, 8)
-      drawField('Date of Birth', b.dateOfBirth, 8)
-      drawField('Address', b.address, 8)
-      drawField('Percentage', b.percentage ? `${b.percentage}%` : undefined, 8)
-      drawField('Notes', b.notes, 8)
-      y -= 4
-    }
-    y -= 8
-  }
-
-  // --- Executor & Key Contacts ---
-  const contacts = data.importantContacts ?? []
-  if (contacts.length > 0) {
-    drawSectionHeader('Executor & Key Contacts')
-    const priority = ['Executor', 'Attorney', 'Trustee', 'Financial Advisor', 'Accountant / CPA', 'Insurance Agent', 'Doctor', 'Clergy']
-    const sorted = [...contacts].sort((a, b) => {
-      const ai = priority.indexOf(a.role || '')
-      const bi = priority.indexOf(b.role || '')
-      return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
-    })
-    for (const c of sorted) {
-      const nameRole = [c.name, c.role].filter(Boolean).join(' — ')
-      if (nameRole) drawItemName(nameRole)
-      drawField('Phone', c.phone, 8)
-      drawField('Email', c.email, 8)
-      drawField('Organization', c.organization, 8)
-      drawField('Notes', c.notes, 8)
-      y -= 4
-    }
-    y -= 8
-  }
-
-  // --- Financial Accounts ---
-  const accounts = (data.financialAccounts ?? []) as any[]
-  if (accounts.length > 0) {
-    drawSectionHeader('Financial Accounts')
-    for (const a of accounts) {
-      const label = [a.institution, a.accountType].filter(Boolean).join(' — ')
-      if (label) drawItemName(label)
-      drawField('Account #', a.accountNumber, 8)
-      drawField('Balance', a.balance, 8)
-      drawField('Owner', a.accountCategory, 8)
-      y -= 4
-    }
-    y -= 8
-  }
-
-  // --- Property ---
+  // ========================================
+  // TRUST PLANNING CONSIDERATIONS — bespoke aggregation
+  // (counts assets across sections + flags minor beneficiaries by age)
+  // ========================================
   const properties = data.property ?? []
-  if (properties.length > 0) {
-    drawSectionHeader('Property & Real Estate')
-    for (const p of properties) {
-      const label = p.address || 'Property'
-      drawItemName(label)
-      drawField('Type', p.type, 8)
-      drawField('Ownership', p.ownership, 8)
-      drawField('Estimated Value', p.estimatedValue, 8)
-      drawField('Mortgage Info', p.mortgageInfo, 8)
-      y -= 4
-    }
-    y -= 8
-  }
-
-  // --- Vehicles ---
-  const vehicles = data.vehicles ?? []
-  if (vehicles.length > 0) {
-    drawSectionHeader('Vehicles')
-    for (const v of vehicles) {
-      const label = [v.year, v.make, v.model].filter(Boolean).join(' ')
-      drawItemName(label || 'Vehicle')
-      drawField('VIN', v.vin, 8)
-      drawField('Title Location', v.titleLocation, 8)
-      drawField('Lienholder', v.lienholder, 8)
-      y -= 4
-    }
-    y -= 8
-  }
-
-  // --- Retirement & Investment ---
+  const accounts = (data.financialAccounts ?? []) as unknown[]
   const retirement = data.retirementAccounts ?? []
-  if (retirement.length > 0) {
-    drawSectionHeader('Retirement & Investment Accounts')
-    for (const r of retirement) {
-      const label = [r.institution, r.type].filter(Boolean).join(' — ')
-      drawItemName(label || 'Account')
-      drawField('Account #', r.accountNumber, 8)
-      drawField('Balance', r.balance, 8)
-      if (r.beneficiaries?.length) {
-        const bNames = r.beneficiaries.map((b: any) => b.customName || 'Designated').join(', ')
-        drawField('Beneficiaries', bNames, 8)
-      }
-      y -= 4
-    }
-    y -= 8
-  }
-
-  // --- Crypto Assets (non-sensitive) ---
   const crypto = data.cryptoAssets ?? []
-  if (crypto.length > 0) {
-    drawSectionHeader('Cryptocurrency Assets')
-    for (const c of crypto) {
-      const chain = c.blockchain && c.blockchain !== 'Other' ? c.blockchain : c.blockchainOther || ''
-      const label = [c.nickname || c.type, chain].filter(Boolean).join(' — ')
-      drawItemName(label || 'Crypto Asset')
-      const storageLabels: Record<string, string> = {
-        'single-sig': 'Single-Sig Wallet',
-        'multi-sig': 'Multi-Sig Wallet',
-        'exchange': 'Exchange',
-      }
-      drawField('Storage', storageLabels[c.storageType || ''] || c.storageType, 8)
-      drawField('Holdings', c.approximateHoldings, 8)
-      if (c.storageType === 'exchange') {
-        drawField('Exchange', c.exchange, 8)
-      } else {
-        const walletName = c.walletApp === 'Other' ? c.walletAppOther : c.walletApp
-        drawField('Wallet App', walletName, 8)
-      }
-      y -= 4
-    }
-    y -= 8
-  }
-
-  // --- Debts ---
-  const debts = data.debts ?? []
-  if (debts.length > 0) {
-    drawSectionHeader('Debts & Obligations')
-    for (const d of debts) {
-      const label = [d.creditor, d.type].filter(Boolean).join(' — ')
-      drawItemName(label || 'Debt')
-      drawField('Account #', d.accountNumber, 8)
-      drawField('Balance', d.balance, 8)
-      drawField('Monthly Payment', d.monthlyPayment, 8)
-      y -= 4
-    }
-    y -= 8
-  }
-
-  // --- Credit Cards ---
-  const cards = data.creditCards ?? []
-  if (cards.length > 0) {
-    drawSectionHeader('Credit Cards')
-    for (const c of cards) {
-      drawItemName(c.cardName || c.issuer || 'Credit Card')
-      drawField('Card #', c.cardNumber, 8)
-      drawField('Issuer', c.issuer, 8)
-      y -= 4
-    }
-    y -= 8
-  }
-
-  // --- Life Insurance ---
-  const policies = data.lifeInsurance?.policies ?? []
-  if (policies.length > 0) {
-    drawSectionHeader('Life Insurance Policies')
-    for (const p of policies) {
-      drawItemName(p.company || 'Policy')
-      drawField('Policy #', p.policyNumber, 8)
-      drawField('Amount', p.amount, 8)
-      if (p.beneficiaries?.length) {
-        const bNames = p.beneficiaries.map((b: any) => b.customName || 'Designated').join(', ')
-        drawField('Beneficiaries', bNames, 8)
-      }
-      y -= 4
-    }
-    y -= 8
-  }
-
-  // --- Legal Documents ---
-  if (data.legalDocuments) {
-    const ld = data.legalDocuments
-    const hasData = ld.willLocation || ld.willDate || ld.poaAgent || ld.powerOfAttorney || ld.livingWill
-    if (hasData) {
-      drawSectionHeader('Existing Legal Documents')
-      drawField('Will Location', ld.willLocation, 4)
-      drawField('Will Date', ld.willDate, 4)
-      drawField('POA Agent', ld.poaAgent, 4)
-      drawField('POA Document Location', ld.powerOfAttorney, 4)
-      drawField('Living Will / Advance Directive', ld.livingWill, 4)
-      drawField('Other Documents', ld.otherDocuments, 4)
-      y -= 8
-    }
-  }
-
-  // --- Trusts ---
-  const trusts = data.trusts ?? []
-  if (trusts.length > 0) {
-    drawSectionHeader('Trusts')
-    for (const t of trusts) {
-      drawItemName(t.trustName || t.trustType || 'Trust')
-      drawField('Type', t.trustType, 8)
-      drawField('Date Created', t.dateCreated, 8)
-      drawField('Trustee', t.trustee, 8)
-      drawField('Successor Trustee', t.successorTrustee, 8)
-      y -= 4
-    }
-    y -= 8
-  }
-
-  // --- Trust Planning Considerations ---
-  // This section summarizes assets that may be candidates for trust funding
   const businesses = data.businessOwnership ?? []
+  const policies = data.lifeInsurance?.policies ?? []
+  const beneficiaries = data.beneficiaries ?? []
+  const trusts = data.trusts ?? []
+
   const trustFundingCandidates: string[] = []
   if (properties.length > 0) trustFundingCandidates.push(`${properties.length} propert${properties.length === 1 ? 'y' : 'ies'}`)
   if (accounts.length > 0) trustFundingCandidates.push(`${accounts.length} financial account${accounts.length === 1 ? '' : 's'}`)
@@ -491,53 +369,55 @@ export async function generateAttorneyPrepPdf(data: DeathboxData): Promise<Uint8
     drawSectionHeader('Trust Planning Considerations')
 
     if (trusts.length > 0) {
-      drawField('Existing Trusts', `${trusts.length} trust${trusts.length === 1 ? '' : 's'} already established (see above)`, 4)
+      drawField(
+        'Existing Trusts',
+        `${trusts.length} trust${trusts.length === 1 ? '' : 's'} already established (see above)`,
+        4,
+      )
     }
-
     if (trustFundingCandidates.length > 0) {
-      drawField('Assets for Potential Trust Funding', trustFundingCandidates.join(', '), 4)
+      drawField(
+        'Assets for Potential Trust Funding',
+        trustFundingCandidates.join(', '),
+        4,
+      )
     }
 
-    // Highlight beneficiaries who might need special trust provisions
-    const minorBeneficiaries = beneficiaries.filter(b => {
-      if (!b.dateOfBirth) return false
-      const age = Math.floor((Date.now() - new Date(b.dateOfBirth).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+    const minorBeneficiaries = beneficiaries.filter((b) => {
+      const dob = (b as Record<string, unknown>).dateOfBirth
+      if (typeof dob !== 'string' || !dob) return false
+      const age = Math.floor(
+        (Date.now() - new Date(dob).getTime()) /
+          (365.25 * 24 * 60 * 60 * 1000),
+      )
       return age < 18
     })
     if (minorBeneficiaries.length > 0) {
-      const names = minorBeneficiaries.map((b: any) => b.name || 'Unnamed').join(', ')
+      const names = minorBeneficiaries
+        .map((b) => String((b as Record<string, unknown>).name ?? '') || 'Unnamed')
+        .join(', ')
       drawField('Minor Beneficiaries (may need trust)', names, 4)
     }
 
-    // Note about life insurance trust
     if (policies.length > 0) {
       const totalAmount = policies
-        .map((p: any) => p.amount)
+        .map((p) => (p as Record<string, unknown>).amount)
         .filter(Boolean)
         .join(', ')
       if (totalAmount) {
-        drawField('Life Insurance (ILIT candidate)', `${policies.length} polic${policies.length === 1 ? 'y' : 'ies'} — amounts: ${totalAmount}`, 4)
+        drawField(
+          'Life Insurance (ILIT candidate)',
+          `${policies.length} polic${policies.length === 1 ? 'y' : 'ies'} — amounts: ${totalAmount}`,
+          4,
+        )
       }
     }
 
     y -= 8
   }
 
-  // --- Business Ownership ---
-  if (businesses.length > 0) {
-    drawSectionHeader('Business Ownership')
-    for (const b of businesses) {
-      drawItemName(b.businessName || 'Business')
-      drawField('Type', b.type, 8)
-      drawField('Ownership %', b.ownershipPercentage ? `${b.ownershipPercentage}%` : undefined, 8)
-      drawField('Contact Info', b.contactInfo, 8)
-      y -= 4
-    }
-    y -= 8
-  }
-
   // ========================================
-  // ATTORNEY MEETING CHECKLIST
+  // ATTORNEY MEETING CHECKLIST (curated content)
   // ========================================
   ensureSpace(100)
   if (y < PAGE_HEIGHT - MARGIN - 60) {
@@ -550,8 +430,8 @@ export async function generateAttorneyPrepPdf(data: DeathboxData): Promise<Uint8
       x: MARGIN + 4,
       y,
       size: fontSize + 1,
-      font: bold,
-      color: rgb(0.2, 0.2, 0.2),
+      font: heading,
+      color: rgb(...pdfColor.textMedium),
     })
     y -= lineHeight + 2
     for (const item of group.items) {
@@ -561,7 +441,7 @@ export async function generateAttorneyPrepPdf(data: DeathboxData): Promise<Uint8
         y,
         size: fontSize,
         font,
-        color: rgb(0.3, 0.3, 0.3),
+        color: rgb(...pdfColor.textChecklist),
       })
       y -= lineHeight
     }
@@ -573,7 +453,7 @@ export async function generateAttorneyPrepPdf(data: DeathboxData): Promise<Uint8
 
   // "Generated by" on first page
   const firstPage = pdfDoc.getPage(0)
-  drawGeneratedBy(firstPage, font, PAGE_WIDTH, 40)
+  drawGeneratedBy(firstPage, fonts, PAGE_WIDTH, 40)
 
   return pdfDoc.save()
 }

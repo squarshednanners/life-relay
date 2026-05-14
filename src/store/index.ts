@@ -2,6 +2,11 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { DeathboxData } from '@/models/DeathboxData'
 import { LocalDataStore } from '@/services/LocalDataStore'
+import {
+  LoadRequiresManualImportError,
+  MigrationFailedError,
+} from '@/services/errors'
+import { useMigrationStatus } from '@/composables/useMigrationStatus'
 
 export const useLegacyStore = defineStore('legacy', () => {
   const data = ref<DeathboxData | null>(null)
@@ -14,8 +19,33 @@ export const useLegacyStore = defineStore('legacy', () => {
     isLoading.value = true
     try {
       data.value = await dataStore.load()
+      // Successful load — if we were stuck in 'requires-manual-import'
+      // from a prior failed boot, clear it so the full-screen surface
+      // dismounts (P20). Typical recovery path: user does a manual
+      // import via the surface → store.importJSON() → loadData() →
+      // here. The state was set before the import; clear it now.
+      useMigrationStatus().clearRequiresManualImport()
     } catch (error) {
-      console.error('Error loading data:', error)
+      // Story 1.13 — migration failure routing.
+      if (error instanceof LoadRequiresManualImportError) {
+        // Hard refuse — show full-screen surface, leave data null.
+        useMigrationStatus().markRequiresManualImport(error.message)
+        data.value = null
+      } else if (error instanceof MigrationFailedError) {
+        // Soft failure — the rollback ran, the prior data is back in
+        // IndexedDB. Re-read it so the store reflects the restored state.
+        useMigrationStatus().markRolledBack(error.message)
+        try {
+          data.value = await dataStore.load()
+        } catch (reloadErr) {
+          // The reload failed too — escalate to hard refuse.
+          console.error('Post-rollback reload failed:', reloadErr)
+          useMigrationStatus().markRequiresManualImport(String(reloadErr))
+          data.value = null
+        }
+      } else {
+        console.error('Error loading data:', error)
+      }
     } finally {
       isLoading.value = false
     }

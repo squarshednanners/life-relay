@@ -123,6 +123,14 @@ export const finalWishesAndServicesSchema: FormSectionSchema = {
       rows: 3,
     },
     {
+      name: 'documentFiles',
+      label: 'Service documents (funeral pre-purchase contract, cemetery plot deed)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
+    },
+    {
       name: 'notes',
       label: 'Notes',
       type: 'textarea',

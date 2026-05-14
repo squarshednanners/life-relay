@@ -7,6 +7,12 @@ export const businessOwnershipSchema: FormSectionSchema = {
   isArray: true,
   arrayItemLabel: (_, item) => item?.businessName || 'Business',
   pdfGroup: 'Property & Household',
+  pdfViews: {
+    attorneyPrep: {
+      sectionLabel: 'Business Ownership',
+      itemLabel: (item) => String(item.businessName ?? '') || 'Business',
+    },
+  },
   fields: [
     {
       name: 'businessName',
@@ -20,6 +26,9 @@ export const businessOwnershipSchema: FormSectionSchema = {
       label: 'Entity Type',
       type: 'select',
       colSpan: 1,
+      pdfViews: {
+        attorneyPrep: { include: true, priority: 10, label: 'Type' },
+      },
       options: [
         { label: '', value: '' },
         { label: 'Sole Proprietorship', value: 'sole-prop' },
@@ -38,6 +47,15 @@ export const businessOwnershipSchema: FormSectionSchema = {
       type: 'text',
       placeholder: '50, 100, etc.',
       colSpan: 1,
+      pdfSkipIfEmpty: true,
+      pdfViews: {
+        attorneyPrep: {
+          include: true,
+          priority: 20,
+          label: 'Ownership %',
+          format: (value) => (value ? `${value}%` : ''),
+        },
+      },
     },
     {
       name: 'ein',
@@ -180,6 +198,14 @@ export const businessOwnershipSchema: FormSectionSchema = {
       helpText: 'Time-sensitive things that must happen quickly',
     },
 
+    {
+      name: 'documentFiles',
+      label: 'Business documents (operating agreement, articles of incorporation, buy-sell)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
+    },
     {
       name: 'notes',
       label: 'Notes',

@@ -10,6 +10,12 @@
 export interface DeathboxData {
   schemaVersion?: number // Data schema version (current: 1)
 
+  // Vault metadata (top-level — not part of any FormSectionSchema).
+  // Single optional attachmentId pointing at the cover photo for the
+  // generated vault PDF (Story 1.7c). Empty/missing → PDF renders
+  // without a cover.
+  coverPhotoAttachmentId?: string
+
   // People & Contacts
   people?: Person[]
   beneficiaries?: Beneficiary[]

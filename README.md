@@ -122,4 +122,6 @@ Issues and pull requests are welcome. Please:
 
 ## License
 
-MIT
+**FSL-1.1-MIT** — Functional Source License, Version 1.1, MIT Future License.
+
+Source-available with a non-compete clause; converts automatically to MIT two years after each release. See [`LICENSE`](./LICENSE) for full terms.

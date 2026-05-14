@@ -1,0 +1,365 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`emergencySheet — schema-driven data plan > matches the snapshot for the canonical fixture 1`] = `
+[
+  {
+    "items": [
+      {
+        "fields": [
+          {
+            "fieldName": "name",
+            "label": "Full Name",
+            "value": "Eleanor Vance",
+          },
+          {
+            "fieldName": "dateOfBirth",
+            "label": "DOB",
+            "value": "1958-04-12",
+          },
+          {
+            "fieldName": "phone",
+            "label": "Phone",
+            "value": "(555) 010-2030",
+          },
+          {
+            "fieldName": "address",
+            "label": "Address",
+            "value": "142 Maple Lane, Springfield, IL 62701",
+          },
+        ],
+        "itemId": "person-1",
+        "itemLabel": "Eleanor Vance",
+      },
+      {
+        "fields": [
+          {
+            "fieldName": "name",
+            "label": "Full Name",
+            "value": "Thomas Vance",
+          },
+          {
+            "fieldName": "dateOfBirth",
+            "label": "DOB",
+            "value": "1960-09-03",
+          },
+          {
+            "fieldName": "phone",
+            "label": "Phone",
+            "value": "(555) 020-4050",
+          },
+          {
+            "fieldName": "address",
+            "label": "Address",
+            "value": "142 Maple Lane, Springfield, IL 62701",
+          },
+        ],
+        "itemId": "person-2",
+        "itemLabel": "Thomas Vance",
+      },
+    ],
+    "sectionKey": "people",
+    "sectionLabel": "PERSONAL INFORMATION",
+  },
+  {
+    "items": [
+      {
+        "fields": [
+          {
+            "fieldName": "name",
+            "label": "Name",
+            "value": "Margaret Hill",
+          },
+          {
+            "fieldName": "role",
+            "label": "Role",
+            "value": "Executor",
+          },
+          {
+            "fieldName": "phone",
+            "label": "Phone",
+            "value": "(555) 110-2200",
+          },
+          {
+            "fieldName": "email",
+            "label": "Email",
+            "value": "margaret@hillassoc.com",
+          },
+          {
+            "fieldName": "organization",
+            "label": "Org",
+            "value": "Hill & Associates",
+          },
+        ],
+        "itemLabel": "Margaret Hill - Executor",
+      },
+      {
+        "fields": [
+          {
+            "fieldName": "name",
+            "label": "Name",
+            "value": "David Chen",
+          },
+          {
+            "fieldName": "role",
+            "label": "Role",
+            "value": "Attorney",
+          },
+          {
+            "fieldName": "phone",
+            "label": "Phone",
+            "value": "(555) 220-3300",
+          },
+          {
+            "fieldName": "email",
+            "label": "Email",
+            "value": "david@chenlegal.com",
+          },
+          {
+            "fieldName": "organization",
+            "label": "Org",
+            "value": "Chen Legal",
+          },
+        ],
+        "itemLabel": "David Chen - Attorney",
+      },
+      {
+        "fields": [
+          {
+            "fieldName": "name",
+            "label": "Name",
+            "value": "Dr. Anil Patel",
+          },
+          {
+            "fieldName": "role",
+            "label": "Role",
+            "value": "Doctor",
+          },
+          {
+            "fieldName": "phone",
+            "label": "Phone",
+            "value": "(555) 330-4400",
+          },
+          {
+            "fieldName": "email",
+            "label": "Email",
+            "value": "apatel@springfieldfp.com",
+          },
+          {
+            "fieldName": "organization",
+            "label": "Org",
+            "value": "Springfield Family Practice",
+          },
+        ],
+        "itemLabel": "Dr. Anil Patel - Doctor",
+      },
+      {
+        "fields": [
+          {
+            "fieldName": "name",
+            "label": "Name",
+            "value": "Susan Kim",
+          },
+          {
+            "fieldName": "role",
+            "label": "Role",
+            "value": "Accountant / CPA",
+          },
+          {
+            "fieldName": "phone",
+            "label": "Phone",
+            "value": "(555) 440-5500",
+          },
+          {
+            "fieldName": "email",
+            "label": "Email",
+            "value": "susan@kimcpa.com",
+          },
+          {
+            "fieldName": "organization",
+            "label": "Org",
+            "value": "Kim CPA",
+          },
+        ],
+        "itemLabel": "Susan Kim - Accountant / CPA",
+      },
+    ],
+    "sectionKey": "importantContacts",
+    "sectionLabel": "KEY CONTACTS",
+  },
+  {
+    "items": [
+      {
+        "fields": [
+          {
+            "fieldName": "provider",
+            "label": "Provider",
+            "value": "BlueCross BlueShield",
+          },
+          {
+            "fieldName": "planType",
+            "label": "Plan Type",
+            "value": "PPO",
+          },
+          {
+            "fieldName": "policyNumber",
+            "label": "Policy #",
+            "value": "BCBS-998877",
+          },
+          {
+            "fieldName": "groupNumber",
+            "label": "Group #",
+            "value": "GRP-44210",
+          },
+          {
+            "fieldName": "contactPhone",
+            "label": "Phone",
+            "value": "(800) 555-1212",
+          },
+          {
+            "fieldName": "coveredMembers",
+            "label": "Covered",
+            "value": "Eleanor, Thomas",
+          },
+        ],
+        "itemLabel": "BlueCross BlueShield",
+      },
+    ],
+    "sectionKey": "healthInsurance",
+    "sectionLabel": "HEALTH INSURANCE",
+  },
+  {
+    "items": [
+      {
+        "fields": [
+          {
+            "fieldName": "primaryPhysician",
+            "label": "Physician",
+            "value": "Dr. Anil Patel",
+          },
+          {
+            "fieldName": "physicianPhone",
+            "label": "Dr. Phone",
+            "value": "(555) 330-4400",
+          },
+          {
+            "fieldName": "allergies",
+            "label": "Allergies",
+            "value": "Penicillin, shellfish",
+          },
+          {
+            "fieldName": "medications",
+            "label": "Medications",
+            "value": "Lisinopril 10mg daily; Atorvastatin 20mg nightly",
+          },
+          {
+            "fieldName": "medicalConditions",
+            "label": "Conditions",
+            "value": "Hypertension, mild osteoarthritis",
+          },
+          {
+            "fieldName": "organDonor",
+            "label": "Organ Donor",
+            "value": "Yes",
+          },
+          {
+            "fieldName": "advanceDirective",
+            "label": "Advance Directive",
+            "value": "Top drawer of bedroom dresser",
+          },
+        ],
+        "itemLabel": "Eleanor Vance",
+      },
+    ],
+    "sectionKey": "medicalInfo",
+    "sectionLabel": "MEDICAL INFORMATION",
+  },
+  {
+    "items": [
+      {
+        "fields": [
+          {
+            "fieldName": "storageType",
+            "label": "Type",
+            "value": "Single-Sig Wallet",
+          },
+          {
+            "fieldName": "approximateHoldings",
+            "label": "Holdings",
+            "value": undefined,
+          },
+          {
+            "fieldName": "walletApp",
+            "label": "Wallet",
+            "value": undefined,
+          },
+        ],
+        "itemLabel": "Crypto Asset",
+      },
+    ],
+    "sectionKey": "cryptoAssets",
+    "sectionLabel": "CRYPTOCURRENCY ASSETS",
+  },
+  {
+    "items": [
+      {
+        "fields": [
+          {
+            "fieldName": "willLocation",
+            "label": "Will Location",
+            "value": "Home Safe (see Physical Storage)",
+          },
+          {
+            "fieldName": "willDate",
+            "label": "Will Date",
+            "value": "2024-03-15",
+          },
+          {
+            "fieldName": "poaAgent",
+            "label": "POA Agent",
+            "value": "Thomas Vance",
+          },
+          {
+            "fieldName": "powerOfAttorney",
+            "label": "POA Location",
+            "value": undefined,
+          },
+          {
+            "fieldName": "livingWill",
+            "label": "Living Will",
+            "value": undefined,
+          },
+        ],
+      },
+    ],
+    "sectionKey": "legalDocuments",
+    "sectionLabel": "LEGAL DOCUMENTS",
+  },
+  {
+    "items": [
+      {
+        "fields": [
+          {
+            "fieldName": "location",
+            "label": "Location",
+            "value": "Master bedroom closet, top shelf",
+          },
+          {
+            "fieldName": "keyLocation",
+            "label": "Key/Access",
+            "value": undefined,
+          },
+          {
+            "fieldName": "accessInstructions",
+            "label": "Key/Access",
+            "value": "Combination in sealed envelope at attorney",
+          },
+        ],
+        "itemId": "storage-1",
+        "itemLabel": "Home Safe",
+      },
+    ],
+    "sectionKey": "physicalStorageLocations",
+    "sectionLabel": "KEY DOCUMENT LOCATIONS",
+  },
+]
+`;

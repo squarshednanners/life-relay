@@ -22,6 +22,15 @@ export const trustsSchema: FormSectionSchema = {
     notes: '',
   }),
   pdfGroup: 'Documents & Storage',
+  pdfViews: {
+    attorneyPrep: {
+      sectionLabel: 'Trusts',
+      itemLabel: (item) =>
+        String(item.trustName ?? '') ||
+        String(item.trustType ?? '') ||
+        'Trust',
+    },
+  },
   fields: [
     {
       name: 'trustName',
@@ -35,6 +44,9 @@ export const trustsSchema: FormSectionSchema = {
       label: 'Trust Type',
       type: 'select',
       colSpan: 1,
+      pdfViews: {
+        attorneyPrep: { include: true, priority: 10, label: 'Type' },
+      },
       options: [
         { label: 'Select type', value: '' },
         { label: 'Revocable Living Trust', value: 'Revocable Living Trust' },
@@ -50,6 +62,9 @@ export const trustsSchema: FormSectionSchema = {
       label: 'Date Created',
       type: 'date',
       colSpan: 1,
+      pdfViews: {
+        attorneyPrep: { include: true, priority: 20, label: 'Date Created' },
+      },
     },
     {
       name: 'trustNumber',
@@ -71,6 +86,9 @@ export const trustsSchema: FormSectionSchema = {
       type: 'text',
       placeholder: 'Person managing the trust',
       colSpan: 1,
+      pdfViews: {
+        attorneyPrep: { include: true, priority: 30, label: 'Trustee' },
+      },
     },
     {
       name: 'successorTrustee',
@@ -78,6 +96,13 @@ export const trustsSchema: FormSectionSchema = {
       type: 'text',
       placeholder: 'Backup trustee',
       colSpan: 1,
+      pdfViews: {
+        attorneyPrep: {
+          include: true,
+          priority: 40,
+          label: 'Successor Trustee',
+        },
+      },
     },
     {
       name: 'trustLocation',
@@ -114,6 +139,14 @@ export const trustsSchema: FormSectionSchema = {
       colSpan: 2,
       fullWidth: true,
       rows: 3,
+    },
+    {
+      name: 'documentFiles',
+      label: 'Trust documents (trust agreement, amendments, schedule of assets)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
     },
     {
       name: 'notes',

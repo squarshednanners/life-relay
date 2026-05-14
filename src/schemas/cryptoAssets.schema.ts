@@ -122,6 +122,7 @@ const cryptoKeySchema: FormSectionSchema = {
       name: 'publicKey',
       label: 'Public Key',
       type: 'text',
+      displayAs: 'mono',
       placeholder: 'Public key or xpub',
       colSpan: 2,
       fullWidth: true,
@@ -186,6 +187,7 @@ const cryptoKeySchema: FormSectionSchema = {
       name: 'seedPhrase',
       label: 'Seed Phrase (12 or 24 words)',
       type: 'textarea',
+      displayAs: 'mono',
       placeholder: 'Enter 12 or 24 word seed phrase (optional - consider storing separately)',
       rows: 2,
       colSpan: 2,
@@ -270,6 +272,30 @@ export const cryptoAssetsSchema: FormSectionSchema = {
   title: 'Cryptocurrency Assets',
   description: 'Bitcoin, Ethereum, wallets, seed phrases, and recovery information.',
   pdfGroup: 'Digital & Crypto Assets',
+  pdfViews: {
+    emergencySheet: {
+      sectionLabel: 'CRYPTOCURRENCY ASSETS',
+      itemLabel: (item) => {
+        const label = String(item.nickname ?? '') || String(item.type ?? '') || 'Crypto Asset'
+        const blockchain = String(item.blockchain ?? '')
+        const blockchainOther = String(item.blockchainOther ?? '')
+        const chain =
+          blockchain && blockchain !== 'Other' ? blockchain : blockchainOther
+        return [label, chain].filter(Boolean).join(' — ')
+      },
+    },
+    attorneyPrep: {
+      sectionLabel: 'Cryptocurrency Assets',
+      itemLabel: (item) => {
+        const label = String(item.nickname ?? '') || String(item.type ?? '') || 'Crypto Asset'
+        const blockchain = String(item.blockchain ?? '')
+        const blockchainOther = String(item.blockchainOther ?? '')
+        const chain =
+          blockchain && blockchain !== 'Other' ? blockchain : blockchainOther
+        return [label, chain].filter(Boolean).join(' — ')
+      },
+    },
+  },
   isArray: true,
   arrayItemLabel: (index, item) => item.type || `Asset ${index + 1}`,
   initializeItem: () => ({
@@ -363,12 +389,44 @@ export const cryptoAssetsSchema: FormSectionSchema = {
       placeholder: 'e.g., 2.5 BTC, ~$50,000 worth of ETH',
       colSpan: 1,
       helpText: 'Approximate only — helps your executor understand scale and priority.',
+      pdfViews: {
+        emergencySheet: { include: true, priority: 20, label: 'Holdings' },
+        attorneyPrep: { include: true, priority: 20, label: 'Holdings' },
+      },
     },
     {
       name: 'storageType',
       label: 'Storage Type',
       type: 'select',
       colSpan: 1,
+      pdfViews: {
+        emergencySheet: {
+          include: true,
+          priority: 10,
+          label: 'Type',
+          format: (value) => {
+            const labels: Record<string, string> = {
+              'single-sig': 'Single-Sig Wallet',
+              'multi-sig': 'Multi-Sig Wallet',
+              exchange: 'Exchange',
+            }
+            return labels[String(value ?? '')] ?? String(value ?? '')
+          },
+        },
+        attorneyPrep: {
+          include: true,
+          priority: 10,
+          label: 'Storage',
+          format: (value) => {
+            const labels: Record<string, string> = {
+              'single-sig': 'Single-Sig Wallet',
+              'multi-sig': 'Multi-Sig Wallet',
+              exchange: 'Exchange',
+            }
+            return labels[String(value ?? '')] ?? String(value ?? '')
+          },
+        },
+      },
       options: [
         { label: 'Single Signature Wallet', value: 'single-sig' },
         { label: 'Multi-Signature Wallet', value: 'multi-sig' },
@@ -390,6 +448,32 @@ export const cryptoAssetsSchema: FormSectionSchema = {
       type: 'select',
       colSpan: 1,
       visible: { field: 'storageType', operator: 'notEquals', value: 'exchange' },
+      pdfViews: {
+        emergencySheet: {
+          include: true,
+          priority: 30,
+          label: 'Wallet',
+          format: (value, item) => {
+            const v = String(value ?? '')
+            if (v === 'Other') {
+              return String(item.walletAppOther ?? '')
+            }
+            return v
+          },
+        },
+        attorneyPrep: {
+          include: true,
+          priority: 30,
+          label: 'Wallet App',
+          format: (value, item) => {
+            const v = String(value ?? '')
+            if (v === 'Other') {
+              return String(item.walletAppOther ?? '')
+            }
+            return v
+          },
+        },
+      },
       options: [
         { label: 'Select wallet', value: '' },
         { label: 'Ledger Live', value: 'Ledger Live' },
@@ -425,6 +509,10 @@ export const cryptoAssetsSchema: FormSectionSchema = {
       placeholder: 'Coinbase, Kraken, etc.',
       colSpan: 1,
       visible: { field: 'storageType', operator: 'equals', value: 'exchange' },
+      pdfViews: {
+        emergencySheet: { include: true, priority: 30, label: 'Exchange' },
+        attorneyPrep: { include: true, priority: 40, label: 'Exchange' },
+      },
     },
     {
       name: 'exchangeAccountId',
@@ -496,6 +584,7 @@ export const cryptoAssetsSchema: FormSectionSchema = {
       name: 'walletAddress',
       label: 'Wallet Address',
       type: 'text',
+      displayAs: 'mono',
       colSpan: 2,
       fullWidth: true,
       placeholder: 'Wallet address or public key',

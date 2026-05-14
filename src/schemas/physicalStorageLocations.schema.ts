@@ -17,6 +17,18 @@ export const physicalStorageLocationsSchema: FormSectionSchema = {
     notes: '',
   }),
   pdfGroup: 'Documents & Storage',
+  pdfViews: {
+    emergencySheet: {
+      sectionLabel: 'KEY DOCUMENT LOCATIONS',
+      pickerLabel: 'Key Document Locations',
+      itemLabel: (item) => {
+        const name = String(item.name ?? '')
+        const locationType = String(item.locationType ?? '')
+        if (name && locationType) return `${name} (${locationType})`
+        return name || locationType
+      },
+    },
+  },
   fields: [
     {
       name: 'name',
@@ -24,12 +36,14 @@ export const physicalStorageLocationsSchema: FormSectionSchema = {
       type: 'text',
       placeholder: 'e.g., Home Safe, Bank Deposit Box, Filing Cabinet',
       colSpan: 1,
+      // Rendered as item heading via emergencySheet itemLabel (name + type combined).
     },
     {
       name: 'locationType',
       label: 'Type',
       type: 'select',
       colSpan: 1,
+      // Rendered as item heading via emergencySheet itemLabel (name + type combined).
       options: [
         { label: 'Select type', value: '' },
         { label: 'Safe', value: 'Safe' },
@@ -49,6 +63,9 @@ export const physicalStorageLocationsSchema: FormSectionSchema = {
       colSpan: 2,
       fullWidth: true,
       rows: 2,
+      pdfViews: {
+        emergencySheet: { include: true, priority: 20, label: 'Location' },
+      },
     },
     {
       name: 'combination',
@@ -64,6 +81,13 @@ export const physicalStorageLocationsSchema: FormSectionSchema = {
       type: 'text',
       placeholder: 'Where the key is stored',
       colSpan: 1,
+      // Emergency sheet picks the first non-empty of keyLocation OR
+      // accessInstructions and labels it "Key/Access". Implemented by tagging
+      // both fields with the same label and same priority — first to provide
+      // a non-empty value wins via section ordering of items in the renderer.
+      pdfViews: {
+        emergencySheet: { include: true, priority: 30, label: 'Key/Access' },
+      },
     },
     {
       name: 'accessInstructions',
@@ -73,6 +97,18 @@ export const physicalStorageLocationsSchema: FormSectionSchema = {
       colSpan: 2,
       fullWidth: true,
       rows: 2,
+      pdfSkipIfEmpty: true,
+      pdfViews: {
+        emergencySheet: { include: true, priority: 31, label: 'Key/Access' },
+      },
+    },
+    {
+      name: 'documentFiles',
+      label: 'Storage documents (photos of locations, key locations, access instructions)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
     },
     {
       name: 'notes',

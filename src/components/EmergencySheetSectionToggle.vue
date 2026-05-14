@@ -4,8 +4,8 @@
       <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ label }}</span>
       <button
         type="button"
-        @click="$emit('toggleAll')"
         class="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-200"
+        @click="$emit('toggleAll')"
       >
         {{ count === total ? 'Deselect all' : 'Select all' }}
       </button>
