@@ -448,7 +448,11 @@ export async function generatePDFDocument(
   // Top accent bar
   page.drawRectangle({ x: 0, y: PAGE_H - 6, width: PAGE_W, height: 6, color: TEAL })
 
-  y = PAGE_H - 70
+  // Embed the cover photo up-front so the header origin can be chosen
+  // based on its presence — without a photo the whole header drops to
+  // close the empty band that would otherwise sit mid-page.
+  const coverImage = await tryEmbedCoverPhoto(pdfDoc, data)
+  y = coverImage ? PAGE_H - 70 : PAGE_H - 180
 
   // Brand name
   const brandText = 'Life Relay'
@@ -457,7 +461,7 @@ export async function generatePDFDocument(
   page.drawText(brandText, {
     x: (PAGE_W - brandW) / 2, y, size: brandSize, font: heading, color: TEAL,
   })
-  y -= 24
+  y -= 32
 
   // Subtitle
   const sub = 'Legacy Information Document'
@@ -466,7 +470,7 @@ export async function generatePDFDocument(
   page.drawText(sub, {
     x: (PAGE_W - subW) / 2, y, size: subSize, font, color: GRAY,
   })
-  y -= 24
+  y -= 28
 
   // Centered decorative rule
   page.drawLine({
@@ -475,46 +479,28 @@ export async function generatePDFDocument(
     thickness: pdfSize.thinRule,
     color: RULE_COLOR,
   })
-  y -= 20
+  y -= 32
 
-  // Cover photo (Story 1.7c) — embedded below the brand + subtitle
-  // header. Centered, aspect-preserved, capped at 4"×4". Any failure
-  // (missing blob, unsupported format, decode error) silently skips
-  // the cover and proceeds — the PDF must always generate.
-  const coverImage = await tryEmbedCoverPhoto(pdfDoc, data)
-  if (coverImage) {
-    const maxBox = 288 // 4" at 72dpi
-    const scaled = coverImage.scaleToFit(maxBox, maxBox)
-    const x = (PAGE_W - scaled.width) / 2
-    page.drawImage(coverImage, {
-      x,
-      y: y - scaled.height,
-      width: scaled.width,
-      height: scaled.height,
-    })
-    y -= scaled.height + 20
-  }
-
-  // Dedication block — scales by person count:
+  // Dedication block — first 1–2 people, always with name + details.
+  // Sits directly below the centered rule, above the cover photo:
   //   1 person  → centered name + address + phone
-  //   2 people  → side-by-side columns, each with name + address + phone
-  //   3+ people → names only, CSV-joined (no addresses; layout doesn't scale)
+  //   2+ people → first two side-by-side, each with name + address + phone
   const people = (data as { people?: Array<{ name?: unknown; address?: unknown; phone?: unknown }> }).people
   const personRecords = (people ?? []).filter(
     p => typeof p?.name === 'string' && (p.name as string).trim().length > 0,
   )
   if (personRecords.length > 0) {
     const prep = 'Prepared for the legacy of'
-    const prepSize = 11
-    const prepW = font.widthOfTextAtSize(prep, prepSize)
+    const prepSize = 16
+    const prepW = heading.widthOfTextAtSize(prep, prepSize)
     page.drawText(prep, {
       x: (PAGE_W - prepW) / 2,
       y,
       size: prepSize,
-      font,
+      font: heading,
       color: TEAL,
     })
-    y -= 24
+    y -= 30
 
     const NAME_SIZE = 18
     const DETAIL_SIZE = 10
@@ -570,9 +556,10 @@ export async function generatePDFDocument(
       for (const detail of personDetails(p)) {
         y = drawCenteredWrapped(detail, MARGIN, CONTENT_W, y, DETAIL_SIZE, font, GRAY, 14)
       }
-    } else if (personRecords.length === 2) {
-      // Side-by-side columns: each column gets half of CONTENT_W minus
-      // a small inter-column gap.
+    } else {
+      // 2+ people: render the first two side-by-side with full details.
+      // Anyone past index 1 is intentionally omitted — the cover stays
+      // legible at three columns and the People section carries the rest.
       const COLUMN_GAP = 24
       const colWidth = (CONTENT_W - COLUMN_GAP) / 2
       const leftX = MARGIN
@@ -604,22 +591,28 @@ export async function generatePDFDocument(
       const leftEndY = renderColumn(personRecords[0], leftX, colWidth)
       const rightEndY = renderColumn(personRecords[1], rightX, colWidth)
       y = Math.min(leftEndY, rightEndY)
-    } else {
-      // 3+ people: names only, CSV-joined, wrapped.
-      const nameLine = personRecords.map(p => (p.name as string).trim()).join(', ')
-      for (const line of wrapText(nameLine, CONTENT_W - 40, NAME_SIZE, heading)) {
-        const lineW = heading.widthOfTextAtSize(line, NAME_SIZE)
-        page.drawText(line, {
-          x: (PAGE_W - lineW) / 2,
-          y,
-          size: NAME_SIZE,
-          font: heading,
-          color: DARK,
-        })
-        y -= 22
-      }
     }
-    y -= 14
+    y -= 20
+  }
+
+  // Cover photo (Story 1.7c) — centered, aspect-preserved, capped at
+  // 4"×4". Any failure (missing blob, unsupported format, decode error)
+  // silently skips the cover — the PDF must always generate. When
+  // absent, push the cursor down so the disclaimer doesn't collapse
+  // toward the dedication block.
+  if (coverImage) {
+    const maxBox = 288 // 4" at 72dpi
+    const scaled = coverImage.scaleToFit(maxBox, maxBox)
+    const x = (PAGE_W - scaled.width) / 2
+    page.drawImage(coverImage, {
+      x,
+      y: y - scaled.height,
+      width: scaled.width,
+      height: scaled.height,
+    })
+    y -= scaled.height + 60
+  } else {
+    y -= 90
   }
 
   // Disclaimer — 9.5pt is below the UX scale; pdfSize-namespaced.
