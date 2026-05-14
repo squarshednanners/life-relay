@@ -46,6 +46,12 @@
           Import Vault
         </button>
         <button
+          class="px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+          @click="importStructured"
+        >
+          Import Structured Data
+        </button>
+        <button
           :disabled="isGenerating"
           :aria-busy="isGenerating || undefined"
           class="px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
@@ -198,6 +204,7 @@
 
 <script setup lang="ts">
 import { ref, computed, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import { useLegacyStore } from '@/store'
 import { useToast } from '@/composables/useToast'
 import { generatePDFDocument } from '@/pdf/generator'
@@ -381,6 +388,12 @@ async function exportData() {
 
 function importData() {
   fileInput.value?.click()
+}
+
+const router = useRouter()
+
+function importStructured() {
+  router.push({ name: 'import' })
 }
 
 async function handleFileImport(event: Event) {

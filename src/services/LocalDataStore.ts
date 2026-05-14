@@ -305,6 +305,57 @@ export class LocalDataStore implements IDataStore {
     await db.rollback.delete(key)
   }
 
+  /**
+   * Atomic read-modify-write inside a single Dexie `rw` transaction over
+   * the `data` table. Required by Story 1.14a AC7 (all-or-nothing import
+   * commit). The `updater` callback receives the current `DeathboxData`
+   * (or `null` for a fresh vault) and returns the new value to persist.
+   *
+   * Throws if the updater throws OR if the transaction fails. On failure,
+   * IndexedDB is left untouched (Dexie auto-rolls back the transaction).
+   *
+   * localStorage mirroring happens AFTER the transaction commits — it is
+   * intentionally non-transactional (localStorage has no transaction
+   * primitive), but the IndexedDB write is the source of truth, so a
+   * partial localStorage failure is recoverable on next load.
+   */
+  async updateAtomic(
+    updater: (current: DeathboxData | null) => DeathboxData,
+  ): Promise<DeathboxData> {
+    let nextSerialized: any = null
+    try {
+      await db.transaction('rw', db.data, async () => {
+        const stored = await db.data.get(DATA_KEY)
+        const current = stored?.data ? (JSON.parse(JSON.stringify(stored.data)) as DeathboxData) : null
+        const next = updater(current)
+        nextSerialized = JSON.parse(JSON.stringify(next))
+        const dataToSave = {
+          ...nextSerialized,
+          updatedAt: new Date().toISOString(),
+        }
+        await db.data.put({ id: DATA_KEY, data: dataToSave })
+      })
+    } catch (error) {
+      console.error('updateAtomic transaction failed (IndexedDB rolled back):', error)
+      if (isQuotaError(error)) {
+        useStorageQuota().markFull()
+        throw new StorageQuotaExceededError(undefined, { cause: error })
+      }
+      throw error
+    }
+    // Best-effort localStorage mirror after the IDB transaction succeeded.
+    try {
+      const dataToMirror = {
+        ...nextSerialized,
+        updatedAt: new Date().toISOString(),
+      }
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(dataToMirror))
+    } catch (error) {
+      console.error('localStorage mirror failed after successful IDB write (non-fatal):', error)
+    }
+    return nextSerialized as DeathboxData
+  }
+
   async save(data: DeathboxData): Promise<void> {
     try {
       // Serialize the data to remove Vue reactive proxies and ensure it's a plain object
