@@ -22,14 +22,17 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
     ['deriveBits', 'deriveKey']
   )
 
-  // Derive key using PBKDF2
-  // Create a new ArrayBuffer from the salt to ensure proper type
-  const saltBuffer = new Uint8Array(salt).buffer
-  
+  // Derive key using PBKDF2. Pass the `Uint8Array` view directly — Web
+  // Crypto accepts BufferSource (ArrayBufferView | ArrayBuffer), and the
+  // TypedArray brand check works cross-realm. The previous
+  // `new Uint8Array(salt).buffer` reconstruction tripped Node's strict
+  // ArrayBuffer instanceof check when run from a vitest worker thread
+  // (the worker's ArrayBuffer constructor differs from the crypto
+  // module's reference).
   return crypto.subtle.deriveKey(
     {
       name: 'PBKDF2',
-      salt: saltBuffer as ArrayBuffer,
+      salt,
       iterations: PBKDF2_ITERATIONS,
       hash: 'SHA-256',
     },
