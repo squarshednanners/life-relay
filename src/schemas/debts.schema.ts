@@ -76,6 +76,14 @@ export const debtsSchema: FormSectionSchema = {
       helpText: 'A cosigner remains responsible for the debt — critical for the executor to know',
     },
     {
+      name: 'documentFiles',
+      label: 'Loan documents (loan agreement, mortgage doc, payoff statement)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
+    },
+    {
       name: 'notes',
       label: 'Notes',
       type: 'textarea',

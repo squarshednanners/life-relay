@@ -120,6 +120,14 @@ export const medicalInfoSchema: FormSectionSchema = {
       },
     },
     {
+      name: 'documentFiles',
+      label: 'Medical documents (advance directive, DNR, healthcare proxy, medical history)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
+    },
+    {
       name: 'notes',
       label: 'Notes',
       type: 'textarea',

@@ -34,6 +34,14 @@
     />
   </div>
 
+  <!-- Attachment Field (Story 1.7) -->
+  <AttachmentField
+    v-else-if="field.type === 'attachment' && field.name"
+    :model-value="fieldValue(field.name!)"
+    :field="field"
+    @update:model-value="updateField(field.name!, $event)"
+  />
+
   <!-- Custom components -->
   <div
     v-else-if="field.component && field.name"
@@ -508,6 +516,7 @@ import TrustSelector from './TrustSelector.vue'
 import PersonSelector from './PersonSelector.vue'
 import RecoveryInstructionsButton from './RecoveryInstructionsButton.vue'
 import DynamicForm from './DynamicForm.vue'
+import AttachmentField from './AttachmentField.vue'
 
 const props = defineProps<{
   field: FormFieldSchema

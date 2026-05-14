@@ -73,6 +73,14 @@ export const pendingLegalMattersSchema: FormSectionSchema = {
       colSpan: 1,
     },
     {
+      name: 'documentFiles',
+      label: 'Case documents (filings, attorney correspondence, court orders)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
+    },
+    {
       name: 'notes',
       label: 'Notes',
       type: 'textarea',

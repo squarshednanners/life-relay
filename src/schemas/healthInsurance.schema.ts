@@ -82,6 +82,14 @@ export const healthInsuranceSchema: FormSectionSchema = {
       },
     },
     {
+      name: 'documentFiles',
+      label: 'Insurance documents (policy, insurance card, claim correspondence)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
+    },
+    {
       name: 'notes',
       label: 'Notes',
       type: 'textarea',

@@ -199,6 +199,14 @@ export const businessOwnershipSchema: FormSectionSchema = {
     },
 
     {
+      name: 'documentFiles',
+      label: 'Business documents (operating agreement, articles of incorporation, buy-sell)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
+    },
+    {
       name: 'notes',
       label: 'Notes',
       type: 'textarea',

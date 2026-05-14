@@ -141,6 +141,14 @@ export const trustsSchema: FormSectionSchema = {
       rows: 3,
     },
     {
+      name: 'documentFiles',
+      label: 'Trust documents (trust agreement, amendments, schedule of assets)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
+    },
+    {
       name: 'notes',
       label: 'Notes',
       type: 'textarea',

@@ -291,6 +291,14 @@ export const propertySchema: FormSectionSchema = {
       rows: 2,
     },
     {
+      name: 'documentFiles',
+      label: 'Property documents (deed, title, mortgage, appraisal)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
+    },
+    {
       name: 'notes',
       label: 'Additional Notes',
       type: 'textarea',

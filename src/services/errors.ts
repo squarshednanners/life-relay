@@ -49,3 +49,19 @@ export class LoadRequiresManualImportError extends Error {
     if (options?.cause !== undefined) this.cause = options.cause
   }
 }
+
+/**
+ * Thrown by `LocalDataStore.exportToJSON()` when the vault's attachments
+ * exceed the inline-export limits (Story 1.7, architecture D-1 Refinement
+ * 1): 25 MB per attachment or 250 MB total. The caller surfaces a
+ * Companion Voice message that names the offending file(s) or total size
+ * and points the user at the future tar/zip export (1.7b).
+ */
+export class AttachmentExportLimitError extends Error {
+  override readonly name = 'AttachmentExportLimitError'
+  readonly cause?: unknown
+  constructor(message?: string, options?: { cause?: unknown }) {
+    super(message ?? 'Attachments exceed the inline export size limits')
+    if (options?.cause !== undefined) this.cause = options.cause
+  }
+}

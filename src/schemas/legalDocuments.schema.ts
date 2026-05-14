@@ -112,6 +112,14 @@ export const legalDocumentsSchema: FormSectionSchema = {
       },
     },
     {
+      name: 'documentFiles',
+      label: 'Document files (will, POA, trust paperwork)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
+    },
+    {
       name: 'notes',
       label: 'Notes',
       type: 'textarea',

@@ -1,12 +1,13 @@
 import { PDFDocument, PDFRef, PDFArray, PDFDict, PDFName, PDFNumber, PDFString, StandardFonts, rgb } from 'pdf-lib'
 import type { PDFPage, PDFFont } from 'pdf-lib'
 import type { DeathboxData } from '@/models/DeathboxData'
-import { getSchemasByGroup } from '@/schemas/index'
-import { addSchemaSectionToPDF } from '@/pdf/schemaToPdf'
+import { getSchemasByGroup, schemaRegistry } from '@/schemas/index'
+import { addSchemaSectionToPDF, type AttachmentSummaryEntry } from '@/pdf/schemaToPdf'
+import { AttachmentStore } from '@/services/AttachmentStore'
 import { drawGeneratedBy } from '@/pdf/pdfBranding'
 import { embedPdfFonts } from '@/pdf/fonts'
 import { drawWitnessLine, WITNESS_LINE_DEFAULT_HEIGHT } from '@/pdf/witnessLine'
-import { pdfColor, pdfPage, pdfTypeScale, pdfSize, pdfSpacing } from '@/tokens'
+import { pdfColor, pdfPage, pdfTypeScale, pdfSize } from '@/tokens'
 
 /* ── Design tokens (legacy aliases for the local file) ────────── */
 
@@ -152,6 +153,10 @@ export async function generatePDFDocument(
 ): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create()
   const fonts = await embedPdfFonts(pdfDoc)
+  // Preload attachment metadata for every referenced id so attachment
+  // fields can render filename / type / size / date in one pass (Story
+  // 1.7). Sync rendering can then look up by id without awaiting.
+  const attachmentMeta = await preloadAttachmentMetadata(data)
   // Local aliases — body text uses Inter; headings upgrade to `heading`
   // (Source Serif 4 Medium) at specific use-sites below.
   const font: PDFFont = fonts.bodyRegular
@@ -220,11 +225,13 @@ export async function generatePDFDocument(
   }
 
   // Item header within a section (e.g. person name, account name)
-  // Teal left accent bar + bold text
+  // Witness line + bold text. Balanced spacing — enough breathing room
+  // above the witness line (so it doesn't crowd the separator) and
+  // below the header text (so the first field doesn't crowd the header).
   const addSectionHeader = (text: string) => {
-    ensureSpace(34)
+    ensureSpace(30)
 
-    // Subtle separator between items (skip if near top of page)
+    // Subtle separator between items (skip if near top of page).
     if (y < PAGE_H - MARGIN - 50) {
       y -= 4
       page.drawLine({
@@ -233,7 +240,7 @@ export async function generatePDFDocument(
         thickness: 0.5,
         color: RULE_COLOR,
       })
-      y -= 10
+      y -= 10 // breathing room before the witness line + header text
     }
 
     // Witness Line — cross-surface primitive (3pt accent-700, same as screen
@@ -244,14 +251,19 @@ export async function generatePDFDocument(
       yBottom: y - 3,
     })
 
+    // Tighter horizontal inset between the witness line and the
+    // section-header text in the PDF — the token value (24pt) reads
+    // generous on letter paper. Local override; screen WitnessSection
+    // stays at the broader cross-surface spacing.
+    const SECTION_HEADER_TEXT_INSET = 10
     page.drawText(sanitize(text), {
-      x: MARGIN + pdfSpacing.witnessLinePaddingLeftPt,
+      x: MARGIN + SECTION_HEADER_TEXT_INSET,
       y,
       size: 11,
       font: bold,
       color: DARK,
     })
-    y -= 20
+    y -= 18 // gap to first field below the header
   }
 
   // Label: value field pair.
@@ -277,9 +289,13 @@ export async function generatePDFDocument(
     label: string,
     value: string | undefined,
     indent: number = 0,
-    isTextarea: boolean = false,
+    // isTextarea retained for callsite API compatibility but no longer
+    // drives layout — length + explicit-newline detection inside this
+    // function chooses inline vs stacked.
+    _isTextarea: boolean = false,
     displayAs: 'prose' | 'mono' = 'prose',
   ) => {
+    void _isTextarea
     if (!value || value.trim() === '' || value === 'N/A') return
 
     const labelSize = PDF_LABEL_SIZE
@@ -297,22 +313,54 @@ export async function generatePDFDocument(
       ? sanitize(label.endsWith(':') ? label : `${label}:`)
       : ''
 
-    // Wrap the value FIRST so we know how tall this field will be. Then
-    // reserve enough space for label + every wrapped line up front. Without
-    // this, ensureSpace() only covered ONE value line — a multi-line value
-    // could split: label on page N, value continues on page N+1. (Story 1.6
-    // code review caught the orphan-label hazard.)
+    // Length-based layout decision: inline when the value fits on a
+    // small number of lines next to the label, stacked when it doesn't.
+    // Single-line and short multi-line content stays compact; truly
+    // long prose stacks so the value gets full horizontal width.
+    //
+    // Applies to every field type — text, textarea, attachment. Even
+    // user-typed multi-line textarea content goes inline when it's
+    // small enough; only content that wraps beyond INLINE_MAX_LINES
+    // (at the inline width) falls back to stacked.
     const stackedMaxW = MARGIN + CONTENT_W - fieldX
-    const lines = isTextarea
-      ? wrapTextarea(value, stackedMaxW, valueSize, valueFont)
-      : wrapText(value, stackedMaxW, valueSize, valueFont)
-    const labelHeight = cleanLabel ? labelLineHeight : 0
+    const INLINE_MAX_LINES = 3 // permissive — anything ≤ 3 wrapped lines goes inline
+    const hasExplicitNewlines = value.includes('\n')
+    const wrapFn = hasExplicitNewlines ? wrapTextarea : wrapText
+    let useStackedLayout = false
+    let valueStartX = fieldX
+    let lines: string[]
+    const labelW = cleanLabel ? bold.widthOfTextAtSize(cleanLabel, labelSize) : 0
+    if (cleanLabel) {
+      // Try inline first.
+      const inlineValueX = fieldX + labelW + 6 // 6pt gap
+      const inlineValueMaxW = MARGIN + CONTENT_W - inlineValueX
+      if (inlineValueMaxW >= 60) {
+        const inlineLines = wrapFn(value, inlineValueMaxW, valueSize, valueFont)
+        if (inlineLines.length <= INLINE_MAX_LINES) {
+          valueStartX = inlineValueX
+          lines = inlineLines
+        } else {
+          useStackedLayout = true
+          lines = wrapFn(value, stackedMaxW, valueSize, valueFont)
+        }
+      } else {
+        // Label is so wide it'd leave no room for the value — stack.
+        useStackedLayout = true
+        lines = wrapFn(value, stackedMaxW, valueSize, valueFont)
+      }
+    } else {
+      // No label — just render the value at the standard inset.
+      lines = wrapFn(value, stackedMaxW, valueSize, valueFont)
+    }
+
+    // Reserve space for label + every wrapped line up front so a long
+    // value can't orphan its label across a page break (Story 1.6 code
+    // review caught this hazard).
+    const labelHeight = useStackedLayout && cleanLabel ? labelLineHeight : 0
     ensureSpace(labelHeight + lines.length * valueLineHeight + postFieldGap)
 
-    // With the larger value type, stacked layout (label above value) is the
-    // only legible choice — inline label+value at body-sm / body-lg would
-    // produce a noticeable baseline mismatch. Always stack.
-    if (cleanLabel) {
+    if (useStackedLayout && cleanLabel) {
+      // Stacked: label on its own line, value below.
       page.drawText(cleanLabel, {
         x: fieldX,
         y,
@@ -321,6 +369,18 @@ export async function generatePDFDocument(
         color: GRAY,
       })
       y -= labelLineHeight
+    } else if (!useStackedLayout && cleanLabel) {
+      // Inline: label sits to the left of the first value line. Shift
+      // the label baseline up slightly so the smaller-font label visually
+      // aligns with the larger value text on the same row.
+      const labelBaselineOffset = (valueSize - labelSize) / 2
+      page.drawText(cleanLabel, {
+        x: fieldX,
+        y: y - labelBaselineOffset,
+        size: labelSize,
+        font: bold,
+        color: GRAY,
+      })
     }
 
     // Wrap drawText in a try/catch per line. fontkit can throw during
@@ -332,10 +392,16 @@ export async function generatePDFDocument(
     //
     // The user gets the actual data (just in a different, less-pretty
     // font for the affected line) rather than a useless placeholder.
-    for (const line of lines) {
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]
       if (y < MARGIN + valueLineHeight) newPage()
+      // Inline-mode hanging-indent fix: line 0 sits next to the label
+      // at `valueStartX`; subsequent wrapped lines return to `fieldX`
+      // so the full content width is used. In stacked mode every line
+      // starts at `fieldX` already, so this is a no-op there.
+      const lineX = !useStackedLayout && i > 0 ? fieldX : valueStartX
       try {
-        page.drawText(line, { x: fieldX, y, size: valueSize, font: valueFont, color: DARK })
+        page.drawText(line, { x: lineX, y, size: valueSize, font: valueFont, color: DARK })
       } catch (err) {
         console.error(
           `PDF text draw failed for line "${line}" in field "${label}" — retrying with Helvetica fallback to preserve the data.`,
@@ -343,7 +409,7 @@ export async function generatePDFDocument(
         )
         try {
           page.drawText(line, {
-            x: fieldX,
+            x: lineX,
             y,
             size: valueSize,
             font: helveticaFallback,
@@ -359,7 +425,7 @@ export async function generatePDFDocument(
           )
           try {
             page.drawText('[content unrenderable — see schema data]', {
-              x: fieldX,
+              x: lineX,
               y,
               size: valueSize,
               font: helveticaFallback,
@@ -382,7 +448,7 @@ export async function generatePDFDocument(
   // Top accent bar
   page.drawRectangle({ x: 0, y: PAGE_H - 6, width: PAGE_W, height: 6, color: TEAL })
 
-  y = PAGE_H - 120
+  y = PAGE_H - 70
 
   // Brand name
   const brandText = 'Life Relay'
@@ -391,7 +457,7 @@ export async function generatePDFDocument(
   page.drawText(brandText, {
     x: (PAGE_W - brandW) / 2, y, size: brandSize, font: heading, color: TEAL,
   })
-  y -= 30
+  y -= 24
 
   // Subtitle
   const sub = 'Legacy Information Document'
@@ -400,7 +466,7 @@ export async function generatePDFDocument(
   page.drawText(sub, {
     x: (PAGE_W - subW) / 2, y, size: subSize, font, color: GRAY,
   })
-  y -= 40
+  y -= 24
 
   // Centered decorative rule
   page.drawLine({
@@ -409,7 +475,152 @@ export async function generatePDFDocument(
     thickness: pdfSize.thinRule,
     color: RULE_COLOR,
   })
-  y -= 30
+  y -= 20
+
+  // Cover photo (Story 1.7c) — embedded below the brand + subtitle
+  // header. Centered, aspect-preserved, capped at 4"×4". Any failure
+  // (missing blob, unsupported format, decode error) silently skips
+  // the cover and proceeds — the PDF must always generate.
+  const coverImage = await tryEmbedCoverPhoto(pdfDoc, data)
+  if (coverImage) {
+    const maxBox = 288 // 4" at 72dpi
+    const scaled = coverImage.scaleToFit(maxBox, maxBox)
+    const x = (PAGE_W - scaled.width) / 2
+    page.drawImage(coverImage, {
+      x,
+      y: y - scaled.height,
+      width: scaled.width,
+      height: scaled.height,
+    })
+    y -= scaled.height + 20
+  }
+
+  // Dedication block — scales by person count:
+  //   1 person  → centered name + address + phone
+  //   2 people  → side-by-side columns, each with name + address + phone
+  //   3+ people → names only, CSV-joined (no addresses; layout doesn't scale)
+  const people = (data as { people?: Array<{ name?: unknown; address?: unknown; phone?: unknown }> }).people
+  const personRecords = (people ?? []).filter(
+    p => typeof p?.name === 'string' && (p.name as string).trim().length > 0,
+  )
+  if (personRecords.length > 0) {
+    const prep = 'Prepared for the legacy of'
+    const prepSize = 11
+    const prepW = font.widthOfTextAtSize(prep, prepSize)
+    page.drawText(prep, {
+      x: (PAGE_W - prepW) / 2,
+      y,
+      size: prepSize,
+      font,
+      color: TEAL,
+    })
+    y -= 24
+
+    const NAME_SIZE = 18
+    const DETAIL_SIZE = 10
+    const personDetails = (p: { address?: unknown; phone?: unknown }): string[] => {
+      const out: string[] = []
+      // Address fields are `type: 'textarea'` and may contain explicit
+      // newlines (e.g., "123 Main St\nApt 4B\nNew York, NY"). Split
+      // each line so the dedication block renders address-as-stanza
+      // rather than as a single overflowing line (Story 1.7c review).
+      if (typeof p.address === 'string') {
+        for (const line of p.address.split(/\r?\n/)) {
+          const trimmed = line.trim()
+          if (trimmed.length > 0) out.push(trimmed)
+        }
+      }
+      if (typeof p.phone === 'string' && p.phone.trim().length > 0) out.push(p.phone.trim())
+      return out
+    }
+    /**
+     * Draw a string centered within a horizontal slot. Wraps if it
+     * exceeds `width`. Returns the y position after the last line
+     * drawn (caller subtracts to advance past the block).
+     */
+    const drawCenteredWrapped = (
+      text: string,
+      x: number,
+      width: number,
+      startY: number,
+      size: number,
+      lineFont: typeof font,
+      color: typeof DARK,
+      lineHeight: number,
+    ): number => {
+      const sanitized = sanitize(text)
+      let cursorY = startY
+      for (const line of wrapText(sanitized, width, size, lineFont)) {
+        const w = lineFont.widthOfTextAtSize(line, size)
+        page.drawText(line, {
+          x: x + (width - Math.min(w, width)) / 2,
+          y: cursorY,
+          size,
+          font: lineFont,
+          color,
+        })
+        cursorY -= lineHeight
+      }
+      return cursorY
+    }
+
+    if (personRecords.length === 1) {
+      const p = personRecords[0]
+      y = drawCenteredWrapped(p.name as string, MARGIN, CONTENT_W, y, NAME_SIZE, heading, DARK, 22)
+      for (const detail of personDetails(p)) {
+        y = drawCenteredWrapped(detail, MARGIN, CONTENT_W, y, DETAIL_SIZE, font, GRAY, 14)
+      }
+    } else if (personRecords.length === 2) {
+      // Side-by-side columns: each column gets half of CONTENT_W minus
+      // a small inter-column gap.
+      const COLUMN_GAP = 24
+      const colWidth = (CONTENT_W - COLUMN_GAP) / 2
+      const leftX = MARGIN
+      const rightX = MARGIN + colWidth + COLUMN_GAP
+      // Render both columns with parallel y tracking — the taller column
+      // wins; y advances by the larger of the two (lower y = further
+      // down the page in pdf-lib's coordinate space).
+      const startY = y
+      const renderColumn = (
+        p: { name?: unknown; address?: unknown; phone?: unknown },
+        colX: number,
+        colW: number,
+      ): number => {
+        let colY = drawCenteredWrapped(
+          p.name as string,
+          colX,
+          colW,
+          startY,
+          NAME_SIZE,
+          heading,
+          DARK,
+          22,
+        )
+        for (const detail of personDetails(p)) {
+          colY = drawCenteredWrapped(detail, colX, colW, colY, DETAIL_SIZE, font, GRAY, 14)
+        }
+        return colY
+      }
+      const leftEndY = renderColumn(personRecords[0], leftX, colWidth)
+      const rightEndY = renderColumn(personRecords[1], rightX, colWidth)
+      y = Math.min(leftEndY, rightEndY)
+    } else {
+      // 3+ people: names only, CSV-joined, wrapped.
+      const nameLine = personRecords.map(p => (p.name as string).trim()).join(', ')
+      for (const line of wrapText(nameLine, CONTENT_W - 40, NAME_SIZE, heading)) {
+        const lineW = heading.widthOfTextAtSize(line, NAME_SIZE)
+        page.drawText(line, {
+          x: (PAGE_W - lineW) / 2,
+          y,
+          size: NAME_SIZE,
+          font: heading,
+          color: DARK,
+        })
+        y -= 22
+      }
+    }
+    y -= 14
+  }
 
   // Disclaimer — 9.5pt is below the UX scale; pdfSize-namespaced.
   const disc = 'This document provides organized personal, financial, and logistical information '
@@ -422,52 +633,9 @@ export async function generatePDFDocument(
   }
   y -= 24
 
-  // People
-  if (data.people?.length) {
-    const prep = 'Prepared for the legacy of'
-    const prepW = font.widthOfTextAtSize(prep, 11)
-    page.drawText(prep, {
-      x: (PAGE_W - prepW) / 2, y, size: 11, font, color: TEAL,
-    })
-    y -= 30
-
-    for (const person of data.people) {
-      if (y < 120) break
-      if (person.name) {
-        const n = sanitize(person.name)
-        const nW = heading.widthOfTextAtSize(n, 18)
-        page.drawText(n, {
-          x: (PAGE_W - nW) / 2, y, size: 18, font: heading, color: DARK,
-        })
-        y -= 22
-      }
-      const details = [
-        person.dateOfBirth ? `Born ${person.dateOfBirth}` : '',
-        person.address || '',
-      ].filter(Boolean)
-      for (const d of details) {
-        const dt = sanitize(d)
-        const dw = font.widthOfTextAtSize(dt, 10)
-        page.drawText(dt, {
-          x: (PAGE_W - Math.min(dw, CONTENT_W)) / 2, y, size: 10, font, color: GRAY,
-        })
-        y -= 14
-      }
-      y -= 12
-    }
-  }
-
-  // Date at bottom of title page. Positioned with explicit clearance above
-  // the "Generated on" line drawn by `drawGeneratedBy` — the two dates are
-  // semantically distinct (data update vs PDF generation) and must remain
-  // visually separated.
-  if (data.updatedAt) {
-    const dt = sanitize(`Last updated ${new Date(data.updatedAt).toLocaleDateString()}`)
-    const dw = font.widthOfTextAtSize(dt, 9)
-    page.drawText(dt, {
-      x: (PAGE_W - dw) / 2, y: MARGIN + 54, size: 9, font, color: GRAY,
-    })
-  }
+  // (The old per-person card block lived here. Replaced by the
+  // single CSV-style dedication line above the disclaimer — people
+  // details belong in the People section of the body, not the cover.)
 
   // Generated by branding
   drawGeneratedBy(page, fonts, PAGE_W, MARGIN + 20)
@@ -537,6 +705,7 @@ export async function generatePDFDocument(
         addSectionHeader,
         addField,
         ensureSpace,
+        attachmentMeta,
       )
     }
 
@@ -724,4 +893,225 @@ export async function generatePDFDocument(
   }
 
   return pdfDoc.save()
+}
+
+/**
+ * Walk the vault for every attachment-typed field reference and load
+ * each one's metadata (filename / type / size / date) so the PDF
+ * renderer can show per-file lists synchronously. Story 1.7.
+ *
+ * Walks `arraySchema` nested fields recursively (Story 1.7 review finding
+ * P4) and honors dotted sectionKeys (P5). Raced against a 5-second
+ * timeout (P12) so a hung Dexie open (e.g., blocked behind a v3 upgrade
+ * transaction during PWA autoUpdate) doesn't deadlock PDF generation —
+ * the renderer degrades to count-only output instead.
+ */
+async function preloadAttachmentMetadata(
+  data: DeathboxData,
+): Promise<Map<string, AttachmentSummaryEntry>> {
+  const out = new Map<string, AttachmentSummaryEntry>()
+  const referencedIds: string[] = []
+  for (const [sectionKey, schema] of Object.entries(schemaRegistry)) {
+    const sectionValue = readSectionByKey(data, sectionKey)
+    if (sectionValue === undefined || sectionValue === null) continue
+    const items: unknown[] = schema.isArray
+      ? Array.isArray(sectionValue)
+        ? sectionValue
+        : []
+      : [sectionValue]
+    for (const item of items) {
+      collectPdfIds(item, schema.fields, referencedIds)
+    }
+  }
+  if (referencedIds.length === 0) return out
+  try {
+    const store = new AttachmentStore()
+    const meta = await Promise.race([
+      store.getMeta(referencedIds),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('preloadAttachmentMetadata: 5s timeout')), 5000),
+      ),
+    ])
+    for (const m of meta) {
+      out.set(m.id, {
+        filename: m.filename,
+        mimeType: m.mimeType,
+        sizeBytes: m.sizeBytes,
+        uploadedAt: m.uploadedAt,
+      })
+    }
+  } catch (err) {
+    // IndexedDB unavailable, Dexie open hang, or any other failure ->
+    // fall back to the empty map. The schema renderer degrades to a
+    // "N files attached" count line, which is still useful and keeps
+    // the PDF generator usable.
+    console.error('preloadAttachmentMetadata: degrading to count-only render:', err)
+  }
+  return out
+}
+
+function readSectionByKey(data: DeathboxData, sectionKey: string): unknown {
+  if (!sectionKey.includes('.')) {
+    return (data as Record<string, unknown>)[sectionKey]
+  }
+  return sectionKey.split('.').reduce<unknown>(
+    (acc, part) =>
+      acc && typeof acc === 'object'
+        ? (acc as Record<string, unknown>)[part]
+        : undefined,
+    data,
+  )
+}
+
+function collectPdfIds(
+  item: unknown,
+  fields: import('@/models/FormSchema').FormFieldSchema[],
+  out: string[],
+): void {
+  if (!item || typeof item !== 'object') return
+  const obj = item as Record<string, unknown>
+  for (const field of fields) {
+    if (!field.name) continue
+    if (field.type === 'attachment') {
+      const v = obj[field.name]
+      if (Array.isArray(v)) {
+        for (const id of v) {
+          if (typeof id === 'string' && id.length > 0) out.push(id)
+        }
+      } else if (typeof v === 'string' && v.length > 0) {
+        out.push(v)
+      }
+    } else if (field.type === 'array' && field.arraySchema) {
+      const nested = obj[field.name]
+      if (Array.isArray(nested)) {
+        for (const child of nested) {
+          collectPdfIds(child, field.arraySchema.fields, out)
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Load + embed the vault's cover photo into the PDF (Story 1.7c).
+ * Returns the embedded `PDFImage` ref on success, or `null` on any
+ * failure (no cover set, missing blob, unsupported format that
+ * Canvas can't decode, etc.).
+ *
+ * The PDF generation MUST NOT fail because of a bad cover. Every
+ * error path is caught + logged + swallowed.
+ *
+ * `pdf-lib` natively embeds only PNG and JPEG. For other formats
+ * (WebP, AVIF, HEIC) we convert via the Canvas API to PNG before
+ * embedding. The conversion path is gated on browser decode support;
+ * if the browser can't render the image, the cover is skipped.
+ */
+async function tryEmbedCoverPhoto(
+  pdfDoc: PDFDocument,
+  data: DeathboxData,
+): Promise<import('pdf-lib').PDFImage | null> {
+  const id = data.coverPhotoAttachmentId
+  if (typeof id !== 'string' || id.length === 0) return null
+  try {
+    const store = new AttachmentStore()
+    const record = await store.get(id)
+    if (!record) return null
+    const mimeType = (record.mimeType ?? '').toLowerCase()
+    // Defensive Uint8Array reconstruction. Dexie returns the typed-array
+    // intact in browsers, but fake-indexeddb (test) sometimes returns
+    // a plain ArrayBuffer or an Array-of-numbers. Guard explicitly so
+    // `.buffer`/`.byteOffset` access doesn't throw on non-Uint8Array.
+    // Use `ArrayBuffer.isView` (works cross-realm — `instanceof Uint8Array`
+    // fails between jsdom/test realms) and `Object.prototype.toString.call`
+    // to detect ArrayBuffer reliably.
+    let bytes: Uint8Array
+    const tag = Object.prototype.toString.call(record.blob)
+    if (ArrayBuffer.isView(record.blob)) {
+      const view = record.blob as ArrayBufferView
+      bytes = new Uint8Array(view.buffer, view.byteOffset, view.byteLength)
+    } else if (tag === '[object ArrayBuffer]') {
+      bytes = new Uint8Array(record.blob as unknown as ArrayBuffer)
+    } else if (Array.isArray(record.blob)) {
+      bytes = Uint8Array.from(record.blob as number[])
+    } else {
+      return null
+    }
+    if (mimeType === 'image/png') {
+      return await pdfDoc.embedPng(bytes)
+    }
+    if (mimeType === 'image/jpeg') {
+      return await pdfDoc.embedJpg(bytes)
+    }
+    // Convert via Canvas (browser-only; skipped during jsdom tests).
+    const pngBytes = await convertImageToPng(bytes, mimeType)
+    if (!pngBytes) return null
+    return await pdfDoc.embedPng(pngBytes)
+  } catch (err) {
+    console.warn('tryEmbedCoverPhoto: skipping cover image (non-fatal):', err)
+    return null
+  }
+}
+
+/**
+ * Render an arbitrary image blob to PNG bytes via the Canvas API.
+ * Returns `null` when the runtime can't decode the image (jsdom test
+ * environment, unsupported MIME, corrupted bytes).
+ */
+async function convertImageToPng(
+  bytes: Uint8Array,
+  mimeType: string,
+): Promise<Uint8Array | null> {
+  if (typeof document === 'undefined' || typeof Image === 'undefined') return null
+  const objectUrl = URL.createObjectURL(new Blob([bytes as BlobPart], { type: mimeType }))
+  try {
+    const img = await loadImage(objectUrl)
+    const canvas = document.createElement('canvas')
+    canvas.width = img.naturalWidth || img.width
+    canvas.height = img.naturalHeight || img.height
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return null
+    ctx.drawImage(img, 0, 0)
+    const pngBlob = await canvasToBlob(canvas)
+    if (!pngBlob) return null
+    return new Uint8Array(await pngBlob.arrayBuffer())
+  } catch (err) {
+    console.warn('convertImageToPng: decode failed (non-fatal):', err)
+    return null
+  } finally {
+    URL.revokeObjectURL(objectUrl)
+  }
+}
+
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    let settled = false
+    // Hard 10-second cap so a hung browser decoder (rare but documented
+    // on malformed AVIF/HEIC) can't deadlock the PDF generator. The
+    // cover-photo path catches this rejection and skips the cover.
+    const timeoutHandle = setTimeout(() => {
+      if (settled) return
+      settled = true
+      reject(new Error('Image decode timeout'))
+    }, 10_000)
+    img.onload = () => {
+      if (settled) return
+      settled = true
+      clearTimeout(timeoutHandle)
+      resolve(img)
+    }
+    img.onerror = () => {
+      if (settled) return
+      settled = true
+      clearTimeout(timeoutHandle)
+      reject(new Error('Image decode failed'))
+    }
+    img.src = src
+  })
+}
+
+function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob | null> {
+  return new Promise(resolve => {
+    canvas.toBlob(b => resolve(b), 'image/png')
+  })
 }

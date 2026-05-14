@@ -153,6 +153,14 @@ export const vehiclesSchema: FormSectionSchema = {
     },
 
     {
+      name: 'documentFiles',
+      label: 'Vehicle documents (title, registration, insurance card)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
+    },
+    {
       name: 'notes',
       label: 'Notes',
       type: 'textarea',

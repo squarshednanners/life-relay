@@ -111,6 +111,14 @@ export const beneficiariesSchema: FormSectionSchema = {
       },
     },
     {
+      name: 'documentFiles',
+      label: 'Beneficiary documents (designation forms, signed acknowledgments)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
+    },
+    {
       name: 'notes',
       label: 'Notes',
       type: 'textarea',

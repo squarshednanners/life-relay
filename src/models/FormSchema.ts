@@ -5,7 +5,7 @@
  * for both UI rendering and PDF generation, reducing duplication.
  */
 
-export type FieldType = 
+export type FieldType =
   | 'text'
   | 'textarea'
   | 'number'
@@ -18,6 +18,7 @@ export type FieldType =
   | 'currency'
   | 'password'
   | 'array' // For nested arrays (e.g., multiSigConfig.keys[])
+  | 'attachment' // For binary file uploads (PDFs, images) — Story 1.7
   | 'custom' // For special components like BeneficiarySelector
 
 export type VisibilityCondition = {
@@ -157,6 +158,14 @@ export interface FormFieldSchema {
   arraySchema?: FormSectionSchema // Schema for array items (only used when type is 'array')
   arrayAllowAdd?: boolean // Whether to show the "Add" button for array fields (default: true)
   arrayAllowRemove?: boolean // Whether to show the "Remove" button for array fields (default: true)
+
+  // Binary attachments (Story 1.7) — only used when type is 'attachment'.
+  // The stored value is `string | string[]` (attachmentId references).
+  // The actual binary lives in the separate `attachments` IndexedDB table.
+  acceptMimeTypes?: string[] // Restricts the file picker (default: PDF + common image MIME types).
+  maxSizeBytes?: number // Per-file hard limit (default: 25 MB, matches inline export cap).
+  multiple?: boolean // When true, the field stores attachmentId[]; otherwise a single string.
+  maxAttachments?: number // Per-record cap on number of attached files (default: 10). Story 1.7b — prevents kitchen-sink usage.
   
   // Custom component (for special cases)
   component?: string // e.g., 'BeneficiarySelector', 'TrustSelector'

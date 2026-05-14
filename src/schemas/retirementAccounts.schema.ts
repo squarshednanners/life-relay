@@ -85,6 +85,14 @@ export const retirementAccountsSchema: FormSectionSchema = {
       },
     },
     {
+      name: 'documentFiles',
+      label: 'Account documents (recent statement, plan summary)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
+    },
+    {
       name: 'notes',
       label: 'Notes',
       type: 'textarea',

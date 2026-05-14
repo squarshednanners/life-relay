@@ -6,6 +6,21 @@
     />
 
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-6">
+      <!-- Cover photo (Story 1.7c) -->
+      <div>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          Cover photo
+        </h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          Optional. Adds a photo to the front of the vault PDF — a portrait, a family photo, anything you'd like the family to see first.
+        </p>
+        <AttachmentField
+          :model-value="coverPhotoId"
+          :field="coverPhotoField"
+          @update:model-value="onCoverPhotoChange"
+        />
+      </div>
+
       <!-- Appearance -->
       <div>
         <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
@@ -160,8 +175,33 @@ import SectionHeader from '@/components/SectionHeader.vue'
 import LifeRelayLogo from '@/components/LifeRelayLogo.vue'
 import PasswordPromptModal from '@/components/PasswordPromptModal.vue'
 import { isEncrypted } from '@/utils/encryption'
+import AttachmentField from '@/components/AttachmentField.vue'
+import { computed } from 'vue'
+import type { FormFieldSchema } from '@/models/FormSchema'
 
 const store = useLegacyStore()
+
+const coverPhotoField: FormFieldSchema = {
+  name: 'coverPhoto',
+  label: '',
+  type: 'attachment',
+  multiple: false,
+  maxAttachments: 1,
+  acceptMimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/avif'],
+  maxSizeBytes: 5 * 1024 * 1024, // 5 MB cap for display imagery (Story 1.7c).
+  fullWidth: true,
+}
+
+const coverPhotoId = computed<string | undefined>(
+  () => store.data?.coverPhotoAttachmentId,
+)
+
+function onCoverPhotoChange(value: string | string[] | undefined): void {
+  // AttachmentField in single-mode emits string | undefined; coerce
+  // defensively in case `multiple` wiring drifts.
+  const id = Array.isArray(value) ? value[0] : value
+  void store.updateData({ coverPhotoAttachmentId: id ?? undefined })
+}
 const { showToast } = useToast()
 const { theme, setTheme } = useTheme()
 const fileInput = ref<HTMLInputElement | null>(null)

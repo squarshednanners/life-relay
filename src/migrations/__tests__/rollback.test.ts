@@ -38,7 +38,12 @@ const v1Fixture = JSON.parse(
 /** Open a peek-only handle to the same DB to inspect rows without going through the SUT. */
 async function openPeekDb(): Promise<Dexie> {
   const peek = new Dexie('LegacyVaultDB')
+  // Match the production schema version chain so Dexie doesn't throw
+  // `VersionError` when the SUT has already bumped the DB to v3
+  // (Story 1.7 attachments).
+  peek.version(1).stores({ data: 'id' })
   peek.version(2).stores({ data: 'id', rollback: 'key' })
+  peek.version(3).stores({ data: 'id', rollback: 'key', attachments: 'id' })
   await peek.open()
   return peek
 }

@@ -103,6 +103,14 @@ export const peopleSchema: FormSectionSchema = {
       },
     },
     {
+      name: 'documentFiles',
+      label: 'Identity documents (passport, driver\'s license, birth certificate)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
+    },
+    {
       name: 'notes',
       label: 'Notes',
       type: 'textarea',

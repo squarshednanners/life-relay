@@ -88,10 +88,13 @@ describe('LocalDataStore — encrypted export/import round-trip (Story 1.9 + 1.1
 
     const exported = await store.exportToJSON()
     expect(isEncrypted(exported)).toBe(false)
-    // Plaintext should parse as JSON containing the vault shape.
+    // Story 1.7 wraps the payload in an envelope: { envelopeVersion,
+    // exportedAt, data, attachments }. Vault content lives under .data.
     const parsed = JSON.parse(exported)
-    expect(parsed.schemaVersion).toBe(1)
-    expect(parsed.people).toHaveLength(1)
+    expect(parsed.envelopeVersion).toBe(1)
+    expect(parsed.data.schemaVersion).toBe(1)
+    expect(parsed.data.people).toHaveLength(1)
+    expect(parsed.attachments).toEqual({})
   })
 
   it('importFromJSON without password rejects encrypted input with a clear error', async () => {
@@ -132,13 +135,17 @@ describe('LocalDataStore — encrypted export/import round-trip (Story 1.9 + 1.1
     expect(restored?.financialAccounts).toHaveLength(1)
   })
 
-  it('exportToJSON of an empty store returns "null" JSON string', async () => {
-    // Boundary case — the store was never saved. `load()` returns null;
-    // `JSON.stringify(null)` is `"null"`. Just pin the behavior so a
-    // future regression to a thrown error is caught.
+  it('exportToJSON of an empty store returns an envelope with empty data', async () => {
+    // Boundary case — the store was never saved. Story 1.7 envelope
+    // still wraps the empty payload so the export remains parseable on
+    // the other side; data falls back to a stub at the current schema
+    // version.
     const store = new LocalDataStore()
     const exported = await store.exportToJSON()
-    expect(exported).toBe('null')
+    const parsed = JSON.parse(exported)
+    expect(parsed.envelopeVersion).toBe(1)
+    expect(parsed.data.schemaVersion).toBe(1)
+    expect(parsed.attachments).toEqual({})
   })
 })
 

@@ -163,6 +163,14 @@ export const lifeInsurancePolicySchema: FormSectionSchema = {
     },
 
     {
+      name: 'documentFiles',
+      label: 'Policy documents (policy, beneficiary form, riders)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
+    },
+    {
       name: 'notes',
       label: 'Notes',
       type: 'textarea',

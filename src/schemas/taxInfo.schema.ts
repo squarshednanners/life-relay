@@ -83,6 +83,14 @@ export const taxInfoSchema: FormSectionSchema = {
       colSpan: 2,
     },
     {
+      name: 'documentFiles',
+      label: 'Tax documents (recent returns, W-2s, 1099s)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
+    },
+    {
       name: 'notes',
       label: 'Notes',
       type: 'textarea',

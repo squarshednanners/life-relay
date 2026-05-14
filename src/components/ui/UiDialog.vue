@@ -83,11 +83,11 @@ defineSlots<{
         class="fixed inset-0 z-40 bg-text-primary/40 motion-safe:transition-opacity motion-safe:duration-200"
       />
       <DialogContent
-        class="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-md bg-surface-bone p-6 shadow-modal focus-visible:outline-none focus-visible:shadow-focus motion-safe:transition-transform motion-safe:duration-200"
+        class="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-md bg-surface-bone dark:bg-gray-800 p-6 shadow-modal focus-visible:outline-none focus-visible:shadow-focus motion-safe:transition-transform motion-safe:duration-200"
       >
         <DialogTitle
           v-if="title || $slots.title"
-          class="text-heading-md font-medium text-text-primary"
+          class="text-heading-md font-medium text-text-primary dark:text-gray-100"
         >
           <template v-if="title">
             {{ title }}
@@ -99,7 +99,7 @@ defineSlots<{
         </DialogTitle>
         <DialogDescription
           v-if="description || $slots.description"
-          class="mt-2 text-body-md text-text-secondary"
+          class="mt-2 text-body-md text-text-secondary dark:text-gray-400"
         >
           <template v-if="description">
             {{ description }}
@@ -120,7 +120,7 @@ defineSlots<{
         </div>
         <DialogClose
           :aria-label="closeLabel"
-          class="absolute right-4 top-4 rounded-sm text-text-secondary focus-visible:outline-none focus-visible:shadow-focus"
+          class="absolute right-4 top-4 rounded-sm text-text-secondary dark:text-gray-400 hover:text-text-primary dark:hover:text-gray-100 focus-visible:outline-none focus-visible:shadow-focus"
         >
           <svg
             aria-hidden="true"

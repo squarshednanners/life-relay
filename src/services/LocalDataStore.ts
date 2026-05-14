@@ -1,8 +1,10 @@
 import Dexie, { type Table } from 'dexie'
 import type { DeathboxData } from '@/models/DeathboxData'
+import type { AttachmentRecord } from '@/models/AttachmentRecord'
 import type { IDataStore } from './IDataStore'
 import { encrypt, decrypt, isEncrypted } from '@/utils/encryption'
 import {
+  AttachmentExportLimitError,
   LoadRequiresManualImportError,
   MigrationFailedError,
   StorageQuotaExceededError,
@@ -12,6 +14,29 @@ import {
   CURRENT_SCHEMA_VERSION,
   runMigrations,
 } from '@/migrations'
+import { schemaRegistry } from '@/schemas'
+import { AttachmentStore } from './AttachmentStore'
+
+const MAX_ATTACHMENT_INLINE_SIZE = 25 * 1024 * 1024 // 25 MB per file
+const MAX_TOTAL_INLINE_SIZE = 250 * 1024 * 1024 // 250 MB total
+
+interface AttachmentEnvelopeEntry {
+  metadata: {
+    filename: string
+    mimeType: string
+    sizeBytes: number
+    uploadedAt: string
+  }
+  /** Base64-encoded plaintext blob bytes. Outer-envelope encryption protects it. */
+  base64: string
+}
+
+interface ExportEnvelope {
+  envelopeVersion: 1
+  exportedAt: string
+  data: DeathboxData
+  attachments: Record<string, AttachmentEnvelopeEntry>
+}
 
 /**
  * Detect quota-exceeded errors across browsers. Chrome/Edge/Safari throw
@@ -64,6 +89,7 @@ function rollbackKey(fromVersion: number, context: RollbackContext): string {
 class LifeRelayDatabase extends Dexie {
   data!: Table<StoredData, string>
   rollback!: Table<RollbackRow, string>
+  attachments!: Table<AttachmentRecord, string>
 
   constructor() {
     // Keep DB name for backward compatibility with existing user data
@@ -78,11 +104,29 @@ class LifeRelayDatabase extends Dexie {
       data: 'id',
       rollback: 'key',
     })
+    // v3: add `attachments` table for binary file uploads (Story 1.7).
+    // Additive — existing v2 users gain the empty table on next open.
+    // Only `id` is indexed; the blob lives in the row body.
+    this.version(3).stores({
+      data: 'id',
+      rollback: 'key',
+      attachments: 'id',
+    })
   }
 }
 
 const db = new LifeRelayDatabase()
 const DATA_KEY = 'main'
+
+/**
+ * Module-level accessor for the attachments table. `AttachmentStore`
+ * owns its own CRUD methods but shares this single Dexie database so
+ * future transactional coordination (e.g., delete-vault clears both
+ * tables atomically) is possible.
+ */
+export function _getAttachmentsTable(): Table<AttachmentRecord, string> {
+  return db.attachments
+}
 
 export class LocalDataStore implements IDataStore {
   private readonly STORAGE_KEY = 'legacyVaultData'
@@ -389,7 +433,17 @@ export class LocalDataStore implements IDataStore {
 
   async delete(): Promise<void> {
     try {
-      await db.data.delete(DATA_KEY)
+      // Privacy promise: "Delete All Data" must wipe BOTH the vault data
+      // row AND every attachment blob atomically. A swallowed
+      // attachments-clear error would leave megabytes of sensitive
+      // document scans on disk while the user believes everything is
+      // gone (Story 1.7 review finding P2). Wrap both deletes in a
+      // single Dexie `rw` transaction across both tables so either both
+      // succeed or both roll back.
+      await db.transaction('rw', db.data, db.attachments, async () => {
+        await db.data.delete(DATA_KEY)
+        await db.attachments.clear()
+      })
       localStorage.removeItem(this.STORAGE_KEY)
     } catch (error) {
       console.error('Error deleting data:', error)
@@ -399,14 +453,65 @@ export class LocalDataStore implements IDataStore {
 
   async exportToJSON(password?: string): Promise<string> {
     const data = await this.load()
-    const jsonString = JSON.stringify(data, null, 2)
+    const envelope = await this.buildExportEnvelope(data)
+    const jsonString = JSON.stringify(envelope, null, 2)
 
     if (password) {
-      // Encrypt the JSON before returning
+      // Outer-envelope encryption: attachments live inside the envelope
+      // as base64 plaintext bytes; the whole envelope (data + attachment
+      // base64 strings + metadata) becomes one AES-GCM ciphertext.
       return await encrypt(jsonString, password)
     }
 
     return jsonString
+  }
+
+  /**
+   * Build the export envelope (Story 1.7).
+   *
+   * Walks the vault for attachment-typed fields, loads each referenced
+   * blob from `AttachmentStore`, enforces the inline size limits, and
+   * base64-encodes each blob into the envelope. Throws
+   * `AttachmentExportLimitError` if a single attachment > 25 MB or the
+   * total > 250 MB — sidecar tar/zip is deferred to Story 1.7b.
+   */
+  private async buildExportEnvelope(data: DeathboxData | null): Promise<ExportEnvelope> {
+    const attachmentsDict: Record<string, AttachmentEnvelopeEntry> = {}
+    const referencedIds = data ? collectAttachmentIds(data) : []
+    if (referencedIds.length > 0) {
+      const store = new AttachmentStore()
+      let totalBytes = 0
+      for (const id of referencedIds) {
+        const record = await store.get(id)
+        if (!record) continue // orphan reference — skip silently
+        if (record.sizeBytes > MAX_ATTACHMENT_INLINE_SIZE) {
+          throw new AttachmentExportLimitError(
+            `Attachment "${record.filename}" is ${humanSize(record.sizeBytes)}; the inline export limit is ${humanSize(MAX_ATTACHMENT_INLINE_SIZE)} per file. A larger-export format is coming in a follow-up.`,
+          )
+        }
+        totalBytes += record.sizeBytes
+        if (totalBytes > MAX_TOTAL_INLINE_SIZE) {
+          throw new AttachmentExportLimitError(
+            `Total attachment size exceeds the inline export limit of ${humanSize(MAX_TOTAL_INLINE_SIZE)}. A larger-export format is coming in a follow-up.`,
+          )
+        }
+        attachmentsDict[id] = {
+          metadata: {
+            filename: record.filename,
+            mimeType: record.mimeType,
+            sizeBytes: record.sizeBytes,
+            uploadedAt: record.uploadedAt,
+          },
+          base64: uint8ArrayToBase64(record.blob),
+        }
+      }
+    }
+    return {
+      envelopeVersion: 1,
+      exportedAt: new Date().toISOString(),
+      data: data ?? ({ schemaVersion: CURRENT_SCHEMA_VERSION } as DeathboxData),
+      attachments: attachmentsDict,
+    }
   }
 
   async importFromJSON(jsonString: string, password?: string): Promise<void> {
@@ -425,12 +530,117 @@ export class LocalDataStore implements IDataStore {
         }
       }
 
-      const data = JSON.parse(decryptedString) as DeathboxData
+      const parsed = JSON.parse(decryptedString)
+
+      // Detect envelope vs raw-DeathboxData (back-compat for exports
+      // made before Story 1.7 introduced the envelope wrapper).
+      let data: DeathboxData
+      let attachments: Record<string, AttachmentEnvelopeEntry> = {}
+      if (
+        parsed &&
+        typeof parsed === 'object' &&
+        typeof parsed.envelopeVersion === 'number' &&
+        parsed.data &&
+        typeof parsed.data === 'object'
+      ) {
+        // Strict envelope-version check: only v1 is supported by this
+        // build. A future v2 envelope (e.g., sidecar tar+manifest) would
+        // carry additional fields this code can't interpret — refuse
+        // rather than silently degrade.
+        if (parsed.envelopeVersion !== 1) {
+          throw new Error(
+            `This backup was made with a newer Life Relay format (envelope v${parsed.envelopeVersion}). Update the app before importing it.`,
+          )
+        }
+        data = parsed.data as DeathboxData
+        if (parsed.attachments && typeof parsed.attachments === 'object') {
+          attachments = parsed.attachments as Record<string, AttachmentEnvelopeEntry>
+        }
+      } else {
+        // Legacy export — just the DeathboxData payload at the root.
+        data = parsed as DeathboxData
+      }
+
       // Run any schema migrations needed before persisting. Uses the
       // 'import' rollback context so a load-time rollback in flight (if
       // any) is not clobbered — P1.
       const { data: migrated } = await this.applyMigrations(data, 'import')
-      await this.save(migrated)
+
+      // Decode attachment blobs OUTSIDE the transaction (base64 decode
+      // can throw; we want the failure to happen before the atomic
+      // write begins).
+      const decodedAttachments: AttachmentRecord[] = []
+      if (Object.keys(attachments).length > 0) {
+        for (const [id, entry] of Object.entries(attachments)) {
+          if (!entry?.metadata || typeof entry.base64 !== 'string') continue
+          let blob: Uint8Array
+          try {
+            blob = base64ToUint8Array(entry.base64)
+          } catch (decodeErr) {
+            const wrapped = new Error(
+              `Import failed: attachment "${entry.metadata.filename}" has corrupted content in the backup file (couldn't decode base64).`,
+            )
+            ;(wrapped as { cause?: unknown }).cause = decodeErr
+            throw wrapped
+          }
+          // Validate envelope-claimed `sizeBytes` against the actual
+          // decoded blob length — a tampered or corrupted export could
+          // claim 1 byte while shipping megabytes, breaking downstream
+          // size budgeting (Story 1.7c review finding).
+          const claimedSize = entry.metadata.sizeBytes
+          const actualSize = blob.byteLength
+          const trustedSize =
+            typeof claimedSize === 'number' && claimedSize === actualSize
+              ? claimedSize
+              : actualSize
+          decodedAttachments.push({
+            id,
+            filename: entry.metadata.filename,
+            mimeType: entry.metadata.mimeType,
+            sizeBytes: trustedSize,
+            uploadedAt: entry.metadata.uploadedAt,
+            blob,
+          })
+        }
+      }
+
+      // Atomic write: vault data + every attachment blob in one Dexie
+      // transaction. Either all succeed or none persist — no dangling
+      // references on partial failure (Story 1.7 review finding P1).
+      // Pre-existing attachments are cleared inside the transaction so
+      // a re-import doesn't accumulate orphan blobs from the prior
+      // vault state (Story 1.7c review finding).
+      const serialized = JSON.parse(JSON.stringify(migrated))
+      // Preserve the envelope's `updatedAt` when present — overwriting
+      // with `new Date()` would lose the timestamp of when the export
+      // was originally created.
+      const preservedUpdatedAt =
+        typeof serialized.updatedAt === 'string' && serialized.updatedAt.length > 0
+          ? serialized.updatedAt
+          : new Date().toISOString()
+      const dataToSave = { ...serialized, updatedAt: preservedUpdatedAt }
+      try {
+        await db.transaction('rw', db.data, db.attachments, async () => {
+          await db.attachments.clear()
+          await db.data.put({ id: DATA_KEY, data: dataToSave })
+          for (const record of decodedAttachments) {
+            await db.attachments.put(record)
+          }
+        })
+      } catch (txError) {
+        if (isQuotaError(txError)) {
+          useStorageQuota().markFull()
+          throw new StorageQuotaExceededError(undefined, { cause: txError })
+        }
+        throw txError
+      }
+      // Best-effort localStorage mirror after the IDB transaction
+      // succeeded — matches `save()`'s post-IDB mirroring path.
+      try {
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(dataToSave))
+      } catch (mirrorErr) {
+        console.error('localStorage mirror after import failed (non-fatal):', mirrorErr)
+      }
     } catch (error) {
       console.error('Error importing JSON:', error)
       if (error instanceof Error) {
@@ -439,4 +649,119 @@ export class LocalDataStore implements IDataStore {
       throw new Error('Invalid JSON format or incorrect password')
     }
   }
+}
+
+/**
+ * Read a section's value from `DeathboxData`, supporting dotted section
+ * keys (e.g., `lifeInsurance.policies`). Some registry entries use dotted
+ * keys to address nested data; a literal `data[key]` lookup misses them.
+ */
+function readSectionValue(data: DeathboxData, sectionKey: string): unknown {
+  if (!sectionKey.includes('.')) {
+    return (data as Record<string, unknown>)[sectionKey]
+  }
+  return sectionKey.split('.').reduce<unknown>(
+    (acc, part) =>
+      acc && typeof acc === 'object'
+        ? (acc as Record<string, unknown>)[part]
+        : undefined,
+    data,
+  )
+}
+
+/**
+ * Walk `DeathboxData` collecting every attachment-typed field's value(s).
+ * Uses the schema registry to know which sections/fields are attachment-
+ * typed — no string heuristics, no UUID guessing.
+ *
+ * **Recursive** through `arraySchema` nested fields so a future schema
+ * like `assetDocuments[i].scans: 'attachment'` doesn't silently skip
+ * those ids on export (Story 1.7 review finding P4).
+ */
+function collectAttachmentIds(data: DeathboxData): string[] {
+  const ids: string[] = []
+  // Vault-level cover photo (Story 1.7c) — not part of any schema, so
+  // the schema-walk below would miss it.
+  if (typeof data.coverPhotoAttachmentId === 'string' && data.coverPhotoAttachmentId.length > 0) {
+    ids.push(data.coverPhotoAttachmentId)
+  }
+  for (const [sectionKey, schema] of Object.entries(schemaRegistry)) {
+    const sectionValue = readSectionValue(data, sectionKey)
+    if (sectionValue === undefined || sectionValue === null) continue
+    const items: unknown[] = schema.isArray
+      ? Array.isArray(sectionValue)
+        ? sectionValue
+        : []
+      : [sectionValue]
+    for (const item of items) {
+      collectIdsFromItem(item, schema.fields, ids)
+    }
+  }
+  return ids
+}
+
+function collectIdsFromItem(
+  item: unknown,
+  fields: import('@/models/FormSchema').FormFieldSchema[],
+  out: string[],
+): void {
+  if (!item || typeof item !== 'object') return
+  const obj = item as Record<string, unknown>
+  for (const field of fields) {
+    if (!field.name) continue
+    if (field.type === 'attachment') {
+      const v = obj[field.name]
+      if (Array.isArray(v)) {
+        for (const id of v) {
+          if (typeof id === 'string' && id.length > 0) out.push(id)
+        }
+      } else if (typeof v === 'string' && v.length > 0) {
+        out.push(v)
+      }
+    } else if (field.type === 'array' && field.arraySchema) {
+      // Recurse into nested array items — they may carry attachment
+      // fields of their own.
+      const nested = obj[field.name]
+      if (Array.isArray(nested)) {
+        for (const child of nested) {
+          collectIdsFromItem(child, field.arraySchema.fields, out)
+        }
+      }
+    }
+  }
+}
+
+function humanSize(bytes: number): string {
+  return `${(bytes / (1024 * 1024)).toFixed(0)} MB`
+}
+
+/**
+ * Convert a Uint8Array to a base64 string. Chunked at 8 KB (under the
+ * older mobile Safari `apply()` arg-count safe ceiling) to avoid both
+ * the stack-overflow trap on huge buffers AND the per-chunk `Array.from`
+ * allocation the original implementation paid (Story 1.7 review finding
+ * P3).
+ *
+ * `String.fromCharCode.apply(null, <typed array>)` works because typed
+ * arrays are array-like (have `length` + numeric indices); no full-copy
+ * `Array.from` is needed.
+ */
+function uint8ArrayToBase64(bytes: Uint8Array): string {
+  const CHUNK = 0x2000 // 8 KB — safely under every engine's apply() limit
+  let binary = ''
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    const slice = bytes.subarray(i, i + CHUNK)
+    binary += String.fromCharCode.apply(null, slice as unknown as number[])
+  }
+  return btoa(binary)
+}
+
+function base64ToUint8Array(b64: string): Uint8Array {
+  // `atob` throws `InvalidCharacterError` on malformed input. Caller
+  // wraps in a more user-friendly message; we surface the raw throw
+  // here so the import path can attribute it to a specific attachment.
+  const binary = atob(b64)
+  const out = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++) out[i] = binary.charCodeAt(i)
+  return out
 }

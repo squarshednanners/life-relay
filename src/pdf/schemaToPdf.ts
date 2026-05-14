@@ -70,6 +70,13 @@ function formatPersonName(personId: string, data: DeathboxData): string {
 /**
  * Add a section to PDF based on schema
  */
+export interface AttachmentSummaryEntry {
+  filename: string
+  mimeType: string
+  sizeBytes: number
+  uploadedAt: string
+}
+
 export function addSchemaSectionToPDF(
   schema: FormSectionSchema,
   data: any | any[],
@@ -83,7 +90,13 @@ export function addSchemaSectionToPDF(
     isTextarea?: boolean,
     displayAs?: 'prose' | 'mono',
   ) => void,
-  ensureSpace: (height: number) => void
+  ensureSpace: (height: number) => void,
+  // Optional attachment-metadata lookup (Story 1.7). When provided,
+  // attachment-typed fields render as a per-file list (filename, type,
+  // size, uploaded date). Without it, the field renders as a simple
+  // count line — keeps the PDF generator usable from contexts that
+  // don't want to async-preload metadata.
+  attachmentMeta?: Map<string, AttachmentSummaryEntry>,
 ) {
   // Check if section should be visible
   if (!evaluateVisibility(schema.visible, data)) {
@@ -101,7 +114,7 @@ export function addSchemaSectionToPDF(
 
   items.forEach((item, index) => {
     if (schema.isArray && index > 0) {
-      ensureSpace(20) // Space between array items
+      ensureSpace(10) // Space between array items — tightened in Story 1.7c PDF cleanup.
     }
 
     // Add section header for array items using arrayItemLabel
@@ -309,11 +322,11 @@ export function addSchemaSectionToPDF(
 
                       const deepNestedLabel = deepNestedField.pdfLabel || deepNestedField.label || ''
                       const deepNestedIsTextarea = deepNestedField.type === 'textarea'
-                      // Use more indent for deeper nesting
+                      // No indent — every label starts at the same x.
                       addField(
                         deepNestedLabel,
                         deepNestedDisplayValue,
-                        40,
+                        0,
                         deepNestedIsTextarea,
                         resolveFieldDisplayAs(deepNestedField),
                       )
@@ -383,11 +396,12 @@ export function addSchemaSectionToPDF(
 
               const nestedLabel = nestedField.pdfLabel || nestedField.label || ''
               const nestedIsTextarea = nestedField.type === 'textarea'
-              // Use indent to show nesting visually
+              // No indent — all labels share the same starting x across
+              // every section, regardless of nesting depth.
               addField(
                 nestedLabel,
                 nestedDisplayValue,
-                20,
+                0,
                 nestedIsTextarea,
                 resolveFieldDisplayAs(nestedField),
               )
@@ -463,6 +477,30 @@ export function addSchemaSectionToPDF(
         // For select fields, show the label if available
         const option = field.options?.find(opt => opt.value === actualValue)
         displayValue = option ? option.label : String(actualValue)
+      } else if (field.type === 'attachment') {
+        // Render attachment fields as a per-file list when metadata is
+        // available, else as a count line.
+        const ids: string[] = Array.isArray(actualValue)
+          ? actualValue.filter((v): v is string => typeof v === 'string')
+          : typeof actualValue === 'string' && actualValue.length > 0
+            ? [actualValue]
+            : []
+        if (ids.length === 0) {
+          return // Empty attachment field — skip entirely.
+        }
+        if (attachmentMeta && attachmentMeta.size > 0) {
+          const lines = ids.map(id => {
+            const meta = attachmentMeta.get(id)
+            // Render a friendly "file unavailable" without exposing the
+            // raw attachment UUID — it's an internal id, not useful to
+            // the survivor reading the PDF (Story 1.7c review).
+            if (!meta) return '(a file was attached but its content is unavailable)'
+            return `${meta.filename} — ${humanAttachmentType(meta.mimeType)} — ${humanAttachmentSize(meta.sizeBytes)} — uploaded ${formatAttachmentDate(meta.uploadedAt)}`
+          })
+          displayValue = lines.join('\n')
+        } else {
+          displayValue = `${ids.length} file${ids.length === 1 ? '' : 's'} attached`
+        }
       } else {
         displayValue = String(actualValue)
       }
@@ -474,7 +512,8 @@ export function addSchemaSectionToPDF(
 
       const label = field.pdfLabel || field.label || ''
       // Pass isTextarea flag for textarea fields to preserve line breaks
-      const isTextarea = field.type === 'textarea'
+      // Attachment fields use the same multi-line rendering path.
+      const isTextarea = field.type === 'textarea' || field.type === 'attachment'
       addField(label, displayValue, 0, isTextarea, resolveFieldDisplayAs(field))
     })
 
@@ -483,6 +522,29 @@ export function addSchemaSectionToPDF(
       ensureSpace(15)
     }
   })
+}
+
+function humanAttachmentType(mimeType: string): string {
+  if (mimeType === 'application/pdf') return 'PDF'
+  if (mimeType.startsWith('image/')) {
+    const sub = mimeType.slice('image/'.length).toUpperCase()
+    return `${sub} image`
+  }
+  return mimeType
+}
+
+function humanAttachmentSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} bytes`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function formatAttachmentDate(iso: string): string {
+  try {
+    return new Date(iso).toLocaleDateString()
+  } catch {
+    return iso
+  }
 }
 
 /**

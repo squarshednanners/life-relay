@@ -83,6 +83,13 @@ function fixtureValueFor(field: FormFieldSchema): unknown {
       // Nested-array wrappers — handled separately by `buildItemFixture`;
       // their value comes from `arraySchema`, not from a primitive default.
       return undefined
+    case 'attachment':
+      // Attachment fields reference IDs in the attachments table; the
+      // fixture provides a synthetic id so the field is non-empty and
+      // its label renders in the PDF (Story 1.7). The schema-to-print
+      // path will render "N files attached" when no metadata map is
+      // passed, which is fine for this test's "label appears" check.
+      return field.multiple ? [`fx-${field.name}`] : `fx-${field.name}`
     default: {
       // Surface schema drift loudly — if a new `FieldType` is added to
       // FormSchema.ts, the fixture builder must be extended explicitly.

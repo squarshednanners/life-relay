@@ -103,6 +103,14 @@ export const physicalStorageLocationsSchema: FormSectionSchema = {
       },
     },
     {
+      name: 'documentFiles',
+      label: 'Storage documents (photos of locations, key locations, access instructions)',
+      type: 'attachment',
+      multiple: true,
+      fullWidth: true,
+      pdfSkipIfEmpty: true,
+    },
+    {
       name: 'notes',
       label: 'Notes',
       type: 'textarea',
