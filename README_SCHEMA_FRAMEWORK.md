@@ -146,6 +146,7 @@ addSchemaSectionToPDF(
 - `currency` - Currency formatted input
 - `password` - Password input (masked, supports manual entry)
 - `array` - Nested array of items (e.g., `multiSigConfig.keys[]`)
+- `attachment` - Binary file upload (PDF, image, etc.); stores attachmentId references in IndexedDB
 - `custom` - Custom component (e.g., BeneficiarySelector)
 
 ## Validation
@@ -387,6 +388,31 @@ Some sections need an array nested *inside* a single item — for example, `mult
 
 The `arraySchema` is itself a full `FormSectionSchema`, so nested arrays can have their own fields, validation, conditional visibility, and even further nested arrays.
 
+## Binary Attachments
+
+Fields of type `attachment` accept binary files (PDFs, images, etc.) and persist them in a separate `attachments` IndexedDB table. The field value on the record is a reference — a single `attachmentId` string when `multiple: false`, or `attachmentId[]` when `multiple: true`.
+
+```typescript
+{
+  name: 'documents',
+  label: 'Supporting Documents',
+  type: 'attachment',
+  multiple: true,
+  acceptMimeTypes: ['application/pdf', 'image/png', 'image/jpeg'],
+  maxSizeBytes: 25 * 1024 * 1024,  // 25 MB per file (default)
+  maxAttachments: 10,              // per-record cap (default)
+}
+```
+
+Options:
+
+- `acceptMimeTypes` — Restricts the file picker. Defaults to PDF + common image MIME types.
+- `maxSizeBytes` — Per-file hard limit. Defaults to 25 MB (matches the inline export cap).
+- `multiple` — When true, the field stores `attachmentId[]`; otherwise a single string.
+- `maxAttachments` — Per-record cap on the number of attached files. Defaults to 10.
+
+Attachments are included in encrypted JSON exports and round-trip on import. In the full vault PDF, attached PDFs are inlined and other formats render an availability note. A vault-wide 250 MB cap is enforced at the store layer.
+
 ## Custom Array Item Initialization
 
 By default new array items are added as empty objects. To generate IDs or seed defaults, provide `initializeItem` on the section schema:
@@ -469,23 +495,12 @@ The registry organizes schemas into 8 groups matching the PDF layout:
 - Documents & Storage
 - Final Wishes
 
-## Migration Strategy
+## Stored Data Migrations
 
-1. **Start with Simple Sections**: Begin with straightforward forms like Financial Accounts
-2. **Test Thoroughly**: Ensure schema-based forms work identically to existing forms
-3. **Migrate Incrementally**: Convert one section at a time
-4. **Update PDF Generator**: Use `schemaToPdf.ts` helpers for new sections
-5. **Keep Old Code**: Don't delete old views until migration is complete
+When a schema change alters how data is stored (renaming a field, splitting a section, normalizing a value), add a forward-only migration in `src/migrations/` keyed to the new `schemaVersion`. Migrations run automatically on load, before the form ever sees the data, so the schema can stay focused on the *current* shape.
 
 ## Testing
 
-Tests are in `src/*/__tests__/` directories and run with `npx vitest run`:
-
-- **FormSchema.test.ts** — Visibility evaluation, compound conditions, nested paths, `getVisibleFields`
-- **registry.test.ts** — Schema integrity: all groups populated, required properties, no duplicate fields, valid pdfGroup values
-- **useSectionProgress.test.ts** — `hasSectionData()` across section paths
-- **encryption.test.ts** — AES-256 encryption round-trip, error cases, unique ciphertext
-- **FormField.test.ts** — Component rendering
-- **legacy.test.ts** — Store behavior
+Tests live next to the code under `src/**/__tests__/` and run with `npm test` (watch mode) or `npm run test:ci` (single-pass). Coverage spans schema integrity, visibility/dependency evaluation, store behavior, encryption round-trips, attachment limits, CSV/paste import, PDF generation, and PDF/UA accessibility markers.
 
 A fully fictional example vault is available at `examples/sample-vault.json` and can be imported via the Dashboard for manual testing.

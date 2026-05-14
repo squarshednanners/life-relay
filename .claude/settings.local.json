@@ -37,7 +37,8 @@
       "PowerShell(Get-Item *)",
       "PowerShell(gh api *)",
       "Bash(npx eslint *)",
-      "Bash(echo \"exit: $?\")"
+      "Bash(echo \"exit: $?\")",
+      "Bash(grep *)"
     ]
   }
 }

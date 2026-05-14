@@ -9,11 +9,14 @@ Live site: **[liferelay.app](https://liferelay.app)**
 - **Privacy-First** — Runs entirely in your browser. No accounts, no servers, no tracking.
 - **Local Storage** — Data lives in IndexedDB on your device, with a localStorage fallback.
 - **Encrypted Exports** — AES-256-GCM (PBKDF2 / 100k iterations) password-protected JSON backups.
-- **Multiple PDF Exports** — Full vault, one-page emergency sheet, and attorney preparation summary.
+- **Multiple PDF Exports** — Full vault, one-page emergency sheet, printable wallet cards, attorney preparation summary, and a For My Family runbook.
 - **Estate Planning Guide** — Guided checklist that produces an attorney-prep PDF.
+- **For My Family Runbook** — Step-by-step guide your family follows after your death, from the first 48 hours through long-term wrap-up.
+- **Document Attachments** — Attach PDFs, deeds, titles, photos, and other binaries directly to records across nine sections (250 MB total cap, 10 attachments per record).
+- **CSV & Paste Import** — Bulk-import financial accounts, contacts, and similar tabular data from spreadsheets or clipboard.
 - **Schema-Driven** — Forms and PDFs are both generated from a single set of schema definitions.
 - **Installable PWA** — Works offline after first load; install on desktop or mobile.
-- **26 Sections, 8 Groups** — People, Security, Insurance/Medical, Finances, Digital/Crypto, Property, Documents, Final Wishes.
+- **36 Sections, 8 Groups** — People, Security, Insurance/Medical, Finances, Digital/Crypto, Property, Documents, Final Wishes.
 
 ## Privacy Model
 
@@ -85,17 +88,18 @@ npm run format
 ```
 /
 ├── src/
-│   ├── components/      # Reusable Vue components (DynamicForm, FieldRenderer, etc.)
-│   ├── views/           # Page views/routes (one per section, plus Dashboard, Welcome)
+│   ├── components/      # Reusable Vue components (DynamicForm, FieldRenderer, AttachmentField, etc.)
+│   ├── views/           # Page views/routes (one per section, plus Dashboard, Welcome, Runbook, WillPreparation, Import, Settings)
 │   ├── router/          # Vue Router configuration
 │   ├── store/           # Pinia store
 │   ├── models/          # TypeScript interfaces (DeathboxData, FormSchema)
 │   ├── schemas/         # Declarative form schemas (one per section) + registry
-│   ├── services/        # Data stores (LocalDataStore, CloudDataStore stub)
-│   ├── pdf/             # PDF generators (full vault, emergency sheet, attorney prep)
+│   ├── migrations/      # Forward-only schema-version migrations for stored data
+│   ├── services/        # LocalDataStore, AttachmentStore, CSV/paste import sources, CloudDataStore stub
+│   ├── pdf/             # PDF generators (full vault, emergency sheet, wallet cards, attorney prep, family runbook)
 │   ├── utils/           # Encryption, icons, helpers
-│   ├── data/            # Static content (templates, will-prep categories)
-│   └── composables/     # Vue composables (toast, progress, unsaved-changes)
+│   ├── data/            # Static content (runbook steps, will-prep categories)
+│   └── composables/     # Vue composables (toast, progress, unsaved-changes, theme, storage quota)
 ├── examples/            # Example vault JSON for demoing import
 ├── environment/         # Local vs cloud build-mode configs
 ├── public/              # Static assets, PWA manifest, staticwebapp.config.json

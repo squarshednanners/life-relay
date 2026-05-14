@@ -252,6 +252,54 @@
               A step-by-step guide your family can follow after your death — from the first 48 hours through probate and long-term wrap-up. Each step links back to the exact information in your vault.
             </p>
           </div>
+
+          <div class="group rounded-xl border border-gray-200 p-6 hover:border-primary-300 hover:shadow-md transition-all">
+            <div class="w-10 h-10 bg-sky-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-sky-200 transition-colors">
+              <svg
+                class="w-5 h-5 text-sky-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                />
+              </svg>
+            </div>
+            <h3 class="font-semibold text-gray-900 mb-2">
+              Document Attachments
+            </h3>
+            <p class="text-sm text-gray-500 leading-relaxed">
+              Attach deeds, titles, policies, IDs, and other supporting files directly to the records they belong to. Attachments travel with your encrypted backup and inline into the full vault PDF.
+            </p>
+          </div>
+
+          <div class="group rounded-xl border border-gray-200 p-6 hover:border-primary-300 hover:shadow-md transition-all">
+            <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-indigo-200 transition-colors">
+              <svg
+                class="w-5 h-5 text-indigo-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h7"
+                />
+              </svg>
+            </div>
+            <h3 class="font-semibold text-gray-900 mb-2">
+              CSV &amp; Paste Import
+            </h3>
+            <p class="text-sm text-gray-500 leading-relaxed">
+              Skip the typing. Bulk-import accounts, contacts, and similar tabular data from a spreadsheet or clipboard — column mapping is suggested automatically and previewed before commit.
+            </p>
+          </div>
         </div>
       </div>
     </div>
